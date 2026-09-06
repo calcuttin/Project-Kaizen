@@ -19,9 +19,21 @@ export function lockWorkspace() { locked = true; }
 export const workspaceAvailable = () => !locked && (!cloudStorage || Boolean(workspaceOwner));
 export const currentWorkspaceOwner = () => workspaceOwner;
 
+const pendingWrites = new Set<Promise<void>>();
+/** Await durable browser writes before reporting a bulk restore complete. */
+export async function flushWorkspaceWrites() {
+  while (pendingWrites.size) await Promise.all([...pendingWrites]);
+}
+
 export const idbStorage: StateStorage = {
   getItem: async (name) => workspaceAvailable() ? (await get<string>(name)) ?? null : null,
-  setItem: async (name, value) => { if (workspaceAvailable()) await set(name, value); },
+  setItem: (name, value) => {
+    if (!workspaceAvailable()) return Promise.resolve();
+    const write = set(name, value);
+    pendingWrites.add(write);
+    void write.then(() => pendingWrites.delete(write), () => pendingWrites.delete(write));
+    return write;
+  },
   removeItem: async (name) => del(name),
 };
 

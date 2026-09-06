@@ -6,6 +6,7 @@ import { seedSampleData } from '@/modules/settings/seed';
 import { useStudio } from '@/modules/studio/store';
 import { useImports } from '@/core/imports/store';
 import { useLibrary } from '@/modules/library/store';
+import { flushWorkspaceWrites, idbStorage, storeKey } from './storage';
 import { deleteWithUndo } from './undo';
 const workspace = vi.hoisted(() => ({ owner: 'a', available: true }));
 vi.mock('./storage', async (original) => ({ ...await original<object>(), currentWorkspaceOwner: () => workspace.owner, workspaceAvailable: () => workspace.available }));
@@ -27,6 +28,15 @@ describe('backup recovery', () => {
     expect(inspectBackup(backup)).toHaveLength(7);
     importAll(backup);
     expect(JSON.parse(JSON.stringify(exportAll())).stores).toEqual(backup.stores);
+  });
+  it('finishes browser persistence before a restored workspace is announced', async () => {
+    const book = useLibrary.getState().addBook({ title: 'Durable restore', author: 'Test' });
+    const backup = JSON.parse(JSON.stringify(exportAll()));
+    useLibrary.getState().deleteBook(book.id);
+    importAll(backup);
+    await flushWorkspaceWrites();
+    const persisted = JSON.parse((await idbStorage.getItem(storeKey('library')))!);
+    expect(persisted.state.books[book.id].title).toBe('Durable restore');
   });
   it('round-trips actual tasks, books, notes and reading sessions', () => {
     const task = useTasks.getState().addTask({ title: 'Plan', notes: 'Keep this', subtasks: [{ id: 'sub', title: 'First', done: true }] });

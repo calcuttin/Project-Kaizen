@@ -62,7 +62,7 @@ To restore:
 2. Export that workspace first if it already contains anything you want to keep.
 3. Choose **Settings → Data → Import** and select your Kaizen JSON backup.
 4. Review the collection counts in **Review backup restore**. Choose **Cancel** to leave your data alone, or **Restore backup** to apply the file. Invalid files are rejected before any records change (50 MB maximum).
-5. Review your restored records. In cloud mode, wait for **Saved**; use **Save now** if needed.
+5. Wait for **Backup restored**, which confirms the browser write finished, then review your restored records. In cloud mode, wait for **Saved**; use **Save now** if needed.
 
 **Restore is not a duplicate-aware merge.** It can replace collections in the destination workspace. In cloud mode those replacements, including removed records, can sync to your other devices. Restore into a fresh workspace when possible.
 

@@ -1,11 +1,11 @@
 import { downloadJson, supportReport } from '@/core/diagnostics';
 import { saveStatus } from '@/core/sync/saveStatus';
-import { currentWorkspaceOwner, workspaceAvailable } from '@/core/storage';
+import { currentWorkspaceOwner, workspaceAvailable, flushWorkspaceWrites } from '@/core/storage';
 import { useEffect, useRef, useState } from 'react';
 import { BookOpen, Cloud, Download, LogOut, Moon, RefreshCw, Sparkles, Sun, Trash2, Upload } from 'lucide-react';
 import { Button, Card, Modal, PageHead } from '@/components/ui';
 import { useUI } from '@/app/uiStore';
-import { exportAll, importAll, inspectBackup, resetAll } from '@/core/store';
+import { exportAll, importAll, inspectBackup, registeredStores, whenHydrated, resetAll } from '@/core/store';
 import { toast } from '@/components/Toast';
 import { seedSampleData } from './seed';
 import { useAuth } from '@/core/auth/AuthProvider';
@@ -26,6 +26,7 @@ export function SettingsPage() {
   const sync = useSyncStatus();
   const fileRef = useRef<HTMLInputElement>(null);
   const [backup, setBackup] = useState<{ payload: unknown; summary: ReturnType<typeof inspectBackup> } | null>(null);
+  const [restoring, setRestoring] = useState(false);
   const [backupError, setBackupError] = useState('');
   const [conflicts, setConflicts] = useState<SyncConflict[]>([]);
   const [showConflicts, setShowConflicts] = useState(false);
@@ -41,11 +42,25 @@ export function SettingsPage() {
     setBackupError(''); setBackup(null);
     try {
       if (file.size > 50 * 1024 * 1024) throw new Error('This backup exceeds the 50 MB import limit.');
+      await Promise.all([...registeredStores().values()].map(whenHydrated));
       const payload: unknown = JSON.parse(await file.text());
       if (!workspaceAvailable() || owner !== currentWorkspaceOwner()) return;
       setBackup({ payload, summary: inspectBackup(payload) });
     } catch (error) { setBackupError(error instanceof SyntaxError ? 'This file is not valid JSON. Choose a Kaizen backup.' : error instanceof Error ? error.message : 'Unable to read this backup.'); }
     if (fileRef.current) fileRef.current.value = '';
+  };
+  const restoreBackup = async () => {
+    if (!backup || restoring) return;
+    setRestoring(true);
+    try {
+      importAll(backup.payload);
+      await flushWorkspaceWrites();
+      setBackup(null);
+      toast('Backup restored');
+    } catch {
+      setBackup(null);
+      setBackupError('The restore could not finish saving. Export a recovery backup now before reloading or signing out.');
+    } finally { setRestoring(false); }
   };
   const deleteAccount = async () => {
     if (!confirm('Permanently delete your cloud account and synced data? Download a backup first if you want to keep it.')) return;
@@ -139,11 +154,11 @@ export function SettingsPage() {
         </Card>
         {config.mode === 'cloud' && <Card title="Danger zone" className="span-2"><div className="between"><span className="muted">Permanently delete your cloud account and all synced data</span><Button variant="danger" icon={Trash2} onClick={() => void deleteAccount()}>Delete account</Button></div></Card>}
       </div>
-      <Modal open={Boolean(backup)} onClose={() => setBackup(null)} title="Review backup restore">
+      <Modal open={Boolean(backup)} onClose={() => { if (!restoring) setBackup(null); }} title="Review backup restore">
         <p>This replaces the collections listed below with the backup contents. Records currently in those collections but absent from the backup will be removed. Other collections stay as they are.{config.mode === 'cloud' ? ' Restored changes will also be saved to your cloud account.' : ''}</p>
         <p>Download a current backup first so you can undo this restore.</p>
         <ul>{backup?.summary.map((area) => <li key={area.name}><strong>{area.name}</strong>: {area.collections.map((item) => `${item.count} ${item.name}`).join(', ') || 'preferences only'}</li>)}</ul>
-        <div className="form-actions"><Button onClick={doExport}>Download current backup</Button><Button variant="ghost" onClick={() => setBackup(null)}>Cancel</Button><Button variant="primary" onClick={() => { try { importAll(backup?.payload); setBackup(null); toast('Backup restored'); } catch (error) { setBackup(null); setBackupError(error instanceof Error ? error.message : 'Restore failed'); } }}>Restore backup</Button></div>
+        <div className="form-actions"><Button onClick={doExport}>Download current backup</Button><Button variant="ghost" disabled={restoring} onClick={() => setBackup(null)}>Cancel</Button><Button variant="primary" disabled={restoring} onClick={() => void restoreBackup()}>{restoring ? 'Restoring…' : 'Restore backup'}</Button></div>
       </Modal>
       <Modal open={showConflicts} onClose={() => setShowConflicts(false)} title="Conflict inbox"><div className="stack" style={{ gap: 12 }}>{conflicts.map((conflict) => <div key={conflict.id} style={{ border: '1px solid var(--border)', borderRadius: 10, padding: 12 }}><div className="between"><strong style={{ fontSize: 13 }}>{conflict.entityType} · {conflict.entityId}</strong><span className="muted" style={{ fontSize: 10 }}>{new Date(conflict.detectedAt).toLocaleString()}</span></div><p className="muted" style={{ fontSize: 11, margin: '8px 0' }}>This item changed on two devices. Choose which complete version to keep.</p><details><summary>Compare versions</summary><div className="grid cols-2"><div><strong>This device</strong><pre className="conflict-preview">{JSON.stringify(conflict.local ?? 'Deleted on this device', null, 2)}</pre></div><div><strong>Cloud</strong><pre className="conflict-preview">{JSON.stringify(conflict.remote ?? 'Deleted in the cloud', null, 2)}</pre></div></div></details><div className="row" style={{ justifyContent: 'flex-end' }}><Button size="sm" onClick={() => void resolveConflict(conflict, 'remote')}>Use cloud version</Button><Button size="sm" variant="primary" onClick={() => void resolveConflict(conflict, 'local')}>Keep this device</Button></div></div>)}</div></Modal>
     </div>
