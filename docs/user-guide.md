@@ -2,6 +2,8 @@
 
 [← README](../README.md) · [Need to install it first?](setup-guide.md)
 
+You can also open these guides from **Settings → Help & guides**, or **Help & guides** on the sign-in screen. They are included with the app and do not require a GitHub account. Keep an internet connection when reading guides on a hosted site.
+
 ## Open your workspace
 
 **Using a cloud site:** open the address provided by its owner. Choose **Create your account** the first time, or **Sign in** if you already have one. Use the same site and account on your other devices. You do not need accounts with the site's hosting providers.

@@ -1,4 +1,4 @@
-const CACHE = 'kaizen-shell-v2';
+const CACHE = 'kaizen-shell-v3';
 const SHELL = ['/', '/manifest.webmanifest', '/favicon.svg'];
 
 self.addEventListener('install', (event) => {
@@ -14,10 +14,12 @@ self.addEventListener('fetch', (event) => {
   if (event.request.headers.has('Authorization')) return;
   const url = new URL(event.request.url);
   // Only the public app shell and static files belong in this shared cache.
-  if (url.pathname.startsWith('/api/') || url.pathname.startsWith('/auth/')) return;
+  // Guides are standalone public documents, not the SPA shell. Never cache one as '/'.
+  if (url.pathname.startsWith('/api/') || url.pathname.startsWith('/auth/') || url.pathname.startsWith('/guides/')) return;
   if (event.request.mode === 'navigate') {
     event.respondWith(fetch(event.request).then((response) => {
-      const copy = response.clone(); caches.open(CACHE).then((cache) => cache.put('/', copy)); return response;
+      if (response.ok) { const copy = response.clone(); caches.open(CACHE).then((cache) => cache.put('/', copy)); }
+      return response;
     }).catch(() => caches.match('/')));
     return;
   }

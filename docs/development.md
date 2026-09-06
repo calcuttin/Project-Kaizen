@@ -2,6 +2,8 @@
 
 [← README](../README.md) · [Local setup](local-setup.md) · [Cloud setup](cloud-setup.md)
 
+The app's **Help & guides** pages are generated from these Markdown files by `scripts/guides-plugin.ts` during development and production builds. Edit the source guide once; both GitHub and the app use it. The plugin publishes an explicit list of guides and setup source files, and rejects missing internal links. When adding a linked file, review it for publication before adding it to that list.
+
 Run commands from the repository root, using Node.js 24 and pnpm 11.19.0. The Vite client currently lives at the root; `apps/web` is not a separate runnable application.
 
 ## Everyday development

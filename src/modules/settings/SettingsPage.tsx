@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Cloud, Download, LogOut, Moon, RefreshCw, Sparkles, Sun, Trash2, Upload } from 'lucide-react';
+import { BookOpen, Cloud, Download, LogOut, Moon, RefreshCw, Sparkles, Sun, Trash2, Upload } from 'lucide-react';
 import { Button, Card, Modal, PageHead } from '@/components/ui';
 import { useUI } from '@/app/uiStore';
 import { exportAll, importAll, resetAll } from '@/core/store';
@@ -61,7 +61,7 @@ export function SettingsPage() {
         <Card title="Account & sync" icon={Cloud}>
           <div className="stack" style={{ gap: 11 }}>
             <div className="between"><span className="muted">Mode</span><span className="chip accent">{config.mode === 'cloud' ? 'Cloud sync' : 'Device only'}</span></div>
-            {config.mode === 'device' ? <p className="muted" style={{ fontSize: 12.5, lineHeight: 1.5 }}>No account is required. Add Supabase values to <code>.env.local</code> and set cloud mode to enable sign-in and sync.</p> : <>
+            {config.mode === 'device' ? <p className="muted" style={{ fontSize: 12.5, lineHeight: 1.5 }}>No account is required. To use your workspace across devices, follow the cloud setup guide in Help & guides below.</p> : <>
               <div className="between"><span className="muted">Signed in as</span><span className="row" style={{ gap: 8 }}><strong style={{ fontSize: 12.5 }}>{auth.user?.email}</strong><UserButton /></span></div>
               <div className="between"><span className="muted">Sync</span><Button size="sm" icon={RefreshCw} onClick={() => void syncNow()} disabled={sync.status === 'syncing'}>{sync.status === 'syncing' ? 'Syncing…' : 'Sync now'}</Button></div>
               {sync.error && <p style={{ color: 'var(--danger)', fontSize: 11, margin: 0 }}>{sync.error}</p>}
@@ -97,6 +97,20 @@ export function SettingsPage() {
           <div className="stack" style={{ gap: 10 }}>
             <div className="between"><span className="muted">Online book covers</span><Button onClick={() => setExternalBookCovers(!externalBookCovers)}>{externalBookCovers ? 'Turn off online covers' : 'Enable online covers'}</Button></div>
             <p className="muted" style={{ fontSize: 12.5, margin: 0 }}>Optional. Looking up covers sends book titles, authors, or ISBNs to Open Library. Loading remote images also shares your IP address with the image provider. Manual ISBN lookups contact Open Library when you request them.</p>
+          </div>
+        </Card>
+        <Card title="Help & guides" icon={BookOpen}>
+          <div className="stack" style={{ gap: 12 }}>
+            <p className="muted">Get started, protect your data, or set up your own Kaizen. Guides open in a new tab.</p>
+            {[
+              ['using-kaizen', 'Using Kaizen', 'Your first steps, imports, backups, and sync.'],
+              ['setup', 'Choose a setup', 'Compare using a website, local mode, and your own cloud.'],
+              ['local', 'Local setup', 'Run on your computer with no account required.'],
+              ['cloud', 'Cloud setup', 'Host your own site with private account workspaces.'],
+            ].map(([slug, label, description]) => <div key={slug} className="stack" style={{ gap: 4 }}>
+              <a className="btn" style={{ alignSelf: 'flex-start' }} href={`/guides/${slug}.html`} target="_blank" rel="noopener noreferrer">{label}<span className="sr-only"> (opens in a new tab)</span></a>
+              <small className="muted">{description}</small>
+            </div>)}
           </div>
         </Card>
         <Card title="About" className="span-2">

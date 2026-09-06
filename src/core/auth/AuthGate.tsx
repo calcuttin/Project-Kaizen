@@ -21,6 +21,7 @@ export function AuthGate({ children }: { children: ReactNode }) {
       <SignUpButton mode="modal"><Button variant="primary">Create your account</Button></SignUpButton>
       <SignInButton mode="modal"><Button className="auth-google">Sign in</Button></SignInButton>
       <small>Each account has its own workspace. Changes sync automatically after sign-in.</small>
+      <a className="btn ghost" href="/guides/using-kaizen.html">Help & guides</a>
     </div>
   </div>;
 }

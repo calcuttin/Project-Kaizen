@@ -32,10 +32,13 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.55.0",
+    "@types/node": "^24.13.3",
     "@types/react": "^18.3.31",
     "@types/react-dom": "^18.3.7",
     "@vitejs/plugin-react": "^6.1.1",
     "fake-indexeddb": "^6.2.2",
+    "github-slugger": "^2.0.0",
+    "marked": "^18.0.11",
     "supabase": "^2.116.0",
     "typescript": "^7.0.2",
     "vite": "^8.2.2",
