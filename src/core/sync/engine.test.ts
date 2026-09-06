@@ -69,6 +69,7 @@ it('marks new edits pending immediately and uploads automatically after the debo
   const write = queueSyncOperation({ entityId: 'one', entityType: 'tasks', operation: 'put', payload: { title: 'New edit' } });
   expect(useSyncStatus.getState().writing).toBe(1);
   await write;
+  expect(useSyncStatus.getState().status).not.toBe('idle');
   await vi.waitFor(() => expect(useSyncStatus.getState().pending).toBe(1));
   await vi.waitFor(() => expect(mocks.rpc).toHaveBeenCalledWith('push_changes', expect.anything()), { timeout: 1800 });
   await vi.waitFor(() => expect(useSyncStatus.getState().pending).toBe(0));

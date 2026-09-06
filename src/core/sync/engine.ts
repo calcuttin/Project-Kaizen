@@ -22,12 +22,12 @@ export async function syncNow() {
   const current = () => syncSession === session && !session.controller.signal.aborted && workspaceAvailable();
   const supabase = getSupabaseClient();
   if (!supabase) return;
-  if (!navigator.onLine) { const pending = (await readOutbox(session.owner)).length; if (current()) useSyncStatus.setState({ status: 'offline', pending }); return; }
   if (activeSync) return activeSync;
   activeSync = (async () => {
     try {
       const operations = await readOutbox(session.owner);
       if (!current()) return;
+      if (!navigator.onLine) { useSyncStatus.setState({ status: 'offline', pending: operations.length }); return; }
       useSyncStatus.setState({ status: 'syncing', pending: operations.length, error: undefined });
       for (let offset = 0; offset < operations.length; offset += 100) {
         if (!current()) return;
@@ -62,9 +62,9 @@ export async function syncNow() {
         }
         if (changes.length < 1000) break;
       }
-      const pending = (await readOutbox(session.owner)).length;
-      if (!current()) return;
       const conflicts = (await readConflicts(session.owner)).length;
+      if (!current()) return;
+      const pending = (await readOutbox(session.owner)).length;
       if (!current()) return;
       useSyncStatus.setState({ status: useSyncStatus.getState().localError ? 'error' : navigator.onLine ? 'idle' : 'offline', pending, conflicts, lastSyncedAt: nowIso(), error: undefined });
     } catch (error) {
@@ -93,7 +93,7 @@ export function startCloudSync() {
   };
   const stopQueue = onOutboxChange(({ owner, phase }) => {
     if (owner !== session.owner || syncSession !== session || session.controller.signal.aborted) return;
-    if (phase === 'writing') useSyncStatus.setState((state) => ({ writing: state.writing + 1 }));
+    if (phase === 'writing') useSyncStatus.setState((state) => ({ writing: state.writing + 1, status: state.localError ? 'error' : navigator.onLine ? 'syncing' : 'offline' }));
     else {
       useSyncStatus.setState((state) => ({ writing: Math.max(0, state.writing - 1), ...(phase === 'error' ? { status: 'error' as const, localError: true, error: 'Could not save changes on this device. Export a backup before reloading.' } : {}) }));
       if (phase === 'ready') void readOutbox(owner).then((operations) => {
