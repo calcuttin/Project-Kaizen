@@ -137,7 +137,7 @@ To practice recovery, use a separate browser profile and a local device-mode ins
 
 In **Library → Shelves**, choose **+ Shelf** to name a collection. Each named shelf has its own **Curate cabinet** button.
 
-1. Select the left or right object in the live preview, then choose a collectible. **Leave some space** clears that position.
+1. Select the left or right object in the live preview, then choose a collectible. Search by name or use a category to browse the 22 objects, including the globe, hourglass, bonsai, fossil, camera, and tea cup. **Leave some space** clears that position.
 2. Choose **Gallery**, **Moonlight**, or **Candlelit**, and adjust **Light level**.
 3. Choose **Layered** for a near-and-far arrangement or **Side by side** for a balanced pair.
 4. Select **Done**. Changes save automatically with that shelf and are included in JSON backups. In cloud mode, they save to your signed-in workspace.

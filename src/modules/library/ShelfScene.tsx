@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 
 import { BookOpen, ChevronLeft, ChevronRight, MapPin, Pause, Play, RotateCcw, Settings2, Shuffle, Trash2 } from 'lucide-react';
 import { CabinetScene } from './CabinetScene';
 import { LibraryDialog } from './LibraryDialog';
-import { OBJECTS, ENVIRONMENTS, CABINET_LIGHTS, cabinetSettings, type CabinetSettings, type CabinetObject, type CabinetObjects } from './cabinet';
+import { OBJECTS, ENVIRONMENTS, CABINET_LIGHTS, OBJECT_CATEGORIES, findCabinetObjects, type ObjectCategory, cabinetSettings, type CabinetSettings, type CabinetObject, type CabinetObjects } from './cabinet';
 import { SHELF_THEMES, THEME_KEYS, type ShelfTheme } from './themes';
 import { useLibrary, type Shelf } from './store';
 
@@ -18,6 +18,9 @@ export function ShelfScene({ shelf, themeKey, count, finished, children, atmosph
   const objects = shelf?.objects ?? environment.objects;
   const settings = cabinetSettings(shelf?.cabinet);
   const reducedMotion = useReducedMotion();
+  const [objectQuery, setObjectQuery] = useState('');
+  const [objectCategory, setObjectCategory] = useState<ObjectCategory>('All objects');
+  const matchingObjects = findCabinetObjects(objectQuery, objectCategory);
   const [editing, setEditing] = useState(false), [slot, setSlot] = useState<0 | 1>(0), [paused, setPaused] = useState(false);
   const [active, setActive] = useState(false), [canLeft, setCanLeft] = useState(false), [canRight, setCanRight] = useState(false);
   const root = useRef<HTMLElement>(null), rail = useRef<HTMLDivElement>(null);
@@ -64,7 +67,10 @@ export function ShelfScene({ shelf, themeKey, count, finished, children, atmosph
         <div className="cabinet-controls">
           <h3>1. Make it yours</h3>
           <div className="cabinet-slot-tabs" role="group" aria-label="Object position">{([0, 1] as const).map((i) => <button key={i} aria-pressed={slot === i} onClick={() => setSlot(i)}>{i === 0 ? 'Left object' : 'Right object'}<span>{OBJECTS[objects[i]].name}</span></button>)}</div>
-          <div className="object-picker">{(Object.keys(OBJECTS) as CabinetObject[]).map((object) => <button key={object} onClick={() => selectObject(object)} aria-pressed={objects[slot] === object} className={objects[slot] === object ? 'selected' : ''}>{OBJECTS[object].image ? <img className={object === 'computer' ? 'computer-thumb' : ''} src={OBJECTS[object].image} alt="" /> : <span className="empty-object-icon"><Shuffle size={24} /></span>}<strong>{OBJECTS[object].name}</strong><small>{OBJECTS[object].detail}</small></button>)}</div>
+          <div className="object-browser-tools"><input type="search" aria-label="Search cabinet objects" placeholder="Find an object…" value={objectQuery} onChange={(e) => setObjectQuery(e.target.value)} /><select aria-label="Object category" value={objectCategory} onChange={(e) => setObjectCategory(e.target.value as ObjectCategory)}>{OBJECT_CATEGORIES.map((category) => <option key={category}>{category}</option>)}</select></div>
+          <div className="object-picker" role="group" aria-label="Collectibles">{matchingObjects.map((object) => <button key={object} aria-label={OBJECTS[object].name} title={OBJECTS[object].detail} onClick={() => selectObject(object)} aria-pressed={objects[slot] === object} className={objects[slot] === object ? 'selected' : ''}>{OBJECTS[object].image ? <img className={object === 'computer' ? 'computer-thumb' : ''} src={OBJECTS[object].image} alt="" loading="lazy" /> : <span className="empty-object-icon"><Shuffle size={24} /></span>}<strong>{OBJECTS[object].name}</strong><small>{OBJECTS[object].detail}</small></button>)}</div>
+          {!matchingObjects.length && <p className="object-no-results">No objects found. <button className="btn sm ghost" onClick={() => { setObjectQuery(''); setObjectCategory('All objects'); }}>Clear object filters</button></p>}
+          <div className="object-selection-note"><p><strong>{OBJECTS[objects[slot]].name}</strong><span>{OBJECTS[objects[slot]].detail}</span></p><button className="btn sm ghost" onClick={() => selectObject('none')} aria-pressed={objects[slot] === 'none'}>Leave some space</button></div>
           <h3>2. Set the mood</h3>
           <div className="cabinet-light-options" role="group" aria-label="Cabinet lighting">{CABINET_LIGHTS.map((light) => <button key={light.id} data-light={light.id} aria-pressed={settings.lighting === light.id} onClick={() => updateCabinet({ lighting: light.id })}><span className="light-swatch" aria-hidden="true" /><strong>{light.name}</strong><small>{light.detail}</small></button>)}</div>
           <label className="cabinet-brightness">Light level <output>{settings.brightness}%</output><input type="range" aria-label="Cabinet light level" min="35" max="100" step="5" value={settings.brightness} onChange={(e) => updateCabinet({ brightness: Number(e.target.value) })} /></label>

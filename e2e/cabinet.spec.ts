@@ -33,3 +33,30 @@ test('cabinet objects, lighting and layout persist and stay usable on mobile', a
   await page.getByRole('button', { name: 'Curate cabinet', exact: true }).click();
   await expect(preview).toHaveAttribute('data-moving', 'false');
 });
+
+
+test('new collectibles are searchable, filterable and saved with the shelf', async ({ page }) => {
+  await page.goto('/library');
+  await page.getByRole('button', { name: 'Shelf', exact: true }).click();
+  await page.getByRole('textbox', { name: 'Shelf name', exact: true }).fill('Quiet corner');
+  await page.getByRole('button', { name: 'Create shelf', exact: true }).click();
+  await page.getByRole('button', { name: 'Curate cabinet', exact: true }).click();
+  const dialog = page.getByRole('dialog', { name: 'Curate Quiet corner' });
+  await dialog.getByRole('combobox', { name: 'Object category' }).selectOption('Science & nature');
+  await dialog.getByRole('searchbox', { name: 'Search cabinet objects' }).fill('pine');
+  await expect(dialog.getByRole('group', { name: 'Collectibles', exact: true }).getByRole('button')).toHaveCount(1);
+  await dialog.getByRole('button', { name: 'Bonsai pine', exact: true }).click();
+  await dialog.getByRole('group', { name: 'Object position' }).getByRole('button').nth(1).click();
+  await dialog.getByRole('searchbox', { name: 'Search cabinet objects' }).fill('hourglass');
+  await dialog.getByRole('button', { name: 'Brass hourglass', exact: true }).click();
+  await dialog.getByRole('searchbox', { name: 'Search cabinet objects' }).fill('no such object');
+  await expect(dialog.getByText('No objects found.')).toBeVisible();
+  await dialog.getByRole('button', { name: 'Clear object filters' }).click();
+  await expect(dialog.getByRole('group', { name: 'Collectibles', exact: true }).getByRole('button')).toHaveCount(22);
+  await dialog.getByRole('button', { name: 'Done', exact: true }).click();
+  await page.reload();
+  const cabinet = page.getByRole('complementary', { name: 'Display cabinet for Quiet corner' });
+  await expect(cabinet.getByRole('img', { name: 'Bonsai pine', exact: true })).toBeVisible();
+  await expect(cabinet.getByRole('img', { name: 'Brass hourglass', exact: true })).toBeVisible();
+  await expect.poll(() => cabinet.getByRole('img', { name: 'Bonsai pine', exact: true }).evaluate((img: HTMLImageElement) => img.complete && img.naturalWidth > 0)).toBe(true);
+});

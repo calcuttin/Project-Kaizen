@@ -304,3 +304,33 @@
   .cabinet-preview-caption p { display: none; }
   .cabinet-preview-column > button { display: block; margin: 5px auto; }
 }
+
+/* Curated proportions, grounded silhouettes, and a browsable collection. */
+.cabinet-scene .artifact { transform: translateY(calc(-1 * var(--object-lift, 0%))) scale(var(--object-scale, 1)); transform-origin: 50% 96%; }
+.cabinet-scene .artifact-contact { left: 50%; right: auto; width: var(--contact-width, 60%); transform: translateX(-50%); height: 5%; bottom: 3%; background: #000d; filter: blur(3px); box-shadow: 0 2px 8px #0008; }
+.cabinet-scene .artifact-wafer:hover img { filter: none; }
+.cabinet-placement:hover .artifact, .cabinet-placement:focus-visible .artifact { filter: brightness(calc(.45 + var(--cabinet-brightness) * .65)); }
+.object-browser-tools { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, .9fr); gap: 8px; margin-bottom: 10px; }
+.object-browser-tools input, .object-browser-tools select { width: 100%; min-width: 0; min-height: 42px; font-size: 12px; }
+.cabinet-curator .object-picker { max-height: 260px; min-height: 120px; }
+.cabinet-curator .object-picker button { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 7px; padding: 8px 5px; min-height: 110px; }
+.cabinet-curator .object-picker img { width: 100%; height: 68px; object-fit: contain; border-radius: 5px; background: #080706; mix-blend-mode: normal; transition: transform .2s ease; }
+.cabinet-curator .object-picker button:hover img { transform: scale(1.04); }
+.cabinet-curator .object-picker strong { line-height: 1.3; font-size: 11px; }
+.cabinet-curator .object-picker button.selected { box-shadow: inset 0 0 0 1px var(--accent); }
+.object-selection-note { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 0 0; }
+.object-selection-note p { margin: 0; font-size: 12px; }
+.object-selection-note span { display: block; color: var(--text-2); font-size: 11px; line-height: 1.5; margin-top: 4px; }
+.object-selection-note > button { flex-shrink: 0; min-height: 44px; }
+.object-no-results { font-size: 12px; color: var(--text-2); }
+@media (max-width: 500px) { .object-browser-tools { grid-template-columns: 1fr; } .object-selection-note { align-items: flex-start; } }
+@media (prefers-reduced-motion: reduce) { .cabinet-curator .object-picker img { transition: none; } }
+/* Derive edge alpha from the black-backed photography at render time, keeping
+   the original RGB surfaces opaque instead of screening wood grain through them. */
+.cabinet-filter-defs { position: absolute; pointer-events: none; }
+.cabinet-placement:not(.cabinet-shadow):not([data-object="computer"]):not([data-object="none"]) { mix-blend-mode: normal; }
+.cabinet-scene .artifact:not(.artifact-computer) { filter: var(--object-cutout) brightness(calc(.35 + var(--cabinet-brightness) * .65)); }
+.cabinet-scene[data-light="moonlight"] .artifact:not(.artifact-computer) { filter: var(--object-cutout) brightness(calc(.35 + var(--cabinet-brightness) * .65)) saturate(.7); }
+.cabinet-scene[data-light="candle"] .artifact:not(.artifact-computer) { filter: var(--object-cutout) brightness(calc(.2 + var(--cabinet-brightness) * .7)) sepia(.2); }
+.cabinet-scene .artifact-orrery .orrery-base { mix-blend-mode: normal; }
+.cabinet-object-label { bottom: -15%; }
