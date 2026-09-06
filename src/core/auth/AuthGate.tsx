@@ -20,7 +20,7 @@ export function AuthGate({ children }: { children: ReactNode }) {
       <p>Sign in to keep your private workspace in sync across your devices.</p>
       <SignUpButton mode="modal"><Button variant="primary">Create your account</Button></SignUpButton>
       <SignInButton mode="modal"><Button className="auth-google">Sign in</Button></SignInButton>
-      <small>Your data remains available on this device until you choose to sync it.</small>
+      <small>Each account has its own workspace. Changes sync automatically after sign-in.</small>
     </div>
   </div>;
 }
