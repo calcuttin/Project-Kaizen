@@ -1,3 +1,4 @@
+import { deleteWithUndo } from '@/core/undo';
 import { useState } from 'react';
 import { Activity, Flame, Plus, Target, Trash2 } from 'lucide-react';
 import { Button, Card, Empty, Field, Modal, PageHead, Ring, Stat, Stepper } from '@/components/ui';
@@ -98,7 +99,7 @@ function HabitRow({ habit }: { habit: Habit }) {
             );
           })}
         </div>
-        <button className="btn ghost icon sm" aria-label="Delete habit" onClick={() => { if (confirm(`Delete “${habit.name}” and its history?`)) deleteHabit(habit.id); }}><Trash2 size={14} /></button>
+        <button className="btn ghost icon sm" aria-label="Delete habit" onClick={() => { if (confirm(`Delete “${habit.name}” and its history?`)) deleteWithUndo(useHealth, () => deleteHabit(habit.id), 'Habit deleted'); }}><Trash2 size={14} /></button>
       </div>
     </div>
   );
@@ -133,7 +134,7 @@ function GoalCard({ goal, onLog }: { goal: HealthGoal; onLog: () => void }) {
         </div>
         <div className="stack" style={{ gap: 4 }}>
           <Button size="sm" onClick={onLog}>Log</Button>
-          <Button size="sm" variant="ghost" iconOnly icon={Trash2} aria-label="Delete goal" onClick={() => confirm('Delete goal?') && deleteGoal(goal.id)} />
+          <Button size="sm" variant="ghost" iconOnly icon={Trash2} aria-label="Delete goal" onClick={() => confirm('Delete goal?') && deleteWithUndo(useHealth, () => deleteGoal(goal.id), 'Goal deleted')} />
         </div>
       </div>
     </div>
@@ -162,7 +163,7 @@ function NewHabitModal({ open, onClose }: { open: boolean; onClose: () => void }
             <Field label="Unit"><input value={unit} onChange={(e) => setUnit(e.target.value)} placeholder="glasses, min, km" /></Field>
           </div>
         )}
-        <div className="form-actions"><Button variant="ghost" onClick={onClose}>Cancel</Button><Button variant="primary" onClick={submit}>Add habit</Button></div>
+        <div className="form-actions"><Button variant="ghost" onClick={onClose}>Cancel</Button><Button variant="primary" onClick={submit} disabled={!name.trim()}>Add habit</Button></div>
       </div>
     </Modal>
   );
@@ -186,7 +187,7 @@ function NewGoalModal({ open, onClose }: { open: boolean; onClose: () => void })
           <Field label="Unit"><input value={unit} onChange={(e) => setUnit(e.target.value)} /></Field>
         </div>
         <Field label="Deadline (optional)"><input type="date" value={deadline} onChange={(e) => setDeadline(e.target.value)} /></Field>
-        <div className="form-actions"><Button variant="ghost" onClick={onClose}>Cancel</Button><Button variant="primary" onClick={submit}>Set goal</Button></div>
+        <div className="form-actions"><Button variant="ghost" onClick={onClose}>Cancel</Button><Button variant="primary" onClick={submit} disabled={!title.trim() || !start || !target}>Add goal</Button></div>
       </div>
     </Modal>
   );

@@ -1,3 +1,5 @@
+import { create } from 'zustand';
+import { currentWorkspaceOwner, workspaceAvailable } from '@/core/storage';
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { coverGradient, useLibrary, type Book } from './store';
 import { useUI } from '@/app/uiStore';
@@ -5,6 +7,15 @@ import { useUI } from '@/app/uiStore';
 type SearchDoc = { title?: string; author_name?: string[]; cover_i?: number; number_of_pages_median?: number };
 type CoverResult = string | null | undefined;
 export type BookMetadata = { title?: string; author?: string; pages?: number };
+
+const useCoverRetry = create<{ attempt: number }>(() => ({ attempt: 0 }));
+/** Retrying is explicit; failed lookups do not loop in the background. */
+export function retryBookCovers() {
+  requests.clear();
+  metadataRequests.clear();
+  useLibrary.setState((state) => ({ books: Object.fromEntries(Object.entries(state.books).map(([id, book]) => [id, book.coverUnavailable ? { ...book, coverUnavailable: false } : book])) }));
+  useCoverRetry.setState((state) => ({ attempt: state.attempt + 1 }));
+}
 
 const requests = new Map<string, Promise<CoverResult>>();
 const metadataRequests = new Map<string, Promise<BookMetadata | null>>();
@@ -35,7 +46,8 @@ export async function lookupOpenLibraryBook(isbn: string): Promise<BookMetadata 
       const author = record.author_name?.filter(Boolean).join(', ');
       return { title: record.title, author: author || undefined, pages: record.number_of_pages_median };
     })
-    .catch(() => null);
+    .catch(() => null)
+    .then((result) => { if (!result) metadataRequests.delete(clean); return result; });
   metadataRequests.set(clean, request);
   return request;
 }
@@ -69,6 +81,7 @@ async function resolveOpenLibraryCover(title: string, author: string): Promise<C
       return undefined;
     }
   })();
+  void request.then((result) => { if (result === undefined) requests.delete(key); });
   requests.set(key, request);
   return request;
 }
@@ -81,6 +94,9 @@ export function BookCover({ book, className = 'cover', style, children }: { book
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
   const [failed, setFailed] = useState(false);
+  const attempt = useCoverRetry((state) => state.attempt);
+  const active = useRef(true);
+  useEffect(() => { active.current = true; return () => { active.current = false; }; }, []);
   const externalBookCovers = useUI((state) => state.externalBookCovers);
   const setBookCover = useLibrary((state) => state.setBookCover);
 
@@ -93,21 +109,26 @@ export function BookCover({ book, className = 'cover', style, children }: { book
   useEffect(() => {
     if (!externalBookCovers || !visible || book.coverUrl || book.coverUnavailable) return;
     let cancelled = false;
+    const owner = currentWorkspaceOwner();
     resolveCover(book).then((url) => {
-      if (!cancelled && url !== undefined) setBookCover(book.id, url);
+      if (!cancelled && workspaceAvailable() && currentWorkspaceOwner() === owner && useUI.getState().externalBookCovers && url !== undefined) setBookCover(book.id, url);
     });
     return () => { cancelled = true; };
-  }, [book.author, book.coverUnavailable, book.coverUrl, book.id, book.isbn, book.title, externalBookCovers, setBookCover, visible]);
+  }, [book.author, book.coverUnavailable, book.coverUrl, book.id, book.isbn, book.title, externalBookCovers, setBookCover, visible, attempt]);
 
-  useEffect(() => { setFailed(false); }, [book.coverUrl]);
+  useEffect(() => { setFailed(false); }, [book.coverUrl, attempt]);
 
   const image = Boolean(externalBookCovers && book.coverUrl && /^https:\/\//i.test(book.coverUrl) && !failed);
   return <div ref={ref} className={`${className}${image ? ' has-art' : ''}`} style={{ '--cover': coverGradient(book.hue), ...style } as CSSProperties}>
-    {image ? <img src={book.coverUrl} alt={`Cover of ${book.title}`} loading="lazy" referrerPolicy="no-referrer" onError={() => {
+    {image ? <img key={attempt} src={book.coverUrl} alt={`Cover of ${book.title}`} loading="lazy" referrerPolicy="no-referrer" onError={() => {
       setFailed(true);
-      if (isbnCoverUrl(book.isbn)) {
-        resolveOpenLibraryCover(book.title, book.author).then((url) => setBookCover(book.id, url ?? null));
-      } else setBookCover(book.id, null);
+      const owner = currentWorkspaceOwner();
+      if (book.coverUrl === isbnCoverUrl(book.isbn)) {
+        resolveOpenLibraryCover(book.title, book.author).then((url) => {
+          const current = useLibrary.getState().books[book.id];
+          if (url && active.current && workspaceAvailable() && owner === currentWorkspaceOwner() && useUI.getState().externalBookCovers && current?.title === book.title && current?.author === book.author && current?.isbn === book.isbn) setBookCover(book.id, url);
+        });
+      }
     }} /> : children}
   </div>;
 }

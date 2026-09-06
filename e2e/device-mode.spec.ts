@@ -32,7 +32,7 @@ test('backup export remains available in device mode', async ({ page }) => {
   await page.goto('/settings');
   await expectWorkspaceOpen(page);
   await expect(page.getByRole('button', { name: 'Load samples' })).toBeVisible();
-  await expect(page.getByText('Device only', { exact: true })).toHaveCount(2);
+  await expect(page.getByText('Device only', { exact: true })).toHaveCount(3);
   const download = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Export' }).click();
   await expect(await download).toBeTruthy();
@@ -44,7 +44,9 @@ test('a JSON backup restores into the local library', async ({ page }) => {
   const now = new Date().toISOString();
   const backup = { app: 'kaizen', stores: { library: { shelves: {}, books: { restored: { id: 'restored', createdAt: now, updatedAt: now, title: 'Restored Book', author: 'Backup Author', pages: 200, currentPage: 0, status: 'want', tags: [], hue: 42 } }, sessions: [], annotations: {}, goal: { year: 2026, books: 12, pagesPerDay: 10 }, importedCollections: [], atmosphere: true } } };
   await page.locator('input[type=file]').setInputFiles({ name: 'kaizen-backup.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(backup)) });
-  await expect(page.getByText('Data restored')).toBeVisible();
+  await expect(page.getByRole('dialog', { name: 'Review backup restore' })).toBeVisible();
+  await page.getByRole('button', { name: 'Restore backup', exact: true }).click();
+  await expect(page.getByText('Backup restored')).toBeVisible();
   await page.goto('/library');
   await expect(page.getByRole('button', { name: 'Restored Book' })).toBeVisible();
 });

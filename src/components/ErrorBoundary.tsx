@@ -1,3 +1,4 @@
+import { downloadJson, supportReport } from '@/core/diagnostics';
 import { Component, type ErrorInfo, type ReactNode } from 'react';
 import { exportAll } from '@/core/store';
 
@@ -16,6 +17,6 @@ export class ErrorBoundary extends Component<{ children: ReactNode }, { error?: 
 
   render() {
     if (!this.state.error) return this.props.children;
-    return <main className="auth-shell"><section className="auth-card"><div className="auth-mark">改善</div><h1>Kaizen hit a rough patch</h1><p>Your device data is still stored locally. Download a recovery copy, then reload the app.</p><div className="row" style={{ justifyContent: 'center' }}><button className="btn" onClick={this.downloadBackup}>Download recovery copy</button><button className="btn primary" onClick={() => window.location.reload()}>Reload</button></div><small>{this.state.error.message}</small></section></main>;
+    return <main className="auth-shell"><section className="auth-card"><div className="auth-mark">改善</div><h1>Kaizen hit a rough patch</h1><p>Download a recovery copy of the data currently available, then reload the app.</p><div className="row" style={{ justifyContent: 'center' }}><button className="btn" onClick={this.downloadBackup}>Download recovery copy</button><button className="btn primary" onClick={() => window.location.reload()}>Reload</button></div><button className="btn" onClick={() => downloadJson(supportReport('render-failure'), 'kaizen-support-report.json')}>Download support report</button><small>The report contains save status only. Nothing is sent automatically.</small></section></main>;
   }
 }

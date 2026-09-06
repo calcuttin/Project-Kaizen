@@ -1,14 +1,26 @@
-import { useState, type CSSProperties } from 'react';
+import { config } from '@/core/config';
+import { useSyncStatus } from '@/core/sync/engine';
+import { useEffect, useState, type CSSProperties } from 'react';
 import { BookOpen, CircleDot, HelpCircle, Heart, Moon, Plus, Sparkles, Sun, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { Button, Card } from '@/components/ui';
+import { Button, Card, Modal } from '@/components/ui';
 import { format, greeting, todayKey } from '@/core/dates';
 import { modules } from '@/app/registry';
 import { MOODS, useJournal } from '@/modules/journal/store';
 import { FocusWidget } from '@/modules/tasks/widgets';
+import { TODAY_LABELS, TODAY_SECTIONS, useUI } from '@/app/uiStore';
+import { useTasks } from '@/modules/tasks/store';
+import { useHealth } from '@/modules/health/store';
+import { useLibrary } from '@/modules/library/store';
+import { useImports } from '@/core/imports/store';
+import { registeredStores, whenHydrated } from '@/core/store';
 import './today.css';
 
 export function TodayPage() {
+  const { todayOrder, todayHidden, setTodayLayout } = useUI();
+  const [customizing, setCustomizing] = useState(false);
+  const order = [...new Set([...todayOrder, ...TODAY_SECTIONS])].filter((id) => TODAY_SECTIONS.includes(id));
+  const move = (id: string, direction: number) => { const next = [...order]; const i = next.indexOf(id); [next[i], next[i + direction]] = [next[i + direction], next[i]]; setTodayLayout(next, todayHidden); };
   const today = todayKey();
   const { entries, upsert, addWin, removeWin } = useJournal();
   const entry = entries[today];
@@ -37,11 +49,13 @@ export function TodayPage() {
         <Link className="btn" to="/library"><BookOpen size={16} />Open library</Link>
         <Link className="btn" to="/health"><Heart size={16} />Track habits</Link>
         <a className="btn ghost" href="/guides/using-kaizen.html"><HelpCircle size={16} />Getting started</a>
+        <Button variant="ghost" onClick={() => setCustomizing(true)}>Customize Today</Button>
       </nav>
+      <GettingStarted />
 
       <section className="today-ritual" aria-label="Plan your day">
-        <FocusWidget />
-        <Card className="intention today-intention" tint="var(--accent-soft)">
+        {!todayHidden.includes('tasks') && <FocusWidget />}
+        {!todayHidden.includes('intention') && <Card className="intention today-intention" tint="var(--accent-soft)">
           <div className="today-card-kicker"><h2 className="card-title"><Sparkles /> Your daily focus</h2><em>Optional</em></div>
           <label className="today-field-label" htmlFor="daily-intention">What would make today a good day?</label>
           <textarea
@@ -53,12 +67,13 @@ export function TodayPage() {
             aria-label="Today's intention"
           />
           <div className="intention-note">A reminder to yourself, separate from your tasks. Saves as you type.</div>
-        </Card>
+        </Card>}
       </section>
 
-      <div className="today-working-head"><div><h2>Check in & keep going</h2></div><p>Your habits, reading, and plans in one place.</p></div>
+      {order.some((id) => !todayHidden.includes(id)) && <div className="today-working-head"><div><h2>Check in & keep going</h2></div><p>Your habits, reading, and plans in one place.</p></div>}
       <div className="grid dash today-dashboard">
-        <Card className="today-wins" tint="var(--surface)">
+        {order.filter((id) => !todayHidden.includes(id)).map((id) => {
+          if (id === 'checkin') return <Card key={id} className="today-wins" tint="var(--surface)">
           <div className="stack" style={{ gap: 10 }}>
             <div className="today-card-kicker"><h2 className="card-title">{evening ? <Moon /> : <Sun />}A moment for you</h2><em>Optional</em></div>
             <span className="today-field-label" id="today-mood-label">How are you feeling?</span>
@@ -85,11 +100,52 @@ export function TodayPage() {
               <label className="stack today-field-label">Evening reflection<textarea value={entry?.reflection ?? ''} onChange={(e) => upsert(today, { reflection: e.target.value })} placeholder="What went well? What would you change tomorrow?" rows={3} style={{ fontSize: 13.5 }} aria-label="Evening reflection" /><small className="today-helper">Saves as you type.</small></label>
             )}
           </div>
-        </Card>
-        {widgets.map((w) => (
-          <div key={w.id} className={w.size === 'span-2' ? 'span-2' : ''}><w.Component /></div>
-        ))}
+        </Card>;
+          const widget = widgets.find((w) => w.id === id);
+          return widget ? <div key={id} className={widget.size === 'span-2' ? 'span-2' : ''}><widget.Component /></div> : null;
+        })}
       </div>
+      <Modal open={customizing} onClose={() => setCustomizing(false)} title="Customize Today">
+        <p className="muted">Choose what you see. These preferences apply to this browser; your records stay in their areas.</p>
+        <div className="stack today-customize">
+          {['tasks', 'intention', ...order].map((id) => <div className="between" key={id}>
+            <label className="row"><input type="checkbox" checked={!todayHidden.includes(id)} onChange={() => setTodayLayout(order, todayHidden.includes(id) ? todayHidden.filter((item) => item !== id) : [...todayHidden, id])} />{TODAY_LABELS[id]}</label>
+            {order.includes(id) && <div className="row"><Button size="sm" aria-label={`Move ${TODAY_LABELS[id]} up`} disabled={order.indexOf(id) === 0} onClick={() => move(id, -1)}>↑</Button><Button size="sm" aria-label={`Move ${TODAY_LABELS[id]} down`} disabled={order.indexOf(id) === order.length - 1} onClick={() => move(id, 1)}>↓</Button></div>}
+          </div>)}
+          <p className="muted">Tasks and daily focus stay at the top when shown. Use the arrows to arrange the sections below.</p>
+          <div className="form-actions"><Button onClick={() => setTodayLayout(TODAY_SECTIONS, [])}>Reset layout</Button><Button variant="primary" onClick={() => setCustomizing(false)}>Close</Button></div>
+        </div>
+      </Modal>
     </div>
   );
+}
+
+function GettingStarted() {
+  const cloudLoadedAt = useSyncStatus((state) => state.lastSyncedAt);
+  const { gettingStarted, setGettingStarted, lastBackupAt } = useUI();
+  const tasks = useTasks((state) => state.tasks);
+  const habits = useHealth((state) => state.habits);
+  const books = useLibrary((state) => state.books);
+  const runs = useImports((state) => state.runs);
+  useEffect(() => {
+    if (config.mode === 'cloud' && !cloudLoadedAt) return;
+    let active = true;
+    void Promise.all([whenHydrated(useUI), ...[...registeredStores().values()].map(whenHydrated)]).then(() => {
+      if (!active || useUI.getState().gettingStarted !== null) return;
+      const hasData = [...registeredStores().values()].some((store) => Object.entries(store.getState()).some(([key, value]) => !['goal', 'atmosphere'].includes(key) && value && typeof value === 'object' && Object.keys(value).length > 0));
+      setGettingStarted(!hasData);
+    });
+    return () => { active = false; };
+  }, [setGettingStarted, cloudLoadedAt]);
+  if (!gettingStarted) return null;
+  const steps = [
+    { label: 'Add your first task', to: '/tasks', done: Object.keys(tasks).length > 0 },
+    { label: 'Create a habit', to: '/health', done: Object.keys(habits).length > 0 },
+    { label: 'Add a book or import your library (optional)', to: '/library', done: Object.keys(books).length > 0 || runs.length > 0 },
+    { label: 'Download your first backup', to: '/settings', done: Boolean(lastBackupAt) },
+  ];
+  return <Card className="getting-started" title="Make this space yours" action={<Button size="sm" variant="ghost" onClick={() => setGettingStarted(false)}>Dismiss checklist</Button>}>
+    <p className="muted">Start anywhere. You can reopen this checklist in Settings.</p>
+    <ul>{steps.map((step) => <li key={step.to}><span aria-label={step.done ? 'Complete' : 'To do'}>{step.done ? '✓' : '○'}</span><Link to={step.to}>{step.label}</Link></li>)}</ul>
+  </Card>;
 }

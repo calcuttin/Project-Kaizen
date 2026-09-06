@@ -1,3 +1,6 @@
+import { useUI } from '@/app/uiStore';
+import { deleteWithUndo } from '@/core/undo';
+import { currentWorkspaceOwner, workspaceAvailable } from '@/core/storage';
 import { useCallback, useEffect, useMemo, useRef, useState, type MouseEvent } from 'react';
 import { BookOpen, Camera, CheckCheck, LayoutGrid, Library, Plus, Rows3, Star, Sun, Trash2, Upload } from 'lucide-react';
 import { Bar, Button, Chip, Empty, Field, Modal, PageHead, Ring, Segmented } from '@/components/ui';
@@ -7,7 +10,7 @@ import { BOOK_STATUS, finishedThisYear, pagesInLastDays, useLibrary, type Book, 
 import { SHELF_THEMES, spineStyle, spineVariant, themeForShelfName, type ShelfTheme } from './themes';
 import { ShelfScene, useReducedMotion } from './ShelfScene';
 import { RetroTerminal } from './RetroTerminal';
-import { BookCover, lookupOpenLibraryBook } from './BookCover';
+import { BookCover, lookupOpenLibraryBook, retryBookCovers } from './BookCover';
 import { ImportCenter } from './ImportCenter';
 import './library.css';
 
@@ -17,6 +20,9 @@ type View = 'shelves' | 'grid';
 export function LibraryPage() {
   const { books, shelves, sessions, goal, addShelf, deleteShelf, setStatus, atmosphere, setAtmosphere } = useLibrary();
   const [view, setView] = useState<View>('shelves');
+  const { externalBookCovers, setExternalBookCovers } = useUI();
+  const [query, setQuery] = useState('');
+  const [shelfFilter, setShelfFilter] = useState('all');
   const [tab, setTab] = useState<Tab>('all');
   const [adding, setAdding] = useState(false);
   const [importing, setImporting] = useState(false);
@@ -32,7 +38,7 @@ export function LibraryPage() {
   const reading = all.filter((b) => b.status === 'reading');
   const pages7 = pagesInLastDays(sessions, 7);
   const matches = useCallback((b: Book, t: Tab) => t === 'all' ? true : t.startsWith('shelf:') ? b.shelfId === t.slice(6) : b.status === t, []);
-  const visible = useMemo(() => all.filter((b) => matches(b, tab)).sort((a, b) => (a.status === 'reading' ? -1 : 0) - (b.status === 'reading' ? -1 : 0) || b.updatedAt.localeCompare(a.updatedAt)), [all, tab, matches]);
+  const visible = useMemo(() => all.filter((b) => matches(b, tab) && matches(b, shelfFilter as Tab) && `${b.title} ${b.author} ${b.isbn ?? ''}`.toLocaleLowerCase().includes(query.trim().toLocaleLowerCase())).sort((a, b) => (a.status === 'reading' ? -1 : 0) - (b.status === 'reading' ? -1 : 0) || b.updatedAt.localeCompare(a.updatedAt)), [all, tab, shelfFilter, query, matches]);
   const count = (t: Tab) => all.filter((b) => matches(b, t)).length;
   const onBookClick = (b: Book) => (e: MouseEvent) => {
     if (markMode) {
@@ -65,13 +71,17 @@ export function LibraryPage() {
         <button aria-pressed={tab === 'all'} className={tab === 'all' ? 'active' : ''} onClick={() => setTab('all')}>All <span>{all.length}</span></button>
         {(['reading', 'want', 'finished', 'paused'] as BookStatus[]).map((s) => <button key={s} aria-pressed={tab === s} className={tab === s ? 'active' : ''} onClick={() => setTab(s)}>{BOOK_STATUS[s]} <span>{count(s)}</span></button>)}
       </div>
-      <div className="library-shelf-filter"><select aria-label="Choose shelf" value={tab.startsWith('shelf:') ? tab : 'all'} onChange={(e) => setTab(e.target.value as Tab)}><option value="all">All shelves · {shelfList.length}</option>{shelfList.map((s) => <option key={s.id} value={`shelf:${s.id}`}>{s.name} · {count(`shelf:${s.id}`)}</option>)}</select><button className="btn sm ghost" onClick={() => { const n = prompt('Shelf name (e.g. “Office — top shelf”, “Kindle”)'); if (n?.trim()) addShelf(n.trim(), themeForShelfName(n)); }}><Plus size={13} />Shelf</button></div>
+      <div className="library-shelf-filter"><select aria-label="Choose shelf" value={shelfFilter} onChange={(e) => setShelfFilter(e.target.value)}><option value="all">All shelves · {shelfList.length}</option>{shelfList.map((s) => <option key={s.id} value={`shelf:${s.id}`}>{s.name} · {count(`shelf:${s.id}`)}</option>)}</select><button className="btn sm ghost" onClick={() => { const n = prompt('Shelf name (e.g. “Office — top shelf”, “Kindle”)'); if (n?.trim()) addShelf(n.trim(), themeForShelfName(n)); }}><Plus size={13} />Shelf</button></div>
     </div>
+    </div>
+    <div className="library-search row"><input type="search" aria-label="Search books" placeholder="Search by title, author, or ISBN" value={query} onChange={(e) => setQuery(e.target.value)} />{(query || tab !== 'all' || shelfFilter !== 'all') && <Button onClick={() => { setQuery(''); setTab('all'); setShelfFilter('all'); }}>Clear filters</Button>}<span className="muted" role="status">{visible.length} of {all.length} books</span></div>
+    <div className="library-cover-help">
+      {externalBookCovers ? <><span>Online covers are on. Missing artwork may be unavailable from Open Library.</span><Button size="sm" onClick={() => { retryBookCovers(); toast('Retrying visible covers. Scroll to load more.'); }}>Retry covers</Button></> : <><span>Online covers are off. Enabling them sends book details and your IP address to Open Library.</span><Button size="sm" onClick={() => setExternalBookCovers(true)}>Enable online covers</Button></>}
     </div>
     {markMode && <div className="library-mark-note">Mark-read mode: select a book to toggle Finished / Want to read.</div>}
-    {view === 'shelves' ? <Bookcase shelves={shelfList} books={all} tab={tab} markMode={markMode} onBookClick={onBookClick} atmosphere={atmosphere && !reducedMotion} onComputer={() => setComputer(true)} onDeleteShelf={(s) => { if (confirm(`Remove shelf “${s.name}”? Books stay in your library.`)) { deleteShelf(s.id); setTab('all'); } }} /> : !visible.length ? <Empty icon={BookOpen} title="No books here" hint="Try another shelf or add a book." action={<Button size="sm" onClick={() => setAdding(true)}>Add a book</Button>} /> : <div className="book-grid">{visible.map((b) => <BookCard key={b.id} book={b} onClick={onBookClick(b)} />)}</div>}
+    {!visible.length && (query || tab !== 'all' || shelfFilter !== 'all') ? <Empty icon={BookOpen} title="No matching books" hint="Try a different search or clear your filters." /> : view === 'shelves' ? <Bookcase shelves={shelfList.filter((s) => shelfFilter === 'all' || shelfFilter === `shelf:${s.id}`)} books={visible} tab={tab} markMode={markMode} onBookClick={onBookClick} atmosphere={atmosphere && !reducedMotion} onComputer={() => setComputer(true)} onDeleteShelf={(s) => { if (confirm(`Remove shelf “${s.name}”? Books stay in your library.`)) { deleteShelf(s.id); setShelfFilter('all'); } }} /> : !visible.length ? <Empty icon={BookOpen} title="No books here" hint="Try another shelf or add a book." action={<Button size="sm" onClick={() => setAdding(true)}>Add a book</Button>} /> : <div className="book-grid">{visible.map((b) => <BookCard key={b.id} book={b} onClick={onBookClick(b)} />)}</div>}
     <p className="library-footnote">{all.length} books · {shelfList.length} shelves · Countless places to go.</p>
-    {adding && <AddBookModal open onClose={() => setAdding(false)} defaultShelf={tab.startsWith('shelf:') ? tab.slice(6) : undefined} />}
+    {adding && <AddBookModal open onClose={() => setAdding(false)} defaultShelf={shelfFilter.startsWith('shelf:') ? shelfFilter.slice(6) : undefined} />}
     <ImportCenter open={importing} onClose={() => setImporting(false)} />
     <Popover anchor={open?.anchor ?? null} onClose={closeDetail} label="Book details">{open && <BookDetail key={open.id} id={open.id} onClose={closeDetail} />}</Popover>
     <Modal open={goalEdit} onClose={() => setGoalEdit(false)} title={`${year} reading goal`}><GoalForm onDone={() => setGoalEdit(false)} /></Modal>
@@ -109,7 +119,7 @@ function Bookcase({ shelves, books, tab, markMode, atmosphere, onComputer, onBoo
 function BookCard({ book, onClick }: { book: Book; onClick: (e: MouseEvent) => void }) {
   const pct = book.pages ? (book.currentPage / book.pages) * 100 : 0;
   return (
-    <div className="book" onClick={onClick} role="button" aria-label={`${book.title} by ${book.author}`} tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter') { const r = (e.target as HTMLElement).getBoundingClientRect(); onClick({ clientX: r.right, clientY: r.top + 40 } as MouseEvent); } }}>
+    <div className="book" onClick={onClick} role="button" aria-label={`${book.title} by ${book.author}`} tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); const r = (e.target as HTMLElement).getBoundingClientRect(); onClick({ clientX: r.right, clientY: r.top + 40 } as MouseEvent); } }}>
       <BookCover book={book}>
         <div className="ctitle">{book.title}</div>
         <div className="cauthor">{book.author}</div>
@@ -128,6 +138,8 @@ function AddBookModal({ open, onClose, defaultShelf }: { open: boolean; onClose:
   const [title, setTitle] = useState(''); const [author, setAuthor] = useState(''); const [isbn, setIsbn] = useState(''); const [pages, setPages] = useState('300');
   const [status, setStatus] = useState<BookStatus>('want'); const [shelfId, setShelfId] = useState(defaultShelf ?? '');
   const [lookingUp, setLookingUp] = useState(false);
+  const active = useRef(true);
+  useEffect(() => { active.current = true; return () => { active.current = false; }; }, []);
   const [scanning, setScanning] = useState(false);
   const reset = () => { setTitle(''); setAuthor(''); setIsbn(''); setPages('300'); };
   const shelve = (bookTitle: string, bookAuthor: string, bookPages: number) => {
@@ -138,15 +150,19 @@ function AddBookModal({ open, onClose, defaultShelf }: { open: boolean; onClose:
   const submit = async () => {
     if (title.trim()) { shelve(title, author, Number(pages) || 300); return; }
     if (!isbn.trim()) return;
+    const owner = currentWorkspaceOwner();
     setLookingUp(true);
     const metadata = await lookupOpenLibraryBook(isbn);
+    if (!active.current || !workspaceAvailable() || currentWorkspaceOwner() !== owner) return;
     setLookingUp(false);
     if (!metadata?.title) { toast('This ISBN is not indexed yet — add the title and author manually'); return; }
     shelve(metadata.title, metadata.author ?? '', metadata.pages ?? 300);
   };
   const fillFromIsbn = async () => {
+    const owner = currentWorkspaceOwner();
     setLookingUp(true);
     const metadata = await lookupOpenLibraryBook(isbn);
+    if (!active.current || !workspaceAvailable() || currentWorkspaceOwner() !== owner) return;
     setLookingUp(false);
     if (!metadata) { toast('This ISBN is not indexed yet — add the title and author manually'); return; }
     if (metadata.title) setTitle(metadata.title);
@@ -165,7 +181,7 @@ function AddBookModal({ open, onClose, defaultShelf }: { open: boolean; onClose:
           <Field label="Status"><select value={status} onChange={(e) => setStatus(e.target.value as BookStatus)}>{(Object.keys(BOOK_STATUS) as BookStatus[]).map((s) => <option key={s} value={s}>{BOOK_STATUS[s]}</option>)}</select></Field>
           <Field label="Shelf"><select value={shelfId} onChange={(e) => setShelfId(e.target.value)}><option value="">None</option>{Object.values(shelves).map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}</select></Field>
         </div>
-        <div className="form-actions"><Button variant="ghost" onClick={onClose}>Cancel</Button><Button variant="primary" onClick={() => void submit()} disabled={lookingUp || (!title.trim() && !isbn.trim())}>{lookingUp ? 'Looking up…' : !title.trim() && isbn.trim() ? 'Look up & add' : 'Add'}</Button></div>
+        <div className="form-actions"><Button variant="ghost" onClick={onClose}>Cancel</Button><Button variant="primary" onClick={() => void submit()} disabled={lookingUp || (!title.trim() && !isbn.trim())}>{lookingUp ? 'Looking up…' : !title.trim() && isbn.trim() ? 'Look up & add' : 'Add book'}</Button></div>
         {scanning && <BarcodeScanner onCode={(code) => { setIsbn(code); setScanning(false); toast(`Scanned ISBN ${code}`); }} onClose={() => setScanning(false)} />}
       </div>
     </Modal>
@@ -209,14 +225,18 @@ function BookDetail({ id, onClose }: { id: string; onClose: () => void }) {
   const { books, shelves, updateBook, deleteBook, setStatus, logProgress } = useLibrary();
   const [page, setPage] = useState('');
   const [lookingUp, setLookingUp] = useState(false);
+  const active = useRef(true);
+  useEffect(() => { active.current = true; return () => { active.current = false; }; }, []);
   const book = books[id];
   if (!book) return null;
   const pct = book.pages ? Math.round((book.currentPage / book.pages) * 100) : 0;
   const log = () => { if (!page) return; const to = Number(page); logProgress(book.id, to); toast(to >= book.pages ? `Finished “${book.title}” 🎉` : `Page ${to} logged`); setPage(''); };
   const fillFromIsbn = async () => {
     if (!book.isbn) return;
+    const owner = currentWorkspaceOwner();
     setLookingUp(true);
     const metadata = await lookupOpenLibraryBook(book.isbn);
+    if (!active.current || !workspaceAvailable() || currentWorkspaceOwner() !== owner) return;
     setLookingUp(false);
     if (!metadata) { toast('This ISBN is not indexed yet — add the title and author manually'); return; }
     if (metadata.title) updateBook(book.id, { title: metadata.title });
@@ -255,10 +275,10 @@ function BookDetail({ id, onClose }: { id: string; onClose: () => void }) {
           </div>
         </Field>
       </div>
-      <Field label="Notes & highlights"><textarea value={book.notes ?? ''} onChange={(e) => updateBook(book.id, { notes: e.target.value })} placeholder="Ideas worth keeping…" rows={3} /></Field>
+      <p className="muted">Changes save automatically.</p><Field label="Notes & highlights"><textarea value={book.notes ?? ''} onChange={(e) => updateBook(book.id, { notes: e.target.value })} placeholder="Ideas worth keeping…" rows={3} /></Field>
       <div className="form-actions" style={{ marginTop: 0 }}>
-        <Button variant="ghost" className="danger" size="sm" icon={Trash2} onClick={() => { if (confirm('Remove this book?')) { deleteBook(book.id); onClose(); } }}>Remove</Button>
-        <span className="grow" /><Button size="sm" variant="primary" onClick={onClose}>Done</Button>
+        <Button variant="ghost" className="danger" size="sm" icon={Trash2} onClick={() => { deleteWithUndo(useLibrary, () => deleteBook(book.id), 'Book deleted'); onClose(); }}>Delete book</Button>
+        <span className="grow" /><Button size="sm" variant="primary" onClick={onClose}>Close</Button>
       </div>
     </div>
   );

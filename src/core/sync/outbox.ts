@@ -8,6 +8,10 @@ const CONFLICTS_KEY = 'kaizen:sync:v2:conflicts';
 const MIGRATED_KEY = 'kaizen:sync:v2:device-migrated';
 let syncScope = 'device';
 let writeChain: Promise<void> = Promise.resolve();
+type QueueEvent = { owner: string; phase: 'writing' | 'ready' | 'error' };
+const listeners = new Set<(event: QueueEvent) => void>();
+export function onOutboxChange(listener: (event: QueueEvent) => void) { listeners.add(listener); return () => { listeners.delete(listener); }; }
+const notify = (owner: string, phase: QueueEvent['phase']) => listeners.forEach((listener) => listener({ owner, phase }));
 
 const scoped = (key: string, owner = syncScope) => `${key}:${owner}`;
 export const getSyncScope = () => syncScope;
@@ -20,17 +24,20 @@ function serialize<T>(work: () => Promise<T>): Promise<T> {
 }
 
 export async function queueSyncOperation(input: Omit<SyncOperation, 'mutationId' | 'occurredAt'>, owner = syncScope) {
+  notify(owner, 'writing');
   const next: SyncOperation = { ...input, mutationId: newId(), occurredAt: nowIso() };
   const key = scoped(OUTBOX_KEY, owner);
   await serialize(async () => {
     const operations = await readAt(key);
     const compacted = operations.filter((item) => !(item.entityType === next.entityType && item.entityId === next.entityId));
     await set(key, [...compacted, next]);
-  });
+  }).then(() => notify(owner, 'ready'), (error) => { notify(owner, 'error'); throw error; });
   return next;
 }
 
 export async function queueSyncOperations(inputs: Omit<SyncOperation, 'mutationId' | 'occurredAt'>[], owner = syncScope) {
+  if (!inputs.length) return;
+  notify(owner, 'writing');
   const key = scoped(OUTBOX_KEY, owner);
   await serialize(async () => {
     const byEntity = new Map((await readAt(key)).map((operation) => [`${operation.entityType}:${operation.entityId}`, operation]));
@@ -39,7 +46,7 @@ export async function queueSyncOperations(inputs: Omit<SyncOperation, 'mutationI
       byEntity.set(`${next.entityType}:${next.entityId}`, next);
     }
     await set(key, [...byEntity.values()]);
-  });
+  }).then(() => notify(owner, 'ready'), (error) => { notify(owner, 'error'); throw error; });
 }
 
 export async function readOutbox(owner = syncScope): Promise<SyncOperation[]> { await writeChain; return readAt(scoped(OUTBOX_KEY, owner)); }

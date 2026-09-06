@@ -4,9 +4,11 @@
 
 Choose the result you want below. You only need to follow one setup path.
 
-## 1. I already have a Kaizen website to use
+## 1. I want to use the official Project Kaizen website
 
-Open the address provided by the site owner, create an account or sign in, and start using your workspace. You do **not** need GitHub, Node.js, Clerk, Supabase, or Vercel accounts to use someone else's configured site.
+Open the [official Project Kaizen website](https://project-kaizen-gamma.vercel.app/), create an account or sign in, and start using your workspace. You do **not** need GitHub, Node.js, Clerk, Supabase, or Vercel accounts. This is currently an evaluation deployment using development authentication.
+
+Project Kaizen is a placeholder name. Similar names are used by other companies and projects; our branding will need differentiation or a new name before a broader launch.
 
 **Continue:** [Using Kaizen](user-guide.md)
 
@@ -18,7 +20,7 @@ The guide includes an optional Docker route if you already use containers.
 
 **Continue:** [Local setup](local-setup.md)
 
-## 3. I want my own cloud system
+## 3. I want a self-hosted cloud instance
 
 Set up these three services once:
 

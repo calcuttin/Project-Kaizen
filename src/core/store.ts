@@ -1,3 +1,4 @@
+import { assertSafeJson, isRecord, validateBackupField } from './backupValidation';
 import { create, type StateCreator } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import { cloudStorage, currentWorkspaceOwner, idbStorage, lockWorkspace, selectWorkspace, storeKey } from './storage';
@@ -60,12 +61,28 @@ export function exportAll(): Record<string, unknown> {
   return { app: 'kaizen', exportedAt: new Date().toISOString(), stores: out };
 }
 
-export function importAll(payload: { stores?: Record<string, unknown> }) {
-  if (!payload?.stores) throw new Error('Not a Kaizen export file');
+export function inspectBackup(payload: unknown) {
+  if (!isRecord(payload) || payload.app !== 'kaizen' || !isRecord(payload.stores) || !Object.keys(payload.stores).length) throw new Error('Choose a Kaizen JSON backup. Nothing was restored.');
+  assertSafeJson(payload);
+  const summary: { name: string; collections: { name: string; count: number }[] }[] = [];
   for (const [name, data] of Object.entries(payload.stores)) {
     const store = registry.get(name);
-    if (store && data && typeof data === 'object') store.setState(data);
+    if (!store || !isRecord(data)) throw new Error(`Unsupported backup area: ${name}. Nothing was restored.`);
+    const current = store.getState() as Record<string, unknown>;
+    const collections: { name: string; count: number }[] = [];
+    for (const [field, value] of Object.entries(data)) {
+      if (!Object.hasOwn(current, field) || typeof current[field] === 'function') throw new Error(`Unsupported backup field in ${name}. Nothing was restored.`);
+      validateBackupField(`${name}.${field}`, value, current[field]);
+      if (Array.isArray(value) || (isRecord(value) && field !== 'goal')) collections.push({ name: field, count: Object.keys(value).length });
+    }
+    summary.push({ name, collections });
   }
+  return summary;
+}
+
+export function importAll(payload: unknown) {
+  inspectBackup(payload); // Validate every area before mutating any store.
+  for (const [name, data] of Object.entries((payload as { stores: Record<string, object> }).stores)) registry.get(name)!.setState(data);
 }
 
 export function resetAll() {

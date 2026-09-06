@@ -41,7 +41,7 @@ A fresh download uses device mode automatically. **No `.env.local` file is neede
 
 ## 4. Check that it saves
 
-1. Open **Settings → Account & sync**. The mode should say **Device only**.
+1. Open **Settings → Account & saving**. The mode should say **Device only**.
 2. Add a task or a book.
 3. Refresh the page. Your record should still be there.
 4. Choose **Settings → Data → Export** and keep the downloaded JSON backup somewhere private.

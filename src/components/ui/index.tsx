@@ -1,6 +1,6 @@
 import { Check, Minus, Plus } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
-import { useEffect, type ReactNode, type ButtonHTMLAttributes } from 'react';
+import { useEffect, useRef, type ReactNode, type ButtonHTMLAttributes } from 'react';
 import type { Domain, Lens } from '@/core/types';
 
 /* ── Buttons ─────────────────────────────────────────── */
@@ -148,21 +148,15 @@ export function Empty({ icon: Icon, title, hint, action }: { icon: LucideIcon; t
 
 /* ── Modal ───────────────────────────────────────────── */
 export function Modal({ open, onClose, title, children }: { open: boolean; onClose: () => void; title?: string; children: ReactNode }) {
+  const ref = useRef<HTMLDialogElement>(null);
   useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [open, onClose]);
-  if (!open) return null;
-  return (
-    <div className="overlay" onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}>
-      <div className="modal" role="dialog" aria-modal="true" aria-label={title}>
-        {title && <h2>{title}</h2>}
-        {children}
-      </div>
-    </div>
-  );
+    const dialog = ref.current;
+    if (open && !dialog?.open) dialog?.showModal();
+    else if (!open && dialog?.open) dialog.close();
+  }, [open]);
+  return <dialog ref={ref} className="modal" aria-label={title} onCancel={(event) => { event.preventDefault(); onClose(); }} onClick={(event) => { if (event.target === event.currentTarget) { const rect = event.currentTarget.getBoundingClientRect(); if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) onClose(); } }}>
+    {open && <>{title && <h2>{title}</h2>}{children}</>}
+  </dialog>;
 }
 
 /* ── Form bits ───────────────────────────────────────── */

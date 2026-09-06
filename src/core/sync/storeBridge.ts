@@ -95,9 +95,9 @@ export function watchStoresForSync(): () => void {
       const current = entities(descriptor, state as Record<string, unknown>);
       const before = entities(descriptor, previous as Record<string, unknown>);
       for (const [id, entity] of current) {
-        if (JSON.stringify(entity) !== JSON.stringify(before.get(id))) void queueSyncOperation({ entityType: descriptor.entityType, entityId: id, operation: 'put', baseRevision: entity.revision, payload: entity });
+        if (JSON.stringify(entity) !== JSON.stringify(before.get(id))) void queueSyncOperation({ entityType: descriptor.entityType, entityId: id, operation: 'put', baseRevision: entity.revision, payload: entity }).catch(() => undefined);
       }
-      for (const [id, entity] of before) if (!current.has(id)) void queueSyncOperation({ entityType: descriptor.entityType, entityId: id, operation: 'delete', baseRevision: entity.revision });
+      for (const [id, entity] of before) if (!current.has(id)) void queueSyncOperation({ entityType: descriptor.entityType, entityId: id, operation: 'delete', baseRevision: entity.revision }).catch(() => undefined);
     }));
   }
   return () => stops.forEach((stop) => stop());

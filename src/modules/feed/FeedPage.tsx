@@ -1,3 +1,4 @@
+import { deleteWithUndo } from '@/core/undo';
 import { safeExternalUrl } from '@/core/urls';
 import { useMemo, useState } from 'react';
 import { Check, ExternalLink, Headphones, Lightbulb, ListMusic, Mail, Pin, Plus, Rss, SkipForward, Star, Trash2 } from 'lucide-react';
@@ -96,7 +97,7 @@ export function FeedPage() {
                     <div style={{ fontWeight: 600 }}>{s.name}</div>
                     <div className="row" style={{ gap: 5 }}><Chip>{SOURCE_KIND[s.kind]}</Chip>{s.domain && <DomainChip domain={s.domain} />}</div>
                   </div>
-                  <Button size="sm" variant="ghost" iconOnly icon={Trash2} aria-label="Delete source" onClick={() => confirm(`Remove ${s.name} and its items?`) && deleteSource(s.id)} />
+                  <Button size="sm" variant="ghost" iconOnly icon={Trash2} aria-label="Delete source" onClick={() => confirm(`Remove ${s.name} and its items?`) && deleteWithUndo(useFeed, () => deleteSource(s.id), 'Source deleted')} />
                 </div>
                 <div className="faint" style={{ fontSize: 12.5, marginTop: 10 }}>{its.filter((i) => i.status !== 'done' && i.status !== 'skipped').length} queued · {its.filter((i) => i.status === 'done').length} finished</div>
                 {s.url && <a href={safeExternalUrl(s.url)} target="_blank" rel="noreferrer" className="faint" style={{ fontSize: 12, display: 'block', marginTop: 4 }}>{s.url.replace(/^https?:\/\//, '')}</a>}
@@ -151,7 +152,7 @@ export function ItemRow({ item, source, onFinish, compact }: { item: FeedItem; s
       {!compact && <Button size="sm" variant="ghost" iconOnly icon={Pin} aria-label="Pin" onClick={() => updateItem(item.id, { pinned: !item.pinned })} />}
       {!compact && <Button size="sm" variant="ghost" iconOnly icon={SkipForward} aria-label="Skip" onClick={() => { updateItem(item.id, { status: 'skipped' }); toast('Skipped'); }} />}
       <Button size="sm" icon={Check} onClick={onFinish}>Finish</Button>
-      {!compact && <Button size="sm" variant="ghost" iconOnly icon={Trash2} aria-label="Delete" onClick={() => deleteItem(item.id)} />}
+      {!compact && <Button size="sm" variant="ghost" iconOnly icon={Trash2} aria-label="Delete" onClick={() => deleteWithUndo(useFeed, () => deleteItem(item.id), 'Item deleted')} />}
     </div>
   );
 }
@@ -180,7 +181,7 @@ function NewSourceModal({ open, onClose, defaultDomain }: { open: boolean; onClo
           <Field label="Domain"><select value={domain} onChange={(e) => setDomain(e.target.value as Domain | '')}><option value="">Both / neither</option><option value="personal">Personal</option><option value="business">Business</option></select></Field>
         </div>
         <Field label="URL (optional)"><input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://" /></Field>
-        <div className="form-actions"><Button variant="ghost" onClick={onClose}>Cancel</Button><Button variant="primary" onClick={submit}>Follow</Button></div>
+        <div className="form-actions"><Button variant="ghost" onClick={onClose}>Cancel</Button><Button variant="primary" onClick={submit} disabled={!name.trim()}>Add source</Button></div>
       </div>
     </Modal>
   );
@@ -200,7 +201,7 @@ function NewItemModal({ open, onClose, sources, defaultSource }: { open: boolean
           <Field label="Link (optional)"><input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://" /></Field>
           <Field label="Length in minutes"><input type="number" min={1} value={duration} onChange={(e) => setDuration(e.target.value)} placeholder="e.g. 75 or 12" /></Field>
         </div>
-        <div className="form-actions"><Button variant="ghost" onClick={onClose}>Cancel</Button><Button variant="primary" onClick={submit}>Add to queue</Button></div>
+        <div className="form-actions"><Button variant="ghost" onClick={onClose}>Cancel</Button><Button variant="primary" onClick={submit} disabled={!title.trim() || !sid}>Add to queue</Button></div>
       </div>
     </Modal>
   );

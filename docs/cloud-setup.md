@@ -1,6 +1,8 @@
 # Set up your own Kaizen cloud
 
-[← Choose a setup](setup-guide.md) · [Using an existing site instead?](user-guide.md)
+This guide creates a **self-hosted cloud instance** with your own provider accounts and data. To use the official Project Kaizen website instead, open [the official website](https://project-kaizen-gamma.vercel.app/). Project Kaizen is a placeholder name, pending differentiation or renaming.
+
+[← Choose a setup](setup-guide.md) · [Use the official website instead](user-guide.md)
 
 **Result:** a website where each person signs in to their own workspace and can use it across devices.
 
@@ -136,8 +138,8 @@ Kaizen uses **modal** sign-in and sign-up. You do not need to create `/sign-in` 
 ## 8. Test your cloud workspace
 
 1. Open the stable address and create an account.
-2. Open **Settings → Account & sync**. It should show **Cloud sync** and your email address.
-3. Add a test task. Choose **Sync now** and wait for **Synced**.
+2. Open **Settings → Account & saving**. It should show **Cloud sync** and your email address.
+3. Add a test task. Choose **Save now** and wait for **Saved**.
 4. Sign into the same site and account on another browser/device. The task should appear.
 5. Use a separate test account. It should start with its own empty workspace and should not see the first account's task.
 6. Export a backup from your main account. If you test **Delete account**, use only a disposable test account.

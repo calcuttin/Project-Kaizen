@@ -1,6 +1,8 @@
-# Kaizen 改善
+# Project Kaizen 改善
 
 One place for your tasks, habits, health, reading, and publishing plans. Kaizen is built around small, steady improvements.
+
+**Project Kaizen is a placeholder name.** Other companies and projects use similar names in other fields. We will differentiate the branding or choose a new name before a broader launch; this project is not affiliated with those businesses.
 
 **Run it on your computer with no account, or use cloud mode to sign in and sync across devices.**
 
@@ -8,10 +10,12 @@ One place for your tasks, habits, health, reading, and publishing plans. Kaizen 
 
 | What would you like to do? | Your next step |
 | --- | --- |
-| Use a Kaizen website someone has already set up | [Sign in and get started](docs/user-guide.md) — nothing to install |
+| Use the official Project Kaizen website | [Open the official website](https://project-kaizen-gamma.vercel.app/) · [User guide](docs/user-guide.md) — nothing to install |
 | Run Kaizen on your own computer | [Local setup](docs/local-setup.md) — no cloud accounts or Docker required |
-| Set up your own website with sign-in and sync | [Cloud setup](docs/cloud-setup.md) — Clerk + Supabase + Vercel |
+| Run a self-hosted cloud instance | [Cloud setup](docs/cloud-setup.md) — Clerk + Supabase + Vercel |
 | Understand the choices first | [Setup guide](docs/setup-guide.md) |
+
+The official website is currently an evaluation deployment using development authentication. Production domain and authentication setup are deferred. A self-hosted cloud instance has its own accounts and data; signing into a different site does not transfer your workspace.
 
 ## Run locally
 

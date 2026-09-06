@@ -35,6 +35,7 @@ export function Shell() {
       <div className="main">
         <header className="topbar">
           <LensSwitch value={lens} onChange={setLens} />
+          <div className="mobile-save-status"><SyncBadge /></div>
           <button className="btn ghost sm quick-add" aria-label="Quick add" onClick={() => setPalette(true)}><Search size={14} /><span className="quick-add-label">Quick add</span><span className="kbd">⌘K</span></button>
         </header>
         <Outlet />

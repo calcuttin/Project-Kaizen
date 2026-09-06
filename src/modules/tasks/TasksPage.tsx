@@ -1,3 +1,4 @@
+import { deleteWithUndo } from '@/core/undo';
 import { useMemo, useState, type DragEvent } from 'react';
 import { Calendar, CheckSquare, Columns3, Flag, FolderPlus, Inbox, List, Plus, Trash2, X } from 'lucide-react';
 import { Button, CheckBox, Chip, DomainChip, Empty, Field, Modal, PageHead, Segmented } from '@/components/ui';
@@ -251,9 +252,9 @@ export function TaskEditor({ id, onClose }: { id: ID | null; onClose: () => void
           </div>
         </Field>
         <div className="form-actions">
-          <Button variant="ghost" className="danger" icon={Trash2} onClick={() => { deleteTask(task.id); onClose(); }}>Delete</Button>
+          <span className="muted">Changes save automatically.</span><Button variant="ghost" className="danger" icon={Trash2} onClick={() => { deleteWithUndo(useTasks, () => deleteTask(task.id), 'Task deleted'); onClose(); }}>Delete task</Button>
           <span className="grow" />
-          <Button variant="primary" onClick={onClose}>Done</Button>
+          <Button variant="primary" onClick={onClose}>Close</Button>
         </div>
       </div>
     </Modal>
@@ -272,7 +273,7 @@ function NewProjectModal({ open, onClose, defaultDomain }: { open: boolean; onCl
         <Field label="Domain">
           <select value={domain} onChange={(e) => setDomain(e.target.value as Domain)}><option value="personal">Personal</option><option value="business">Business</option></select>
         </Field>
-        <div className="form-actions"><Button variant="ghost" onClick={onClose}>Cancel</Button><Button variant="primary" onClick={submit}>Create</Button></div>
+        <div className="form-actions"><Button variant="ghost" onClick={onClose}>Cancel</Button><Button variant="primary" onClick={submit} disabled={!name.trim()}>Add project</Button></div>
       </div>
     </Modal>
   );

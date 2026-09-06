@@ -74,3 +74,13 @@
   .today-ritual, .grid.today-dashboard { grid-template-columns: minmax(0, 1fr); }
   .grid.today-dashboard > .span-2 { grid-column: span 1; }
 }
+
+.today-customize { gap: 12px; }
+.today-customize input[type=checkbox] { width: 20px; height: 20px; }
+.getting-started { margin-bottom: 24px; }
+.getting-started ul { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); list-style: none; padding: 0; gap: 14px; }
+.getting-started li { display: flex; align-items: baseline; gap: 10px; }
+.getting-started li span { color: var(--accent); }
+.today-ritual:empty { display: none; }
+.today-ritual > :only-child { grid-column: 1 / -1; }
+@media (max-width: 760px) { .getting-started ul { grid-template-columns: 1fr; } }

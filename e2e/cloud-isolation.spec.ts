@@ -54,8 +54,8 @@ test('cloud accounts have separate data and survive reload and sign-out', async 
   await expect(page.getByRole('button', { name: 'Account A Private Book' })).toHaveCount(0);
   await page.goto('/settings');
   await expect(page.getByText('user_b@example.test')).toBeVisible();
-  await page.getByRole('button', { name: 'Sync now', exact: true }).click();
-  await expect(page.getByRole('button', { name: 'Sync now', exact: true })).toBeEnabled();
+  await page.getByRole('button', { name: 'Save now', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Save now', exact: true })).toBeEnabled();
   expect(pushes.some((request) => request.owner === 'Bearer user_b' && request.body.includes('Account A Private Book'))).toBe(false);
   await expect(page.getByText('a-books.csv', { exact: false })).toHaveCount(0);
 

@@ -396,3 +396,28 @@
 .spine.mark-hover:hover::before { content: '✓'; position: absolute; inset: 0; display: grid; place-items: center; background: rgba(0,0,0,.35); color: white; font-size: 18px; border-radius: inherit; z-index: 3; }
 
 @media (max-width: 760px) { .bookcase { padding: 12px 10px 18px; } .shelf-wall { padding: 28px 12px 0; } .spine, .spine.lean, .spine.reading { transform: none !important; } .shelf-tools { opacity: 1; } }
+
+/* Save feedback remains available above the mobile navigation. */
+.mobile-save-status { display: none; }
+.sync-badge { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.sync-badge button, .sync-badge a { text-decoration: underline; color: inherit; }
+dialog.modal { margin: auto; color: var(--text); max-height: calc(100dvh - 32px); overflow-y: auto; overscroll-behavior: contain; }
+dialog.modal::backdrop { background: #0009; backdrop-filter: blur(4px); }
+dialog.modal:not([open]) { display: none; }
+.toast-wrap { pointer-events: none; }
+.toast { pointer-events: auto; max-width: calc(100vw - 32px); }
+@media (max-width: 760px) {
+  .mobile-save-status { display: block; margin-left: auto; font-size: 11px; }
+  .topbar { flex-wrap: wrap; }
+  .btn, .seg button, .lens button { min-height: 44px; }
+  .btn.icon, .check, .stepper button { min-width: 44px; min-height: 44px; }
+  input, textarea, select { font-size: 16px !important; }
+  .form-row { grid-template-columns: minmax(0, 1fr) !important; }
+  .form .row { flex-wrap: wrap; }
+  .form .grow { min-width: 0; }
+  .form-actions { flex-wrap: wrap; }
+  .popover.sheet { max-height: calc(100dvh - 24px); padding-bottom: max(20px, env(safe-area-inset-bottom)); }
+  .toast-wrap { bottom: calc(80px + env(safe-area-inset-bottom)); }
+  .between { gap: 12px; flex-wrap: wrap; }
+}
+.conflict-preview { max-height: 220px; white-space: pre-wrap; overflow-wrap: anywhere; overflow: auto; font-size: 12px; }

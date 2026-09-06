@@ -1,3 +1,4 @@
+import { deleteWithUndo } from '@/core/undo';
 import { useEffect, useMemo, useState, type DragEvent } from 'react';
 import { CalendarDays, Columns3, Flame, LayoutDashboard, Lightbulb, LineChart, Mic, Pencil, Plus, Trash2 } from 'lucide-react';
 import { Button, Card, Chip, Empty, Field, Modal, PageHead, Segmented, Sparkline, Stat } from '@/components/ui';
@@ -211,7 +212,7 @@ function PieceModal({ open, stage, onClose, channels, defaultChannel }: { open: 
           <Field label="Publish date"><input type="date" value={date} onChange={(e) => setDate(e.target.value)} /></Field>
         </div>
         <Field label="Guest (optional)"><input value={guest} onChange={(e) => setGuest(e.target.value)} placeholder={format === 'episode' ? 'Who is on the mic with you?' : ''} /></Field>
-        <div className="form-actions"><Button variant="ghost" onClick={onClose}>Cancel</Button><Button variant="primary" onClick={submit}>Add</Button></div>
+        <div className="form-actions"><Button variant="ghost" onClick={onClose}>Cancel</Button><Button variant="primary" onClick={submit} disabled={!title.trim() || !cid}>Add piece</Button></div>
       </div>
     </Modal>
   );
@@ -235,8 +236,8 @@ function PieceEditor({ id, onClose }: { id: ID | null; onClose: () => void }) {
           <Field label="Guest"><input value={p.guest ?? ''} onChange={(e) => updatePiece(p.id, { guest: e.target.value || undefined })} /></Field>
         </div>
         <Field label="Link (once published)"><input value={p.url ?? ''} onChange={(e) => updatePiece(p.id, { url: e.target.value || undefined })} placeholder="https://" /></Field>
-        <Field label="Notes / outline"><textarea value={p.notes ?? ''} onChange={(e) => updatePiece(p.id, { notes: e.target.value })} placeholder="Angle, key points, show notes, CTA…" rows={5} /></Field>
-        <div className="form-actions"><Button variant="ghost" className="danger" icon={Trash2} onClick={() => { deletePiece(p.id); onClose(); }}>Delete</Button><span className="grow" /><Button variant="primary" onClick={onClose}>Done</Button></div>
+        <p className="muted">Changes save automatically.</p><Field label="Notes / outline"><textarea value={p.notes ?? ''} onChange={(e) => updatePiece(p.id, { notes: e.target.value })} placeholder="Angle, key points, show notes, CTA…" rows={5} /></Field>
+        <div className="form-actions"><Button variant="ghost" className="danger" icon={Trash2} onClick={() => { deleteWithUndo(useStudio, () => deletePiece(p.id), 'Piece deleted'); onClose(); }}>Delete</Button><span className="grow" /><Button variant="primary" onClick={onClose}>Close</Button></div>
       </div>
     </Modal>
   );
@@ -269,8 +270,8 @@ function ChannelModal({ target, onClose }: { target: ID | 'new' | null; onClose:
         <Field label="URL"><input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://" /></Field>
         <Field label="Metrics to track (comma-separated)"><input value={metrics} onChange={(e) => setMetrics(e.target.value)} /></Field>
         <div className="form-actions">
-          {existing && <Button variant="ghost" className="danger" icon={Trash2} onClick={() => { if (confirm(`Delete ${existing.name} and all its pieces and metrics?`)) { deleteChannel(existing.id); onClose(); } }}>Delete</Button>}
-          <span className="grow" /><Button variant="ghost" onClick={onClose}>Cancel</Button><Button variant="primary" onClick={submit}>{existing ? 'Save' : 'Add channel'}</Button>
+          {existing && <Button variant="ghost" className="danger" icon={Trash2} onClick={() => { if (confirm(`Delete ${existing.name} and all its pieces and metrics?`)) { deleteWithUndo(useStudio, () => deleteChannel(existing.id), 'Channel deleted'); onClose(); } }}>Delete</Button>}
+          <span className="grow" /><Button variant="ghost" onClick={onClose}>Cancel</Button><Button variant="primary" onClick={submit} disabled={!name.trim()}>{existing ? 'Save changes' : 'Add channel'}</Button>
         </div>
       </div>
     </Modal>
