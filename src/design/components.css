@@ -1,13 +1,16 @@
 /* ───────── Shell ───────── */
-.shell { display: grid; grid-template-columns: var(--sidebar-w) 1fr; height: 100%; }
+/* Let the shell grow with its content so the sticky sidebar spans the entire page. */
+.shell { display: grid; grid-template-columns: var(--sidebar-w) 1fr; min-height: 100%; }
 .sidebar {
   background: var(--bg-elev);
   border-right: 1px solid var(--border);
   display: flex; flex-direction: column;
   padding: 18px 14px;
   gap: 6px;
-  position: sticky; top: 0; height: 100vh;
+  position: sticky; top: 0; align-self: start;
+  height: 100vh; height: 100dvh; overflow-y: auto;
 }
+.sidebar > * { flex-shrink: 0; }
 .brand { display: flex; align-items: center; gap: 10px; padding: 4px 8px 16px; }
 .brand-mark { width: 30px; height: 30px; border-radius: 9px; background: var(--bg); display: grid; place-items: center; border: 1px solid var(--border); }
 .brand-name { font-family: var(--font-display); font-size: 20px; font-weight: 600; letter-spacing: -0.01em; }
