@@ -43,6 +43,7 @@ export function validateBackupField(path: string, value: unknown, current: unkno
     const record = item as RecordValue;
     if (schema.id && !['library.sessions', 'studio.snapshots', 'imports.runs'].includes(path) && !validateFields(record, { createdAt: 'string', updatedAt: 'string' })) fail();
     if (path === 'library.shelves') {
+      if (record.cabinet !== undefined && (!validateFields(record.cabinet, { lighting: 'warm|moonlight|candle', layout: 'layered|balanced', brightness: 'number' }) || ((record.cabinet as RecordValue).brightness as number) < 35 || ((record.cabinet as RecordValue).brightness as number) > 100)) fail();
       if (record.theme !== undefined && (typeof record.theme !== 'string' || !Object.hasOwn(SHELF_THEMES, record.theme))) fail();
       if (record.objects !== undefined && (!Array.isArray(record.objects) || record.objects.length !== 2 || record.objects.some((item) => typeof item !== 'string' || !Object.hasOwn(OBJECTS, item)))) fail();
     }

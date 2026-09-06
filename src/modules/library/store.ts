@@ -4,13 +4,13 @@ import { todayKey } from '@/core/dates';
 import type { BaseEntity, DateKey, ID } from '@/core/types';
 import type { ShelfImport } from '@/data/bookshelf';
 import type { ShelfTheme } from './themes';
-import type { CabinetObjects } from './cabinet';
+import type { CabinetObjects, CabinetSettings } from './cabinet';
 
 export type BookStatus = 'want' | 'reading' | 'finished' | 'paused';
 export const BOOK_STATUS: Record<BookStatus, string> = { want: 'Want to read', reading: 'Reading', finished: 'Finished', paused: 'Paused' };
 
 /** A shelf mirrors a real or virtual bookshelf (e.g. "Office — top shelf", "Kindle", "Business classics"). */
-export interface Shelf extends BaseEntity { name: string; order: number; /** Genre theme that styles the shelf. */ theme?: ShelfTheme; objects?: CabinetObjects }
+export interface Shelf extends BaseEntity { name: string; order: number; /** Genre theme that styles the shelf. */ theme?: ShelfTheme; objects?: CabinetObjects; cabinet?: CabinetSettings }
 
 export interface Book extends BaseEntity {
   title: string;
@@ -59,6 +59,7 @@ interface LibraryState {
   renameShelf: (id: ID, name: string) => void;
   setShelfTheme: (id: ID, theme: ShelfTheme) => void;
   setShelfObjects: (id: ID, objects: CabinetObjects | undefined) => void;
+  setShelfCabinet: (id: ID, cabinet: CabinetSettings | undefined) => void;
   atmosphere: boolean;
   setAtmosphere: (enabled: boolean) => void;
   deleteShelf: (id: ID) => void;
@@ -84,6 +85,7 @@ export const useLibrary = createPersistedStore<LibraryState>('library', 2, (set,
   shelves: {}, books: {}, sessions: [], annotations: {}, importedCollections: [],
   atmosphere: true,
   setAtmosphere: (atmosphere) => set({ atmosphere }),
+  setShelfCabinet: (id, cabinet) => set((s) => s.shelves[id] ? ({ shelves: { ...s.shelves, [id]: { ...s.shelves[id], cabinet, updatedAt: nowIso() } } }) : s),
   setShelfObjects: (id, objects) => set((s) => s.shelves[id] ? ({ shelves: { ...s.shelves, [id]: { ...s.shelves[id], objects, updatedAt: nowIso() } } }) : s),
   goal: { year: new Date().getFullYear(), books: 24, pagesPerDay: 20 },
   importCollection: (collectionId, shelves) => {

@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { BookOpen, ChevronLeft, ChevronRight, MapPin, Pause, Play, RotateCcw, Settings2, Shuffle, Trash2 } from 'lucide-react';
+import { CabinetScene } from './CabinetScene';
 import { LibraryDialog } from './LibraryDialog';
-import { OBJECTS, ENVIRONMENTS, type CabinetObject, type CabinetObjects } from './cabinet';
+import { OBJECTS, ENVIRONMENTS, CABINET_LIGHTS, cabinetSettings, type CabinetSettings, type CabinetObject, type CabinetObjects } from './cabinet';
 import { SHELF_THEMES, THEME_KEYS, type ShelfTheme } from './themes';
 import { useLibrary, type Shelf } from './store';
 
@@ -11,24 +12,19 @@ export function useReducedMotion() {
   return reduced;
 }
 
-function Artifact({ object, paused, onComputer }: { object: CabinetObject; paused: boolean; onComputer: () => void }) {
-  if (object === 'none') return null;
-  if (object === 'computer') return <button className="artifact artifact-computer" onClick={onComputer} aria-label="Use Apple II computer">
-    <img src={OBJECTS.computer.image} alt="Beige Apple II computer" loading="lazy" draggable={false} />
-    <span className="mini-crt"><span>APPLE II</span><span>] PRINT &quot;HELLO&quot;</span><span>HELLO</span><span>] <i className="crt-cursor" /></span></span>
-  </button>;
-  if (object === 'orrery') return <div className="artifact artifact-orrery" title="Brass solar system"><img className="orrery-base" src="/library/objects/orrery-base.png" alt="" loading="lazy" /><div className="orbit-plane"><img className="orbit-disk" src={OBJECTS.orrery.image} alt="Brass solar system with eight planets" loading="lazy" draggable={false} style={{ animationPlayState: paused ? 'paused' : undefined }} /></div></div>;
-  return <div className={`artifact artifact-${object}`} title={OBJECTS[object].name}><img src={OBJECTS[object].image} alt={OBJECTS[object].name} loading="lazy" draggable={false} /></div>;
-}
-
 export function ShelfScene({ shelf, themeKey, count, finished, children, atmosphere, onComputer, onDeleteShelf }: { shelf: Shelf | null; themeKey: ShelfTheme; count: number; finished: number; children: ReactNode; atmosphere: boolean; onComputer: () => void; onDeleteShelf: (s: Shelf) => void }) {
   const theme = SHELF_THEMES[themeKey], environment = ENVIRONMENTS[themeKey];
   const name = shelf?.name ?? 'Unshelved';
   const objects = shelf?.objects ?? environment.objects;
+  const settings = cabinetSettings(shelf?.cabinet);
+  const reducedMotion = useReducedMotion();
   const [editing, setEditing] = useState(false), [slot, setSlot] = useState<0 | 1>(0), [paused, setPaused] = useState(false);
   const [active, setActive] = useState(false), [canLeft, setCanLeft] = useState(false), [canRight, setCanRight] = useState(false);
   const root = useRef<HTMLElement>(null), rail = useRef<HTMLDivElement>(null);
   const setShelfTheme = useLibrary((s) => s.setShelfTheme), setShelfObjects = useLibrary((s) => s.setShelfObjects);
+  const setShelfCabinet = useLibrary((s) => s.setShelfCabinet);
+  const updateCabinet = (patch: Partial<CabinetSettings>) => { if (shelf) setShelfCabinet(shelf.id, { ...settings, ...patch }); };
+  const moving = atmosphere && !reducedMotion && !paused;
   useEffect(() => {
     if (!root.current) return;
     const observer = new IntersectionObserver(([entry]) => setActive(entry.isIntersecting), { rootMargin: '60px' });
@@ -53,20 +49,30 @@ export function ShelfScene({ shelf, themeKey, count, finished, children, atmosph
       <div className="world-plank"><span className="plaque">{name}</span></div>
     </div>
     <aside className="world-cabinet" aria-label={`Display cabinet for ${name}`}>
-      <div className="cabinet-wall" aria-hidden="true" />
-      {shelf && <button className="cabinet-change" onClick={() => setEditing(true)}><Shuffle size={12} />Change objects</button>}
-      <div className={`cabinet-objects ${objects.filter((o) => o !== 'none').length > 1 ? 'paired' : 'single'}`}>
-        {objects.map((object, i) => <Artifact key={`${i}-${object}`} object={object} paused={paused} onComputer={onComputer} />)}
-        {objects.every((o) => o === 'none') && <span className="cabinet-empty">A little room<br />for something you love.</span>}
-      </div>
+      {shelf && <button className="cabinet-change" onClick={() => setEditing(true)}><Settings2 size={13} />Curate cabinet</button>}
+      <CabinetScene objects={objects} settings={settings} moving={moving && active} onComputer={onComputer} />
       <div className="cabinet-actions">{objects.includes('orrery') && <button disabled={!atmosphere} onClick={() => setPaused((p) => !p)} title={!atmosphere ? 'Enable atmosphere to animate the solar system' : undefined}>{paused || !atmosphere ? <Play size={11} /> : <Pause size={11} />}{paused || !atmosphere ? 'Play orbit' : 'Pause orbit'}</button>}{objects.includes('computer') && <button onClick={onComputer}><Play size={11} />Use computer</button>}</div>
     </aside>
-    <LibraryDialog open={editing} onClose={() => setEditing(false)} title={`Curate ${name}`}>
-      <p className="cabinet-editor-lead">Small objects. A shelf that feels like yours.</p>
-      <div className="cabinet-slot-tabs" role="group" aria-label="Object position">{([0, 1] as const).map((i) => <button key={i} aria-pressed={slot === i} onClick={() => setSlot(i)}>{i === 0 ? 'Left object' : 'Right object'}<span>{OBJECTS[objects[i]].name}</span></button>)}</div>
-      <div className="object-picker">{(Object.keys(OBJECTS) as CabinetObject[]).map((object) => <button key={object} onClick={() => selectObject(object)} aria-pressed={objects[slot] === object} className={objects[slot] === object ? 'selected' : ''}>{OBJECTS[object].image ? <img className={object === 'computer' ? 'computer-thumb' : ''} src={OBJECTS[object].image} alt="" /> : <span className="empty-object-icon"><Shuffle size={24} /></span>}<strong>{OBJECTS[object].name}</strong><small>{OBJECTS[object].detail}</small></button>)}</div>
-      <div className="cabinet-settings"><label><Settings2 size={14} />Shelf environment<select value={themeKey} onChange={(e) => shelf && setShelfTheme(shelf.id, e.target.value as ShelfTheme)}>{THEME_KEYS.map((key) => <option key={key} value={key}>{SHELF_THEMES[key].label}</option>)}</select></label><button className="btn sm ghost" onClick={() => shelf && setShelfObjects(shelf.id, undefined)}><RotateCcw size={13} />Restore genre objects</button></div>
-      <div className="cabinet-editor-footer"><button className="btn sm ghost" onClick={() => { if (shelf) { setEditing(false); onDeleteShelf(shelf); } }}><Trash2 size={13} />Remove shelf</button><span>Changes saved automatically</span><button className="btn primary" onClick={() => setEditing(false)}>Done</button></div>
+    <LibraryDialog open={editing} onClose={() => setEditing(false)} title={`Curate ${name}`} className="cabinet-curator">
+      <p className="cabinet-editor-lead">A small world beside your books. Choose its objects, light, and depth.</p>
+      <div className="cabinet-curator-grid">
+        <div className="cabinet-preview-column">
+          <CabinetScene className="cabinet-preview" objects={objects} settings={settings} moving={moving && editing} selectedSlot={slot} onSelect={setSlot} />
+          <div className="cabinet-preview-caption"><span>LIVE PREVIEW</span><p>Select an object in the cabinet to replace it.{moving && ' Move your pointer across the scene to explore its depth.'}</p></div>
+          {objects.includes('computer') && <button className="btn ghost" onClick={() => { setEditing(false); onComputer(); }}><Play size={14} />Use the Apple II</button>}
+        </div>
+        <div className="cabinet-controls">
+          <h3>1. Make it yours</h3>
+          <div className="cabinet-slot-tabs" role="group" aria-label="Object position">{([0, 1] as const).map((i) => <button key={i} aria-pressed={slot === i} onClick={() => setSlot(i)}>{i === 0 ? 'Left object' : 'Right object'}<span>{OBJECTS[objects[i]].name}</span></button>)}</div>
+          <div className="object-picker">{(Object.keys(OBJECTS) as CabinetObject[]).map((object) => <button key={object} onClick={() => selectObject(object)} aria-pressed={objects[slot] === object} className={objects[slot] === object ? 'selected' : ''}>{OBJECTS[object].image ? <img className={object === 'computer' ? 'computer-thumb' : ''} src={OBJECTS[object].image} alt="" /> : <span className="empty-object-icon"><Shuffle size={24} /></span>}<strong>{OBJECTS[object].name}</strong><small>{OBJECTS[object].detail}</small></button>)}</div>
+          <h3>2. Set the mood</h3>
+          <div className="cabinet-light-options" role="group" aria-label="Cabinet lighting">{CABINET_LIGHTS.map((light) => <button key={light.id} data-light={light.id} aria-pressed={settings.lighting === light.id} onClick={() => updateCabinet({ lighting: light.id })}><span className="light-swatch" aria-hidden="true" /><strong>{light.name}</strong><small>{light.detail}</small></button>)}</div>
+          <label className="cabinet-brightness">Light level <output>{settings.brightness}%</output><input type="range" aria-label="Cabinet light level" min="35" max="100" step="5" value={settings.brightness} onChange={(e) => updateCabinet({ brightness: Number(e.target.value) })} /></label>
+          <div className="cabinet-layout-options" role="group" aria-label="Object arrangement"><button aria-pressed={settings.layout === 'layered'} onClick={() => updateCabinet({ layout: 'layered' })}><strong>Layered</strong><small>Near and far, with depth</small></button><button aria-pressed={settings.layout === 'balanced'} onClick={() => updateCabinet({ layout: 'balanced' })}><strong>Side by side</strong><small>A balanced pair</small></button></div>
+          <div className="cabinet-settings"><label><Settings2 size={14} />Shelf environment<select value={themeKey} onChange={(e) => shelf && setShelfTheme(shelf.id, e.target.value as ShelfTheme)}>{THEME_KEYS.map((key) => <option key={key} value={key}>{SHELF_THEMES[key].label}</option>)}</select></label><button className="btn sm ghost" onClick={() => { if (shelf) { setShelfObjects(shelf.id, undefined); setShelfCabinet(shelf.id, undefined); } }}><RotateCcw size={13} />Restore defaults</button></div>
+        </div>
+      </div>
+      <div className="cabinet-editor-footer"><button className="btn sm ghost" onClick={() => { if (shelf) { setEditing(false); onDeleteShelf(shelf); } }}><Trash2 size={13} />Remove shelf</button><span>Changes save automatically</span><button className="btn primary" onClick={() => setEditing(false)}>Done</button></div>
     </LibraryDialog>
   </section>;
 }

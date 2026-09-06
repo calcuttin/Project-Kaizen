@@ -132,3 +132,16 @@ If your original workspace is still accessible, export it first. Restore a verif
 If the app cannot render, the recovery screen offers a recovery copy and the same limited support report. A recovery copy contains your actual records and should be kept private.
 
 To practice recovery, use a separate browser profile and a local device-mode installation. Import a backup there, check tasks, books, notes, and reading progress, and export again. Keep the original backup until you have verified the restored copy. Do not use your everyday cloud workspace for an experiment.
+
+## Make a bookshelf feel like yours
+
+In **Library → Shelves**, choose **+ Shelf** to name a collection. Each named shelf has its own **Curate cabinet** button.
+
+1. Select the left or right object in the live preview, then choose a collectible. **Leave some space** clears that position.
+2. Choose **Gallery**, **Moonlight**, or **Candlelit**, and adjust **Light level**.
+3. Choose **Layered** for a near-and-far arrangement or **Side by side** for a balanced pair.
+4. Select **Done**. Changes save automatically with that shelf and are included in JSON backups. In cloud mode, they save to your signed-in workspace.
+
+The preview stays visible on a phone while you adjust the controls. With **Atmosphere** on, moving a mouse across a cabinet adds a subtle sense of depth. Atmosphere off and your device's reduced-motion preference stop the movement. **Use computer** still opens the working Apple II; **Pause orbit** pauses the solar system.
+
+**Restore defaults** restores the current environment's objects and the original lighting and arrangement. It keeps your books. The automatic **Unshelved** area uses the default cabinet; create a named shelf to customize your own.

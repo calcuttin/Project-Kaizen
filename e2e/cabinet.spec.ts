@@ -1,0 +1,35 @@
+import { expect, test } from '@playwright/test';
+
+test('cabinet objects, lighting and layout persist and stay usable on mobile', async ({ page }) => {
+  await page.goto('/library');
+  await page.getByRole('button', { name: 'Shelf', exact: true }).click();
+  await page.getByRole('textbox', { name: 'Shelf name', exact: true }).fill('Research');
+  await page.getByRole('button', { name: 'Create shelf', exact: true }).click();
+  await page.getByRole('button', { name: 'Curate cabinet', exact: true }).click();
+  const dialog = page.getByRole('dialog', { name: 'Curate Research' });
+  await dialog.getByRole('button', { name: 'Marble bust', exact: true }).click();
+  await dialog.getByRole('button', { name: 'Moonlight A cool, quiet evening' }).click();
+  await dialog.getByRole('slider', { name: 'Cabinet light level' }).press('Home');
+  await dialog.getByRole('slider', { name: 'Cabinet light level' }).press('ArrowRight');
+  await dialog.getByRole('button', { name: 'Side by side A balanced pair' }).click();
+  await dialog.getByRole('button', { name: 'Done', exact: true }).click();
+  await page.reload();
+  await page.getByRole('button', { name: 'Curate cabinet', exact: true }).click();
+  await expect(dialog.getByRole('button', { name: 'Marble bust', exact: true })).toHaveAttribute('aria-pressed', 'true');
+  await expect(dialog.getByRole('slider', { name: 'Cabinet light level' })).toHaveValue('40');
+  await expect(dialog.getByRole('button', { name: 'Moonlight A cool, quiet evening' })).toHaveAttribute('aria-pressed', 'true');
+  await expect(dialog.getByRole('button', { name: 'Side by side A balanced pair' })).toHaveAttribute('aria-pressed', 'true');
+  await page.setViewportSize({ width: 390, height: 844 });
+  await dialog.getByRole('button', { name: 'Candlelit An intimate amber glow' }).click();
+  expect(await dialog.evaluate((node) => node.scrollWidth <= node.clientWidth)).toBe(true);
+  const preview = dialog.locator('.cabinet-preview');
+  const bounds = await preview.boundingBox();
+  expect(bounds!.y).toBeGreaterThanOrEqual(0);
+  expect(bounds!.y + bounds!.height).toBeLessThan(844);
+  await dialog.getByRole('button', { name: 'Restore defaults', exact: true }).click();
+  await expect(dialog.getByRole('slider', { name: 'Cabinet light level' })).toHaveValue('85');
+  await dialog.getByRole('button', { name: 'Done', exact: true }).click();
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.getByRole('button', { name: 'Curate cabinet', exact: true }).click();
+  await expect(preview).toHaveAttribute('data-moving', 'false');
+});

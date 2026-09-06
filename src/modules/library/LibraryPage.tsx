@@ -25,6 +25,8 @@ export function LibraryPage() {
   const [shelfFilter, setShelfFilter] = useState('all');
   const [tab, setTab] = useState<Tab>('all');
   const [adding, setAdding] = useState(false);
+  const [addingShelf, setAddingShelf] = useState(false);
+  const [shelfName, setShelfName] = useState('');
   const [importing, setImporting] = useState(false);
   const [open, setOpen] = useState<{ id: string; anchor: Anchor } | null>(null);
   const [goalEdit, setGoalEdit] = useState(false);
@@ -71,7 +73,7 @@ export function LibraryPage() {
         <button aria-pressed={tab === 'all'} className={tab === 'all' ? 'active' : ''} onClick={() => setTab('all')}>All <span>{all.length}</span></button>
         {(['reading', 'want', 'finished', 'paused'] as BookStatus[]).map((s) => <button key={s} aria-pressed={tab === s} className={tab === s ? 'active' : ''} onClick={() => setTab(s)}>{BOOK_STATUS[s]} <span>{count(s)}</span></button>)}
       </div>
-      <div className="library-shelf-filter"><select aria-label="Choose shelf" value={shelfFilter} onChange={(e) => setShelfFilter(e.target.value)}><option value="all">All shelves · {shelfList.length}</option>{shelfList.map((s) => <option key={s.id} value={`shelf:${s.id}`}>{s.name} · {count(`shelf:${s.id}`)}</option>)}</select><button className="btn sm ghost" onClick={() => { const n = prompt('Shelf name (e.g. “Office — top shelf”, “Kindle”)'); if (n?.trim()) addShelf(n.trim(), themeForShelfName(n)); }}><Plus size={13} />Shelf</button></div>
+      <div className="library-shelf-filter"><select aria-label="Choose shelf" value={shelfFilter} onChange={(e) => setShelfFilter(e.target.value)}><option value="all">All shelves · {shelfList.length}</option>{shelfList.map((s) => <option key={s.id} value={`shelf:${s.id}`}>{s.name} · {count(`shelf:${s.id}`)}</option>)}</select><button className="btn sm ghost" onClick={() => { setShelfName(''); setAddingShelf(true); }}><Plus size={13} />Shelf</button></div>
     </div>
     </div>
     <div className="library-search row"><input type="search" aria-label="Search books" placeholder="Search by title, author, or ISBN" value={query} onChange={(e) => setQuery(e.target.value)} />{(query || tab !== 'all' || shelfFilter !== 'all') && <Button onClick={() => { setQuery(''); setTab('all'); setShelfFilter('all'); }}>Clear filters</Button>}<span className="muted" role="status">{visible.length} of {all.length} books</span></div>
@@ -82,6 +84,7 @@ export function LibraryPage() {
     {!visible.length && (query || tab !== 'all' || shelfFilter !== 'all') ? <Empty icon={BookOpen} title="No matching books" hint="Try a different search or clear your filters." /> : view === 'shelves' ? <Bookcase shelves={shelfList.filter((s) => shelfFilter === 'all' || shelfFilter === `shelf:${s.id}`)} books={visible} tab={tab} markMode={markMode} onBookClick={onBookClick} atmosphere={atmosphere && !reducedMotion} onComputer={() => setComputer(true)} onDeleteShelf={(s) => { if (confirm(`Remove shelf “${s.name}”? Books stay in your library.`)) { deleteShelf(s.id); setShelfFilter('all'); } }} /> : !visible.length ? <Empty icon={BookOpen} title="No books here" hint="Try another shelf or add a book." action={<Button size="sm" onClick={() => setAdding(true)}>Add a book</Button>} /> : <div className="book-grid">{visible.map((b) => <BookCard key={b.id} book={b} onClick={onBookClick(b)} />)}</div>}
     <p className="library-footnote">{all.length} books · {shelfList.length} shelves · Countless places to go.</p>
     {adding && <AddBookModal open onClose={() => setAdding(false)} defaultShelf={shelfFilter.startsWith('shelf:') ? shelfFilter.slice(6) : undefined} />}
+    <Modal open={addingShelf} onClose={() => setAddingShelf(false)} title="Create a shelf"><form className="form" onSubmit={(e) => { e.preventDefault(); const name = shelfName.trim(); if (!name) return; addShelf(name, themeForShelfName(name)); setAddingShelf(false); setShelfFilter('all'); setTab('all'); setQuery(''); setView('shelves'); }}><Field label="Shelf name"><input autoFocus value={shelfName} maxLength={120} onChange={(e) => setShelfName(e.target.value)} placeholder="Office, Fantasy, or a world of your own" /></Field><p className="muted">Each shelf comes with a display cabinet you can customize.</p><div className="form-actions"><button type="button" className="btn ghost" onClick={() => setAddingShelf(false)}>Cancel</button><button type="submit" className="btn primary" disabled={!shelfName.trim()}>Create shelf</button></div></form></Modal>
     <ImportCenter open={importing} onClose={() => setImporting(false)} />
     <Popover anchor={open?.anchor ?? null} onClose={closeDetail} label="Book details">{open && <BookDetail key={open.id} id={open.id} onClose={closeDetail} />}</Popover>
     <Modal open={goalEdit} onClose={() => setGoalEdit(false)} title={`${year} reading goal`}><GoalForm onDone={() => setGoalEdit(false)} /></Modal>

@@ -36,3 +36,16 @@ export const ENVIRONMENTS: Record<ShelfTheme, { image: string; mood: string; obj
   literary: { image: 'study', mood: 'A room of one’s own', objects: ['typewriter', 'fountainPen'] },
   default: { image: 'study', mood: 'The reading room', objects: ['compassMap', 'lantern'] },
 };
+
+export type CabinetLighting = 'warm' | 'moonlight' | 'candle';
+export type CabinetLayout = 'layered' | 'balanced';
+export type CabinetSettings = { lighting: CabinetLighting; layout: CabinetLayout; brightness: number };
+export const DEFAULT_CABINET: CabinetSettings = { lighting: 'warm', layout: 'layered', brightness: 85 };
+export const CABINET_LIGHTS: { id: CabinetLighting; name: string; detail: string }[] = [
+  { id: 'warm', name: 'Gallery', detail: 'Warm pools of light' },
+  { id: 'moonlight', name: 'Moonlight', detail: 'A cool, quiet evening' },
+  { id: 'candle', name: 'Candlelit', detail: 'An intimate amber glow' },
+];
+export function cabinetSettings(value?: Partial<CabinetSettings>): CabinetSettings {
+  return { lighting: CABINET_LIGHTS.some((light) => light.id === value?.lighting) ? value!.lighting! : DEFAULT_CABINET.lighting, layout: value?.layout === 'balanced' ? 'balanced' : 'layered', brightness: Math.max(35, Math.min(100, Number.isFinite(value?.brightness) ? value!.brightness! : DEFAULT_CABINET.brightness)) };
+}
