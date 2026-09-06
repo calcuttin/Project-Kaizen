@@ -1,0 +1,7 @@
+Use case: stylized-concept
+Asset type: production bookshelf background environment.
+Input image: selected-design.png is a style reference only, especially the bottom fantasy shelf. Create a new background environment asset, not a UI screenshot.
+Primary request: A natural panoramic wide 3:1 scene, exact 1536x512 pixels: straight-on view into a deep antique dark walnut bookshelf niche opening into a moonlit fantasy landscape. Blue-black mountains surround a distant delicate medieval citadel illuminated by a cool moon. Ruined stone archways frame the extreme left and right edges. A small warm amber lantern sits at the extreme left. The center foreground remains dark and empty to allow real books to be overlaid later. A thin dark walnut ledge runs along the very bottom.
+Style: tangible richly textured photoreal fantasy set design matching the reference's warm aged walnut and stone. Moonlit indigo, blue-gray and muted brass amber.
+Composition: very wide cinematic horizontal panorama, main environmental detail concentrated in a horizontal central band so a 3:1 center crop remains attractive if rendering at another ratio. Distant castle and moon inside the central band; lantern at extreme left inside the band. All center and right foreground empty.
+Avoid: no books, no lettering, no typography, no labels, no UI, no buttons, no people, no dragon statue or dragon object, no computer, no solar system model.

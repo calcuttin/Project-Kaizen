@@ -1,0 +1,13 @@
+Use case: product-mockup
+Asset type: transparent cutout object for an immersive dark wood bookshelf web UI.
+Primary request: Generate ONE isolated Apple II desktop computer, based on the charming beige computer in the right-side Tech & Founders shelf of the attached style reference. The reference is only for visual style; do NOT generate the whole bookshelf or any UI.
+Subject: a classic 1977 Apple II beige wedge-shaped keyboard computer base with separate matching small beige CRT monitor placed centrally on top, accurate classic retro silhouette, dark brown keyboard keys, small period detail. Premium photorealistic miniature with detailed lightly worn cream plastic.
+Composition/framing: 1024 by 1024 square canvas. Full object centered inside the canvas with approximately 6% outer padding, front view with enough slightly elevated perspective to see the keyboard. Monitor front must be straight and its display horizontal with no oblique perspective.
+Screen: EMPTY uniformly very dark green/black rectangular recessed CRT display, softly rounded corners. ABSOLUTELY NO TEXT, letters, cursor, logos, or graphics inside the screen. A live DOM terminal will be placed over that rectangular screen.
+Scene/backdrop: genuinely transparent alpha background. No floor, no desk, no shelf, no surroundings, no external props. The object alone.
+Lighting/mood: warm amber side lighting with soft shadows on the object, restrained green tint on blank CRT glass, suited to a dark antique library.
+Constraints: entire computer within frame, clean alpha edges. No surrounding props, labels, UI, cables extending outside composition, or watermark.
+
+Refinement prompt (built-in imagegen): Precisely edit this computer cutout. Preserve the exact computer, screen, object geometry, blank CRT, light, color, and placement. Remove every pixel of the white/gray checkerboard background surrounding it and replace it with REAL fully transparent alpha channel, including the visible spaces beside the monitor and above the keyboard. The checkerboard is a defect, not desired image content. Output a genuine transparent PNG with RGBA alpha. Do not draw any new checkerboard, background color, floor, or shadows around the isolated computer. Only the computer is opaque. 1024x1024.
+
+Output QA: generator returned 1254x1254 RGB with a simulated checkerboard despite two requests for alpha. A CSS clip-path matching the object contour is needed when consuming this image. CRT inset safe overlay bounds: left 27%, top 17%, width 44%, height 28% of full image.

@@ -1,0 +1,7 @@
+Use case: product-mockup.
+Asset type: single antique brass reading lantern for a fantasy bookshelf alcove.
+Input reference: selected-design.png as style reference only, match the lantern in the lower right cabinet.
+Primary request: a beautifully detailed miniature antique brass reading lantern, a softly glowing warm amber candle flame clearly visible within glass panels. Elegant weathered brass frame and domed cap with small carrying loop. Premium photorealistic sculpture/product photography with fine material detail and restrained warm reflections.
+Composition: 1024 square. Entire isolated lantern centered with 10% empty margin all around. Three-quarter front view, compact tabletop proportions.
+Lighting and backdrop: warm light comes softly from the candle. SOLID PURE BLACK #000000 background, suitable for screen blend on a dark library alcove. No checkerboard or environment.
+Constraints: lantern only, including its visible candle. No UI, text, labels, watermark, shelves, books, tables, smoke, other objects or large glow extending beyond frame.

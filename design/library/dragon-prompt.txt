@@ -1,0 +1,8 @@
+Use case: product-mockup.
+Asset type: isolated bronze dragon statue for an immersive bookshelf UI.
+Input reference: selected-design.png is visual style reference only, specifically the elegant dragon in the lower right fantasy cabinet.
+Primary request: ONE beautiful bronze dragon statuette, graceful curved neck, horned head, folded wings, intricate scales, coiled tail, sitting on a tiny dark bronze plinth. Premium detailed photorealistic miniature sculpture.
+Composition: 1024 square. Entire statue contained within 8% margins. Three-quarter view similar to the reference dragon, elegant sweeping vertical silhouette.
+Materials and lighting: finely sculpted antique bronze with warm amber edge light and restrained brass highlights, subtle dark patina in engraved recesses.
+Background: SOLID PURE BLACK #000000, uniform, suitable for screen blending onto a dark alcove. No checkerboard, no environment.
+Constraints: statue and its small plinth only. No crystals, lantern, books, UI, text, labels, watermark, fire, smoke, or other objects.

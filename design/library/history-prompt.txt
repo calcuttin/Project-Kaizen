@@ -1,0 +1,7 @@
+Use case: stylized-concept
+Asset type: production bookshelf environmental backdrop, exact 3:1 wide panorama at 2172x724 pixels.
+Input image: selected-design.png is a style reference for premium miniature photorealism and rich aged walnut materials only. Create a new environmental asset, not a screenshot or application layout.
+Primary request: Straight-on view into an empty antique dark walnut shelf niche with a warmly sunlit ancient Roman landscape. Weathered ancient Roman arches frame the edges, a distant Colosseum appears to the left of center through the opening, and the right side transitions into an aged parchment-colored sepia stone wall without writing. A tiny classical terracotta amphora sits at the far left within the leftmost 10% of the frame. A thin dark walnut shelf ledge runs across the bottom.
+Style/medium: premium tangible miniature photographic realism, detailed aged stone, softly illuminated parchment sepia hues, walnut woodgrain, gentle amber sunlight, deep warm shadows.
+Composition: very wide low natural panorama, eye-level straight-on view. Roman architecture stays distant. Center and right foreground entirely empty for real books to be overlaid. Tiny amphora is the only foreground object and stays at far left. Balanced understated environmental texture.
+Avoid: no books, no UI, no buttons, no text, no signs, no logos, no busts, no statues, no people, no computers, no solar system model.

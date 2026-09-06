@@ -1,0 +1,23 @@
+import { create } from 'zustand';
+import { Sparkles } from 'lucide-react';
+
+interface ToastState { toasts: { id: number; text: string }[]; push: (text: string) => void }
+let seq = 0;
+export const useToast = create<ToastState>((set) => ({
+  toasts: [],
+  push: (text) => {
+    const id = ++seq;
+    set((s) => ({ toasts: [...s.toasts, { id, text }] }));
+    setTimeout(() => set((s) => ({ toasts: s.toasts.filter((t) => t.id !== id) })), 2600);
+  },
+}));
+export const toast = (text: string) => useToast.getState().push(text);
+
+export function Toaster() {
+  const toasts = useToast((s) => s.toasts);
+  return (
+    <div className="toast-wrap" aria-live="polite">
+      {toasts.map((t) => <div key={t.id} className="toast"><Sparkles />{t.text}</div>)}
+    </div>
+  );
+}

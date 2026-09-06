@@ -1,0 +1,8 @@
+Use case: product-mockup.
+Asset type: isolated silicon wafer display object for a dark bookshelf web UI.
+Input image: bookshelf design style reference only. Match the silicon wafer on the right of the computer in its Tech & Founders shelf.
+Primary request: ONE circular silicon wafer on a tiny elegant antique brass display stand. Front-on disk, with a fine regular semiconductor chip grid over its surface and rich iridescent rainbow diffraction shimmering across it. Premium photorealistic miniature. The disk is the main focal point, polished and detailed, with restrained brass highlights on its slender stand.
+Composition: 1024 square, entire object centrally composed with 7% empty padding. Camera directly facing the circular wafer. No tilt, no dramatic foreshortening.
+Lighting: subtle warm side illumination suited to a dark antique library.
+Background: SOLID PURE BLACK #000000, uniform. No checkerboard and no transparency simulation. The black background will be removed visually using screen blend mode.
+Constraints: only silicon wafer and its small display stand. No text, logos, watermark, environment, surrounding objects, shelves, table, or floating decorative elements.

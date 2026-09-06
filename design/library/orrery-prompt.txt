@@ -1,0 +1,12 @@
+Use case: product-mockup
+Asset type: isolated transparent PNG object for animated bookshelf UI.
+Generate ONE 1024x1024 image of a premium miniature brass solar-system orrery orbit assembly, seen orthographically from directly overhead. The subject is ONLY a centered flat circular assembly of fine concentric polished antique brass orbit rings, with exactly eight small spherical planets arranged at different angular positions, one per orbit, and one larger polished gold sun at the exact image center. Planet colors are muted and realistic: gray, cream, earth blue, rusty red, tan banded Jupiter, muted yellow Saturn with rings, pale cyan, deep blue. Warm premium photorealistic antique metal craftsmanship matching a dark walnut library scientific display.
+Composition: strictly TOP-DOWN looking directly down, exact circular rings (no perspective ellipse), center sun at exact image center, assembly occupies 88% of square canvas leaving 6% clear padding on all sides. This PNG will rotate as one disk and then be perspective tilted via CSS. Make the sun rotationally symmetric.
+Lighting: subtle warm studio highlights, detailed metallic ring texture.
+Background: genuinely transparent alpha everywhere between rings and outside the objects. No solid background, no fake checkerboard, no shadows cast on an implied surface.
+NO pedestal, NO base, NO legs, NO table, NO background, NO text, NO labels, NO starfield, NO extra objects. Render only isolated orbit rings, eight planets, and central sun.
+
+Final correction prompt (built-in tool did not return actual alpha):
+Edit this exact orrery image: replace all checkerboard background with perfectly uniform pure black RGB 0,0,0, including every space between the concentric rings. Preserve all brass orbit rings and eight planet spheres and exact centered golden sun. Output a 1024x1024 square product asset with the full assembly centered and a clear 6 percent pure black margin around every side. Top-down orthographic overhead view. The entire backdrop MUST be solid black with no checkerboard, no texture, no shadow, no gradient, no scenery. Only the metallic orbit rings and planets and center sun should be non-black pixels.
+
+Delivery: public/library/objects/orrery.png. Actual tool output 1254x1254 RGB, black background; consume with CSS mix-blend-mode: screen. Original alpha requests twice returned baked checkerboard. No programmatic image editing applied.

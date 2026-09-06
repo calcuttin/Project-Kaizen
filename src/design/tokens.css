@@ -1,0 +1,88 @@
+/* ───────────────────────── Kaizen design tokens ─────────────────────────
+   Philosophy: calm surfaces, warm gold accent (the "one small step"), generous
+   whitespace, serif display for moments of meaning, sans for the everyday.
+   Dark is the default; light is a first-class theme via [data-theme="light"].
+*/
+:root {
+  --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-display: 'Fraunces', 'Iowan Old Style', Georgia, serif;
+  --font-mono: ui-monospace, 'SF Mono', Menlo, monospace;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
+
+  --shadow-sm: 0 1px 2px rgba(0,0,0,.25);
+  --shadow-md: 0 8px 24px -12px rgba(0,0,0,.5);
+  --shadow-lg: 0 24px 60px -24px rgba(0,0,0,.6);
+
+  --ease: cubic-bezier(.2,.8,.2,1);
+  --dur: 180ms;
+
+  /* Dark palette (default) */
+  --bg: #0f1115;
+  --bg-elev: #151820;
+  --bg-elev-2: #1b1f29;
+  --surface: rgba(255,255,255,.03);
+  --surface-hover: rgba(255,255,255,.06);
+  --border: rgba(255,255,255,.08);
+  --border-strong: rgba(255,255,255,.14);
+  --text: #eef0f4;
+  --text-2: #a3a9b8;
+  --text-3: #6b7284;
+  --accent: #e8b04b;
+  --accent-2: #f4cf7e;
+  --accent-ink: #1a1305;
+  --accent-soft: rgba(232,176,75,.14);
+
+  --personal: #7aa2f7;
+  --personal-soft: rgba(122,162,247,.16);
+  --business: #9ece6a;
+  --business-soft: rgba(158,206,106,.16);
+  --health: #f7768e;
+  --health-soft: rgba(247,118,142,.16);
+  --library: #bb9af7;
+  --library-soft: rgba(187,154,247,.16);
+  --feed: #7dcfff;
+  --feed-soft: rgba(125,207,255,.16);
+  --danger: #f7768e;
+  --success: #9ece6a;
+  --warning: #e0af68;
+
+  --sidebar-w: 248px;
+  color-scheme: dark;
+}
+
+[data-theme="light"] {
+  --bg: #f6f4ef;
+  --bg-elev: #ffffff;
+  --bg-elev-2: #fbfaf7;
+  --surface: rgba(0,0,0,.025);
+  --surface-hover: rgba(0,0,0,.05);
+  --border: rgba(20,18,10,.09);
+  --border-strong: rgba(20,18,10,.16);
+  --text: #1a1a1f;
+  --text-2: #5b5f6b;
+  --text-3: #8b8f9b;
+  --accent: #c48a12;
+  --accent-2: #a87407;
+  --accent-ink: #ffffff;
+  --accent-soft: rgba(196,138,18,.12);
+
+  --personal: #3b6fe0;
+  --personal-soft: rgba(59,111,224,.12);
+  --business: #4f9a2a;
+  --business-soft: rgba(79,154,42,.12);
+  --health: #d9485f;
+  --health-soft: rgba(217,72,95,.12);
+  --library: #7c4fd6;
+  --library-soft: rgba(124,79,214,.12);
+  --feed: #1f8fc9;
+  --feed-soft: rgba(31,143,201,.12);
+
+  --shadow-sm: 0 1px 2px rgba(20,18,10,.08);
+  --shadow-md: 0 8px 24px -12px rgba(20,18,10,.25);
+  --shadow-lg: 0 24px 60px -24px rgba(20,18,10,.3);
+  color-scheme: light;
+}

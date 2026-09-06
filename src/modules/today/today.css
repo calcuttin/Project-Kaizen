@@ -1,0 +1,43 @@
+.today-page { position: relative; overflow: hidden; }
+.today-page::before { content: ''; position: absolute; inset: 0 0 auto; height: 410px; pointer-events: none; background: radial-gradient(circle at 80% 5%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 31%), radial-gradient(circle at 16% 35%, color-mix(in srgb, var(--personal) 8%, transparent), transparent 30%); mask-image: linear-gradient(#000, transparent); }
+.today-page > * { position: relative; }
+.today-masthead { display: flex; align-items: flex-end; justify-content: space-between; gap: 28px; margin: 8px 0 28px; }
+.today-masthead .eyebrow { color: var(--accent); font-size: 10px; letter-spacing: .16em; }
+.today-masthead h1 { font-family: var(--font-display); font-size: clamp(38px, 5vw, 58px); font-weight: 500; letter-spacing: -.045em; line-height: .98; }
+.today-masthead h1 span { color: var(--accent); }
+.today-masthead p { color: var(--text-2); margin: 10px 0 0; font-size: 14px; }
+.today-rhythm { display: flex; align-items: center; gap: 13px; min-width: 205px; padding: 10px 14px 10px 10px; border: 1px solid var(--border); border-radius: 999px; background: color-mix(in srgb, var(--bg-elev) 78%, transparent); box-shadow: var(--shadow-sm); }
+.rhythm-orbit { --ritual: 0%; width: 48px; height: 48px; display: grid; place-content: center; text-align: center; border-radius: 50%; background: radial-gradient(circle, var(--bg-elev) 57%, transparent 59%), conic-gradient(var(--accent) var(--ritual), var(--surface-hover) 0); }
+.rhythm-orbit b { font-size: 15px; line-height: 1; }
+.rhythm-orbit small { color: var(--text-3); font-size: 8px; margin-top: 2px; }
+.rhythm-label { display: flex; align-items: center; gap: 5px; color: var(--text-3); font-size: 10px; letter-spacing: .09em; text-transform: uppercase; }
+.rhythm-label svg { width: 11px; color: var(--accent); }
+.today-rhythm strong { display: block; max-width: 124px; margin-top: 3px; font-size: 12px; line-height: 1.3; font-weight: 600; }
+.today-ritual { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(300px, .95fr); gap: 16px; margin-bottom: 34px; }
+.today-ritual .card { min-height: 226px; }
+.today-intention { display: flex; flex-direction: column; justify-content: center; padding: 26px 28px; border-color: color-mix(in srgb, var(--accent) 24%, var(--border)); box-shadow: 0 18px 44px -34px color-mix(in srgb, var(--accent) 85%, transparent); }
+.today-intention::before { content: ''; position: absolute; left: 0; top: 22px; bottom: 22px; width: 3px; border-radius: 0 3px 3px 0; background: var(--accent); }
+.today-card-kicker { display: flex; align-items: center; gap: 9px; margin-bottom: 16px; }
+.today-card-kicker > span, .today-working-head > div > span { display: grid; place-items: center; width: 23px; height: 23px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); font-size: 10px; font-family: var(--font-mono); font-weight: 600; }
+.today-card-kicker .card-title { margin: 0; }
+.today-card-kicker em { margin-left: auto; color: var(--text-3); font-size: 11px; font-style: normal; }
+.today-intention textarea { position: relative; min-height: 84px; font-size: clamp(22px, 2.45vw, 31px); letter-spacing: -.025em; }
+.intention-note { display: flex; align-items: center; gap: 7px; margin-top: 10px; color: var(--text-3); font-size: 11px; letter-spacing: .01em; }
+.intention-note span { color: var(--accent); font-family: var(--font-display); font-size: 16px; }
+.today-wins { padding: 22px; background-image: linear-gradient(145deg, color-mix(in srgb, var(--accent) 4%, transparent), transparent 55%); }
+.today-wins .mood { margin: -2px 0 2px; }
+.today-wins .mood button { width: 38px; height: 38px; border-radius: 50%; background: color-mix(in srgb, var(--bg) 42%, transparent); }
+.today-wins .list { min-height: 24px; max-height: 66px; overflow: auto; }
+.today-wins .list:empty::after { content: 'Small wins count. Name one when it happens.'; color: var(--text-3); font-size: 12px; padding: 3px 0; }
+.today-wins .quick-add { background: color-mix(in srgb, var(--bg) 35%, transparent); }
+.today-working-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin: 0 2px 14px; }
+.today-working-head > div { display: flex; align-items: center; gap: 9px; }
+.today-working-head h2 { font-family: var(--font-display); font-weight: 500; font-size: 23px; letter-spacing: -.025em; }
+.today-working-head p { color: var(--text-3); font-size: 12px; }
+.today-dashboard { gap: 18px; }
+.today-dashboard > div { transition: transform var(--dur) var(--ease); }
+.today-dashboard > div:hover { transform: translateY(-2px); }
+.today-dashboard .card { position: relative; overflow: hidden; }
+.today-dashboard .card::after { content: ''; position: absolute; inset: 0 auto 0 0; width: 2px; background: color-mix(in srgb, var(--card-accent, var(--accent)) 75%, transparent); opacity: .65; }
+@media (max-width: 860px) { .today-masthead { align-items: flex-start; flex-direction: column; } .today-ritual { grid-template-columns: 1fr; } .today-ritual .card { min-height: 0; } }
+@media (max-width: 560px) { .today-page { padding-top: 14px; } .today-masthead { margin-bottom: 20px; gap: 18px; } .today-masthead h1 { font-size: 40px; } .today-rhythm { width: 100%; } .today-ritual { margin-bottom: 26px; } .today-intention { padding: 23px 20px; } .today-intention textarea { font-size: 23px; } .today-working-head { align-items: flex-start; flex-direction: column; gap: 5px; } .today-wins .mood { gap: 5px; } .today-wins .mood button { width: 34px; height: 34px; } }

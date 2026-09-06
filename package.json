@@ -1,0 +1,44 @@
+{
+  "name": "kaizen",
+  "private": true,
+  "packageManager": "pnpm@11.19.0",
+  "version": "0.1.0",
+  "license": "AGPL-3.0-or-later",
+  "type": "module",
+  "description": "Kaizen — a life operating system for continuous improvement",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit -p tsconfig.app.json",
+    "test": "vitest run --exclude 'e2e/**'",
+    "test:watch": "vitest --exclude 'e2e/**'",
+    "test:e2e": "playwright test",
+    "test:e2e:cloud": "playwright test -c playwright.cloud.config.ts",
+    "check:schema-types": "node scripts/check-schema-types.mjs",
+    "check:public-source": "node scripts/check-public-source.mjs"
+  },
+  "dependencies": {
+    "@clerk/react": "^6.15.1",
+    "@supabase/supabase-js": "^2.57.4",
+    "date-fns": "^4.4.0",
+    "idb-keyval": "^6.3.0",
+    "lucide-react": "^1.40.0",
+    "nanoid": "^6.0.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^7.18.3",
+    "zustand": "^5.0.15"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.55.0",
+    "@types/react": "^18.3.31",
+    "@types/react-dom": "^18.3.7",
+    "@vitejs/plugin-react": "^6.1.1",
+    "fake-indexeddb": "^6.2.2",
+    "supabase": "^2.116.0",
+    "typescript": "^7.0.2",
+    "vite": "^8.2.2",
+    "vitest": "^4.0.0"
+  }
+}

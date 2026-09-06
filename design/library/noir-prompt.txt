@@ -1,0 +1,7 @@
+Use case: stylized-concept
+Asset type: production bookshelf environment background, a 3:1 wide panorama at 2172x724 pixels.
+Input image: selected-design.png is a reference for the material richness, lighting, and miniature photorealism only. Create a new scene, never a screenshot or UI.
+Primary request: View straight into a dark antique walnut shelf niche overlooking a rainy nighttime city skyline through one large window. Moody rain streaks and droplets on the glass, distant warm amber building windows and softly reflected muted crimson neon. A small warm brass desk lamp stands at the extreme left within the leftmost 10% of the frame. A thin dark walnut wooden ledge runs along the bottom. The foreground is empty for real books to be overlaid.
+Style/medium: rich miniature photographic realism, tangible walnut woodgrain, old brass and rain glass; cinematic noir atmosphere with restrained crimson, charcoal, amber, and blue-black.
+Composition: exact wide natural 3:1 panorama, straight-on front view. Keep lamp small and entirely at left edge; center and right foreground empty. City remains softly distant and atmospheric through the window. No central focal object.
+Constraints: no books, no UI, no buttons, no typography, no readable signage, no logos, no people, no artifact objects, no computer or solar system model. This is only an environmental backdrop, not an app layout.

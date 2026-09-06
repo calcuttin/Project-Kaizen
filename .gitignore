@@ -1,0 +1,17 @@
+node_modules
+.pnpm-store
+dist
+.claude
+.DS_Store
+*.local
+.env
+.env.*
+!.env.example
+private-data/
+*.pem
+*.key
+*.tsbuildinfo
+test-results
+playwright-report
+supabase/.temp/
+supabase/.branches/

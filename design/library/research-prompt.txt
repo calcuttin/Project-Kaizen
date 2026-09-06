@@ -1,0 +1,8 @@
+Use case: stylized-concept
+Asset type: production website bookshelf environment background, wide 1536x512 pixels, exact 3:1 aspect ratio.
+Input image: reference image for material style, lighting, and mood only. Generate a new environmental asset, not a screenshot or UI.
+Primary request: View straight into an antique dark walnut observatory shelf niche. A deep navy star chart wall with faint delicate antique brass astronomical engravings provides the background. Place an antique brass telescope with tripod at the extreme left within the leftmost 15% of the scene; the center and right 85% are mostly empty navy wall with sparse tiny warm stars and understated astronomical linework.
+Style/medium: finely detailed tangible photoreal fantasy set dressing, aged walnut, brass, and subtle celestial engraved art; match the warm dark immersive observatory shelf in the top row of the reference.
+Composition/framing: straight-on orthographic-feeling frontal view, wide low niche, thin dark walnut wood ledge along the very bottom edge, understated wood trim at top and sides. Empty center and right must remain available for a real book row to be overlaid.
+Lighting/mood: softly illuminated warm amber highlights, deep navy and walnut shadows, cozy old observatory.
+Constraints: no books, no text, no labels, no UI, no buttons, no logos, no orrery or solar system model, no computer, no people, no clutter in the center or right. Do not reproduce the reference layout. Only one wide background scene.

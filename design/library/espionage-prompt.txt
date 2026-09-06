@@ -1,0 +1,7 @@
+Use case: stylized-concept
+Asset type: production bookshelf environment background, exact 3:1 wide panorama at 2172x724 pixels.
+Input image: selected-design.png is a style reference for rich antique walnut materials, warm lighting, and premium miniature photographic realism only. Generate a new scene, not a screenshot or UI.
+Primary request: Straight-on view into a dark antique walnut map-room shelf niche. A large vintage tactical world map in muted olive and sepia covers the backdrop, with a few colored route pins and faint connecting lines, but no legible text. At far left, a narrow distant rainy window brings cool gray ambient light. An old compact radio and small folded field map occupy only the extreme leftmost 12% of the ledge. A subtle warm brass picture light illuminates the map. Thin walnut shelf ledge at bottom.
+Style/medium: richly tangible miniature photorealistic scene, aged paper, dull brass, old walnut woodgrain, restrained olive-sepia espionage atmosphere with warm amber lighting and deep shadows.
+Composition: one continuous wide natural 3:1 panorama, front-on perspective. Center and right foreground fully empty for real books to overlay. Radio and folded map stay small and at extreme left. Backdrop is one large map, no collage.
+Avoid: no books, no UI, no buttons, no typography, no readable text, no signage, no logos, no people, no multiple panels, no display cases, no guns.

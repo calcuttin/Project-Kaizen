@@ -1,0 +1,6 @@
+{
+  "name": "@kaizen/importers",
+  "private": true,
+  "type": "module",
+  "exports": "./src/index.ts"
+}

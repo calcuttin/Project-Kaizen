@@ -1,0 +1,11 @@
+services:
+  kaizen:
+    build:
+      context: .
+      args:
+        VITE_KAIZEN_MODE: ${VITE_KAIZEN_MODE:-device}
+        VITE_SUPABASE_URL: ${VITE_SUPABASE_URL:-}
+        VITE_SUPABASE_PUBLISHABLE_KEY: ${VITE_SUPABASE_PUBLISHABLE_KEY:-}
+    ports:
+      - "5180:8080"
+    restart: unless-stopped
