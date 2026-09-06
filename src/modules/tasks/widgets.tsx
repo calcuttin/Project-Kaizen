@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { ArrowRight, CheckSquare, Plus } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { Card, Empty } from '@/components/ui';
+import { Button, Card, Empty } from '@/components/ui';
 import { useUI } from '@/app/uiStore';
 import { todayKey } from '@/core/dates';
 import { parseQuickAdd } from '@/core/parse';
@@ -33,16 +33,17 @@ export function FocusWidget() {
   };
 
   return (
-    <Card title="Focus" icon={CheckSquare} action={<span className="faint" style={{ fontSize: 12 }}>{doneToday} done today · <Link to="/tasks" style={{ color: 'var(--text-2)' }}>All tasks <ArrowRight size={11} style={{ verticalAlign: '-1px' }} /></Link></span>}>
+    <Card title="Today's tasks" icon={CheckSquare} action={<Link to="/tasks" style={{ color: 'var(--text-2)', fontSize: 12 }}>All tasks <ArrowRight size={11} style={{ verticalAlign: '-1px' }} /></Link>}>
+      <p className="today-helper" style={{ marginBottom: 12 }}>{doneToday ? `${doneToday} completed today. ` : ''}Due, overdue, and next tasks appear here.</p>
+      <form className="quick-add today-entry" style={{ marginBottom: 14 }} onSubmit={(e) => { e.preventDefault(); submit(); }}>
+        <input placeholder="What needs doing?" value={quick} onChange={(e) => setQuick(e.target.value)} aria-label="Quick add for today" />
+        <Button type="submit" variant="primary" size="sm" icon={Plus} disabled={!quick.trim()}>Add task</Button>
+      </form>
       {focus.length ? (
         <div className="list">{focus.map((t) => <TaskRow key={t.id} task={t} compact onOpen={() => setEditing(t.id)} />)}</div>
       ) : (
-        <Empty icon={CheckSquare} title="Clear runway" hint="Nothing due or scheduled. Pick one thing worth doing." />
+        <Empty icon={CheckSquare} title="Room for a fresh start" hint="Add a task above, or choose one from All tasks." />
       )}
-      <div className="quick-add" style={{ marginTop: 10, padding: '7px 10px' }}>
-        <Plus />
-        <input placeholder="Add for today… “Email Sam @business !2”" value={quick} onChange={(e) => setQuick(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && submit()} aria-label="Quick add for today" />
-      </div>
       <TaskEditor id={editing} onClose={() => setEditing(null)} />
     </Card>
   );

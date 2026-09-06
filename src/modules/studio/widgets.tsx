@@ -16,7 +16,7 @@ export function StudioWidget() {
   const all = Object.values(pieces);
   return (
     <Card title="Studio" icon={Mic} action={<Link to="/studio" className="faint" style={{ fontSize: 12 }}>Studio <ArrowRight size={11} style={{ verticalAlign: '-1px' }} /></Link>}>
-      {!list.length ? <Empty icon={Mic} title="No channels yet" hint="Set up your podcast and Substack in Studio." /> : (
+      {!list.length ? <Empty icon={Mic} title="Have something to share?" hint="Plan a podcast, newsletter, or other publishing project." action={<Link className="btn" to="/studio">Explore Studio <ArrowRight size={14} /></Link>} /> : (
         <div className="stack" style={{ gap: 10 }}>
           {list.map((c) => {
             const cad = cadence(c, all);

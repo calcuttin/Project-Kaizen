@@ -11,7 +11,7 @@ export function HabitsWidget() {
   const done = list.filter((h) => habitDone(h, logs[h.id]?.[today])).length;
   return (
     <Card title="Habits" icon={Flame} accent="var(--health)" action={<Link to="/health" className="faint" style={{ fontSize: 12 }}>Health <ArrowRight size={11} style={{ verticalAlign: '-1px' }} /></Link>}>
-      {!list.length ? <Empty icon={Flame} title="No habits yet" hint="Add one on the Health page." /> : (
+      {!list.length ? <Empty icon={Flame} title="Build one small habit" hint="Start with something you can repeat, like a daily walk." action={<Link className="btn" to="/health">Set up a habit <ArrowRight size={14} /></Link>} /> : (
         <div className="row" style={{ gap: 16, alignItems: 'flex-start' }}>
           <Ring value={done} max={list.length} color="var(--health)" label={`${done}/${list.length}`} size={80} stroke={7} />
           <div className="row" style={{ flexWrap: 'wrap', gap: 6 }}>

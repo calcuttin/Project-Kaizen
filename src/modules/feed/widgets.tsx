@@ -17,7 +17,7 @@ export function UpNextWidget() {
     .slice(0, 4);
   return (
     <Card title="Up next" icon={ListMusic} accent="var(--feed)" action={<Link to="/feed" className="faint" style={{ fontSize: 12 }}>Feed <ArrowRight size={11} style={{ verticalAlign: '-1px' }} /></Link>}>
-      {!queue.length ? <Empty icon={ListMusic} title="Queue is clear" hint="Nothing waiting. Enjoy the quiet." /> : (
+      {!queue.length ? <Empty icon={ListMusic} title="Save something for later" hint="Keep articles, videos, and podcasts in your Feed." action={<Link className="btn" to="/feed">Open Feed <ArrowRight size={14} /></Link>} /> : (
         <div className="list">{queue.map((i) => <ItemRow key={i.id} item={i} source={sources[i.sourceId]} compact onFinish={() => setFinishing(i.id)} />)}</div>
       )}
       <FinishModal id={finishing} onClose={() => setFinishing(null)} />

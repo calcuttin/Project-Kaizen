@@ -12,6 +12,14 @@ You can also open these guides from **Settings → Help & guides**, or **Help & 
 
 New workspaces start empty. Returning users open their saved records automatically. If you want examples, use **Settings → Data → Load samples**, ideally in a fresh workspace before adding your own data. Samples change the current workspace and sync if it is a cloud account.
 
+## Start your day
+
+**Today** puts your tasks first. Type into **What needs doing?** and choose **Add task** (or press Enter). New tasks are due today by default; **All tasks** opens the full list and task editor.
+
+**Your daily focus** is an optional reminder to yourself, separate from a task. It saves as you type. In **A moment for you**, choose a labeled mood and use **Add win** to record something that went well. An optional evening reflection appears later in the day. The check-in count tracks your focus, mood, win, and evening reflection; it is not a task-completion score.
+
+Use **Open library**, **Track habits**, or a section's setup link to continue. **Getting started** opens this guide. You can leave any check-in blank and go straight to your work.
+
 ## Find your way around
 
 | Area | Use it for |
