@@ -7,7 +7,7 @@ Kaizen uses one web client with two explicit modes:
 - `device` is the zero-configuration default. IndexedDB is the source of truth, no account appears, imports stay local, and JSON backup/restore provides portability.
 - `cloud` keeps the same IndexedDB stores and adds Clerk authentication, an account-scoped mutation outbox, and cursor-based synchronization through Supabase.
 
-Vercel is the reference static host. The production Dockerfile and Nginx SPA config are portable to any container host. Self-hosters can run the frontend alone or recreate Auth, Postgres, Storage, functions, policies, and seed behavior from `supabase/` with the Supabase CLI and Docker.
+Vercel is the reference cloud frontend host. The included Dockerfile and Compose configuration provide a device-mode web container. The local Supabase stack supports migration and policy tests; a complete self-hosted cloud system needs additional Clerk token-verification and infrastructure configuration. See the [setup guide](setup-guide.md) for supported installation paths.
 
 ## Boundaries
 
@@ -17,7 +17,7 @@ Vercel is the reference static host. The production Dockerfile and Nginx SPA con
 
 ## Tenancy and authorization
 
-The first release is private and single-user. Every cloud row carries Clerk's text user ID in `owner_id` and every user-owned table enforces `owner_id = auth.jwt() ->> 'sub'` with row-level security. Nullable `space_id` and `profiles.default_space_id` fields reserve a migration path for future households or organizations without exposing that model in the product.
+Each cloud account has a personal workspace; shared team workspaces are not exposed in the product. Every cloud row carries Clerk's text user ID in `owner_id` and every user-owned table enforces `owner_id = auth.jwt() ->> 'sub'` with row-level security. Nullable `space_id` and `profiles.default_space_id` fields reserve a migration path for future households or organizations.
 
 The browser uses Clerk's publishable key and a publishable Supabase key. Clerk provides hosted sign-in options such as email, Google, Apple, GitHub, and passkeys. The `delete-account` function verifies the Clerk token, removes private import artifacts and cloud data, then deletes the Clerk user with a server-side Clerk secret.
 
@@ -27,7 +27,7 @@ Each account has its own durable IndexedDB outbox, change cursor, migration mark
 
 Deleted records remain server tombstones. Append-only module records retain distinct IDs. Competing record versions are held in the conflict inbox until the user chooses the cloud version or rebases the device version on the accepted server revision.
 
-Device-to-account migration is explicit. Settings shows entity counts and local duplicate warnings, downloads a backup, then queues all current entities only after the person chooses to sync.
+Device-to-account migration uses a manual JSON export and restore into the intended signed-in account. Restored collection changes are queued by the normal sync watchers, including removals. Legacy shared caches are not automatically adopted. See [backup and restore behavior](user-guide.md#back-up-and-restore).
 
 ## Product growth seams
 
