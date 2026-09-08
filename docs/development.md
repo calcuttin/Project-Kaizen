@@ -75,5 +75,6 @@ Run the local database tests and normal checks before applying a migration to a 
 | `e2e/` | Browser tests |
 | `docker/` | Nginx configuration for the web container |
 | `docs/` | User, setup, architecture, and operations guides |
+| `docs/reviews/` | Public AI-assisted review archive, evidence, and review template |
 
-Use synthetic fixtures in tests and documentation. Keep personal imports, screenshots, `.env` files, and backups outside tracked source. For a release history check, run `node scripts/check-public-source.mjs --history` in a fresh clone; this scans reachable Git objects, not just the current files.
+Use synthetic fixtures in tests and documentation. Keep personal imports, screenshots, `.env` files, and backups outside tracked source. The [public review archive](https://github.com/calcuttin/Project-Kaizen/tree/main/docs/reviews) contains only screenshots with synthetic or explicitly publication-approved data that have been inspected before committing. Review reports record AI and human contributions separately and link findings to the [roadmap](https://github.com/calcuttin/Project-Kaizen/blob/main/ROADMAP.md), implementation PRs, and validation evidence. For a release history check, run `node scripts/check-public-source.mjs --history` in a fresh clone; this scans reachable Git objects, not just the current files.
