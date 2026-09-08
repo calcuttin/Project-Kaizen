@@ -8,7 +8,7 @@ Kaizen develops in the open. This archive records what was reviewed, what was ob
 
 | Date | Review ID | Scope and searchable keywords | Evidence / attribution | Record |
 | --- | --- | --- | --- | --- |
-| 2026-09-08 | REV-2026-09-08-APP | Application UX, accessibility, Tasks, Today, Health, Library, Studio, Feed, Settings, date validation, keyboard, search, habits, mobile, backup, bundle size | Codex browser/source review with synthetic data; reproduction and verification limits recorded | [Application review and screenshots](2026-09-08/review.md) |
+| 2026-09-08 | REV-2026-09-08-APP | Application UX, accessibility, Tasks, Today, Health, Library, Studio, Feed, Settings, date validation, keyboard, search, habits, mobile, backup, bundle size | Codex browser/source review with synthetic data; reproduction and verification limits recorded | [Application review and screenshots](2026-09-08/review.md) · [Tracker #1](https://github.com/calcuttin/Project-Kaizen/issues/1) |
 | 2026-09-06 | Legacy security review | Account isolation, authentication, RLS, storage, imports, deployment, privacy | Historical record; see its own validation and boundaries; AI attribution not retroactively inferred | [Public-release and account-isolation review](../security/review-2026-09-06.md) |
 
 The historical security review stays at its existing path to preserve links. Its statements describe the situation at the time of that review.

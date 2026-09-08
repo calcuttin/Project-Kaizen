@@ -6,23 +6,25 @@ Kaizen's roadmap connects public reviews to actionable issues, implementation pu
 
 ## September 2026 application review
 
+Tracking issue: [#1 — September 2026 AI-assisted application review](https://github.com/calcuttin/Project-Kaizen/issues/1).
+
 Source: [REV-2026-09-08-APP — report and screenshots](docs/reviews/2026-09-08/review.md).
 
 Codex inspected the application, reproduced selected behaviors, reviewed source, and ran local checks. The maintainer requested the review and authorized publication. Independent human reproduction of the findings is not yet recorded. All items below are proposed fixes or improvements; publishing this roadmap does not mean they are implemented.
 
 | Priority | Work item | Review evidence | Tracking |
 | --- | --- | --- | --- |
-| P1 | Validate quick-add dates and recover gracefully from route errors | Step 3 | Pending issue publication |
-| P1 | Keep keyboard focus inside the command palette and restore Escape behavior | Step 6 | Pending issue publication |
-| P2 | Show a completed-task empty state and make Show done consistent across views | Step 2 | Pending issue publication |
-| P2 | Find existing workspace records through global search | Step 6 | Pending issue publication |
-| P2 | Make habit consistency account for tracking start and weekly targets | Step 4 | Pending issue publication |
-| P2 | Edit and archive habits without losing their history | Step 4 | Pending issue publication |
-| P2 | Make project filters, task board cards, and habit controls accessible | Steps 2, 4, 6 | Pending issue publication |
-| P2 | Prioritize useful first actions on Today, Library, and Studio | Steps 1, 5, 7 | Pending issue publication |
-| P2 | Put the Feed queue before empty statistics on phones | Step 8 | Pending issue publication |
-| P3 | Add a dismissible backup reminder and separate destructive settings | Step 9 | Pending issue publication |
-| P3 | Measure initial loading and split route-specific JavaScript | Engineering verification | Pending issue publication |
+| P1 | Validate quick-add dates and recover gracefully from route errors | Step 3 | [#2](https://github.com/calcuttin/Project-Kaizen/issues/2) |
+| P1 | Keep keyboard focus inside the command palette and restore Escape behavior | Step 6 | [#3](https://github.com/calcuttin/Project-Kaizen/issues/3) |
+| P2 | Show a completed-task empty state and make Show done consistent across views | Step 2 | [#4](https://github.com/calcuttin/Project-Kaizen/issues/4) |
+| P2 | Find existing workspace records through global search | Step 6 | [#5](https://github.com/calcuttin/Project-Kaizen/issues/5) |
+| P2 | Make habit consistency account for tracking start and weekly targets | Step 4 | [#6](https://github.com/calcuttin/Project-Kaizen/issues/6) |
+| P2 | Edit and archive habits without losing their history | Step 4 | [#7](https://github.com/calcuttin/Project-Kaizen/issues/7) |
+| P2 | Make project filters, task board cards, and habit controls accessible | Steps 2, 4, 6 | [#8](https://github.com/calcuttin/Project-Kaizen/issues/8) |
+| P2 | Prioritize useful first actions on Today, Library, and Studio | Steps 1, 5, 7 | [#9](https://github.com/calcuttin/Project-Kaizen/issues/9) |
+| P2 | Put the Feed queue before empty statistics on phones | Step 8 | [#10](https://github.com/calcuttin/Project-Kaizen/issues/10) |
+| P3 | Add a dismissible backup reminder and separate destructive settings | Step 9 | [#11](https://github.com/calcuttin/Project-Kaizen/issues/11) |
+| P3 | Measure initial loading and split route-specific JavaScript | Engineering verification | [#12](https://github.com/calcuttin/Project-Kaizen/issues/12) |
 
 ## Priorities and status
 

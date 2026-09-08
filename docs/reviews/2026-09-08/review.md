@@ -2,7 +2,6 @@
 
 Kaizen has a coherent visual identity, fast basic capture, and useful separation between browser storage and cloud mode. The next improvement pass should focus on reliable input handling, keyboard access, and making everyday actions easier to discover.
 
-
 ## Review metadata
 
 | Field | Value |
@@ -17,6 +16,7 @@ Kaizen has a coherent visual identity, fast basic capture, and useful separation
 | AI contribution | Codex performed the review and drafted the findings and proposed fixes |
 | Human contribution | The project maintainer requested the review and authorized public publication and roadmap tracking |
 | Validation status | Agent-reproduced observations and source/visual findings; independent human reproduction is not recorded |
+| Tracking issue | [#1 — roadmap tracker](https://github.com/calcuttin/Project-Kaizen/issues/1) |
 | Delivery status | Findings recorded; implementation progress lives in the linked GitHub issues |
 
 This is an AI-assisted development record, not a claim of independent human validation or a complete security/accessibility audit. Suggestions may change after contributor review. Each issue records evidence and acceptance criteria; a merged fix should link its validation back to the finding.
@@ -39,6 +39,24 @@ All screenshots below were captured during this run, saved, and reopened for ins
 | P2 | Simplify first-use and phone layouts | Steps 1, 5, 7, 8 | The useful next action comes before empty metrics and advanced controls |
 | P2 | Complete semantic accessibility across reusable controls | Steps 2, 4, 6 plus source | Project filters and board cards work with a keyboard; habit buttons announce date and state |
 | P3 | Split the initial JavaScript bundle by route | Build output and registry | Visiting Today does not load every route's implementation; measure improvement before setting a size budget |
+
+## Linked roadmap issues
+
+These issues are the live implementation record. The observations below remain a dated snapshot.
+
+| Priority | Work item | Issue |
+| --- | --- | --- |
+| P1 | Validate quick-add dates and recover gracefully from route errors | [#2](https://github.com/calcuttin/Project-Kaizen/issues/2) |
+| P1 | Keep keyboard focus inside the command palette and restore Escape behavior | [#3](https://github.com/calcuttin/Project-Kaizen/issues/3) |
+| P2 | Show a completed-task empty state and make Show done consistent across views | [#4](https://github.com/calcuttin/Project-Kaizen/issues/4) |
+| P2 | Find existing workspace records through global search | [#5](https://github.com/calcuttin/Project-Kaizen/issues/5) |
+| P2 | Make habit consistency account for tracking start and weekly targets | [#6](https://github.com/calcuttin/Project-Kaizen/issues/6) |
+| P2 | Edit and archive habits without losing their history | [#7](https://github.com/calcuttin/Project-Kaizen/issues/7) |
+| P2 | Make project filters, task board cards, and habit controls accessible | [#8](https://github.com/calcuttin/Project-Kaizen/issues/8) |
+| P2 | Prioritize useful first actions on Today, Library, and Studio | [#9](https://github.com/calcuttin/Project-Kaizen/issues/9) |
+| P2 | Put the Feed queue before empty statistics on phones | [#10](https://github.com/calcuttin/Project-Kaizen/issues/10) |
+| P3 | Add a dismissible backup reminder and separate destructive settings | [#11](https://github.com/calcuttin/Project-Kaizen/issues/11) |
+| P3 | Measure initial loading and split route-specific JavaScript | [#12](https://github.com/calcuttin/Project-Kaizen/issues/12) |
 
 ## Flow review
 
