@@ -64,6 +64,14 @@ Cloud accounts have separate browser workspaces and database ownership rules. Ra
 
 Browser storage and exported backups are not encrypted by Kaizen. Use separate browser profiles on shared computers. Cloud data is protected by account permissions but is readable by authorized service operators.
 
+## AI-assisted development in the open
+
+We publish application reviews, evidence, and proposed fixes so contributors can inspect how Kaizen evolves. Each review records the AI and human contributions, what was verified, and what remains uncertain. Findings become GitHub issues, and fixes link back through pull requests and validation results.
+
+- [Public roadmap](https://github.com/calcuttin/Project-Kaizen/blob/main/ROADMAP.md): priorities and tracked fixes.
+- [Searchable review archive](https://github.com/calcuttin/Project-Kaizen/tree/main/docs/reviews): dated reports, screenshots with synthetic data, and a reusable review template.
+- [Open roadmap issues](https://github.com/calcuttin/Project-Kaizen/issues?q=is%3Aissue%20is%3Aopen%20label%3Aroadmap): follow progress or contribute a fix.
+
 ## For developers and site operators
 
 - [Development guide](docs/development.md): tests, project layout, and database development.
