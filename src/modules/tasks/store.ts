@@ -56,7 +56,7 @@ interface TasksState {
   ensureProject: (name: string, domain: Domain) => Project;
 }
 
-const PALETTE = ['#7aa2f7', '#9ece6a', '#bb9af7', '#f7768e', '#7dcfff', '#e0af68', '#ff9e64', '#73daca'];
+export const PALETTE = ['#7aa2f7', '#9ece6a', '#bb9af7', '#f7768e', '#7dcfff', '#e0af68', '#ff9e64', '#73daca'];
 
 export const useTasks = createPersistedStore<TasksState>('tasks', 1, (set, get) => ({
   tasks: {},
@@ -116,7 +116,10 @@ export const useTasks = createPersistedStore<TasksState>('tasks', 1, (set, get) 
     set((s) => ({ projects: { ...s.projects, [p.id]: p } }));
     return p;
   },
-  updateProject: (id, patch) => set((s) => ({ projects: { ...s.projects, [id]: { ...s.projects[id], ...patch, updatedAt: nowIso() } } })),
+  updateProject: (id, patch) => set((s) => {
+    const p = s.projects[id]; if (!p) return s;
+    return { projects: { ...s.projects, [id]: { ...p, ...patch, updatedAt: nowIso() } } };
+  }),
   deleteProject: (id) => set((s) => {
     const { [id]: _, ...projects } = s.projects;
     const tasks = Object.fromEntries(Object.entries(s.tasks).map(([k, t]) => [k, t.projectId === id ? { ...t, projectId: undefined } : t]));
@@ -124,7 +127,10 @@ export const useTasks = createPersistedStore<TasksState>('tasks', 1, (set, get) 
   }),
   ensureProject: (name, domain) => {
     const existing = Object.values(get().projects).find((p) => p.name.toLowerCase() === name.toLowerCase());
-    return existing ?? get().addProject(name, domain);
+    if (!existing) return get().addProject(name, domain);
+    // Naming an archived project again is a request to use it, so bring it back.
+    if (existing.archived) get().updateProject(existing.id, { archived: false });
+    return get().projects[existing.id];
   },
 }));
 registerStore('tasks', useTasks);
