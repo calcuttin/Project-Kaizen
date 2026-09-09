@@ -1,13 +1,13 @@
 import { deleteWithUndo } from '@/core/undo';
-import { useMemo, useState, type DragEvent } from 'react';
-import { Calendar, CheckSquare, Columns3, Flag, FolderPlus, Inbox, List, Plus, Trash2, X } from 'lucide-react';
+import { Fragment, useMemo, useState, type DragEvent } from 'react';
+import { Calendar, CheckSquare, Columns3, Flag, FolderPlus, Inbox, List, Pencil, Plus, Trash2, X } from 'lucide-react';
 import { Button, CheckBox, Chip, DomainChip, Empty, Field, Modal, PageHead, Segmented } from '@/components/ui';
 import { useUI } from '@/app/uiStore';
 import { humanDate, isOverdue } from '@/core/dates';
 import { parseQuickAdd } from '@/core/parse';
 import { inLens, type Domain, type ID } from '@/core/types';
 import { toast } from '@/components/Toast';
-import { sortTasks, TASK_STATUSES, useTasks, type Priority, type Task, type TaskStatus } from './store';
+import { PALETTE, sortTasks, TASK_STATUSES, useTasks, type Priority, type Task, type TaskStatus } from './store';
 
 type View = 'list' | 'board';
 const PRIO_LABEL: Record<Priority, string> = { 0: 'None', 1: 'Low', 2: 'Medium', 3: 'High' };
@@ -18,8 +18,10 @@ export function TasksPage() {
   const [view, setView] = useState<View>('list');
   const [projectFilter, setProjectFilter] = useState<ID | 'all'>('all');
   const [showDone, setShowDone] = useState(false);
+  const [showArchived, setShowArchived] = useState(false);
   const [editing, setEditing] = useState<ID | null>(null);
   const [newProject, setNewProject] = useState(false);
+  const [editingProject, setEditingProject] = useState<ID | null>(null);
   const [quick, setQuick] = useState('');
 
   const visible = useMemo(() => Object.values(tasks)
@@ -38,8 +40,12 @@ export function TasksPage() {
     toast(`Added “${preview.title}”`);
   };
 
-  const projectList = Object.values(projects).filter((p) => !p.archived && inLens(p.domain, lens));
+  const lensProjects = Object.values(projects).filter((p) => inLens(p.domain, lens));
+  const archivedCount = lensProjects.filter((p) => p.archived).length;
+  const projectList = lensProjects.filter((p) => showArchived || !p.archived).sort((a, b) => Number(!!a.archived) - Number(!!b.archived));
   const openCount = visible.filter((t) => t.status !== 'done').length;
+  // A filter pointing at a hidden project would quietly attach new tasks to it.
+  if (projectFilter !== 'all' && !projectList.some((p) => p.id === projectFilter)) setProjectFilter('all');
 
   return (
     <div className="page">
@@ -76,14 +82,22 @@ export function TasksPage() {
 
       {/* Project filter */}
       <div className="row" style={{ margin: '18px 0 14px', flexWrap: 'wrap' }}>
-        <Chip onClick={() => setProjectFilter('all')} tone={projectFilter === 'all' ? 'accent' : undefined}>All projects</Chip>
+        <button type="button" className={`chip clickable ${projectFilter === 'all' ? 'accent' : ''}`} aria-pressed={projectFilter === 'all'} onClick={() => setProjectFilter('all')}>All projects</button>
         {projectList.map((p) => (
-          <span key={p.id} className={`chip clickable ${projectFilter === p.id ? 'accent' : ''}`} onClick={() => setProjectFilter(p.id)}>
-            <span className="dot" style={{ width: 7, height: 7, borderRadius: 4, background: p.color }} />{p.name}
-          </span>
+          <Fragment key={p.id}>
+            <button type="button" className={`chip clickable ${projectFilter === p.id ? 'accent' : ''}`} aria-pressed={projectFilter === p.id} style={p.archived ? { opacity: .6 } : undefined} onClick={() => setProjectFilter(p.id)}>
+              <span className="dot" style={{ width: 7, height: 7, borderRadius: 4, background: p.color }} />{p.archived ? `${p.name} (archived)` : p.name}
+            </button>
+            {projectFilter === p.id && <button type="button" className="chip clickable" aria-label={`Edit project “${p.name}”`} onClick={() => setEditingProject(p.id)}><Pencil /></button>}
+          </Fragment>
         ))}
         <button className="chip clickable" onClick={() => setNewProject(true)}><FolderPlus />New project</button>
         <span className="grow" />
+        {archivedCount > 0 && (
+          <label className="row faint" style={{ fontSize: 12.5, cursor: 'pointer' }}>
+            <input type="checkbox" style={{ width: 'auto' }} checked={showArchived} onChange={(e) => setShowArchived(e.target.checked)} /> Show archived
+          </label>
+        )}
         <label className="row faint" style={{ fontSize: 12.5, cursor: 'pointer' }}>
           <input type="checkbox" style={{ width: 'auto' }} checked={showDone} onChange={(e) => setShowDone(e.target.checked)} /> Show done
         </label>
@@ -97,6 +111,7 @@ export function TasksPage() {
 
       <TaskEditor id={editing} onClose={() => setEditing(null)} />
       <NewProjectModal open={newProject} onClose={() => setNewProject(false)} defaultDomain={lens === 'business' ? 'business' : 'personal'} />
+      <ProjectEditor key={editingProject} id={editingProject} onClose={() => setEditingProject(null)} />
     </div>
   );
 }
@@ -204,7 +219,7 @@ export function TaskEditor({ id, onClose }: { id: ID | null; onClose: () => void
   const task = id ? tasks[id] : undefined;
   const [sub, setSub] = useState('');
   if (!task) return null;
-  const projectOptions = Object.values(projects).filter((p) => !p.archived);
+  const projectOptions = Object.values(projects).filter((p) => !p.archived || p.id === task.projectId);
   return (
     <Modal open onClose={onClose} title="Task">
       <div className="form">
@@ -218,7 +233,7 @@ export function TaskEditor({ id, onClose }: { id: ID | null; onClose: () => void
           <Field label="Project">
             <select value={task.projectId ?? ''} onChange={(e) => updateTask(task.id, { projectId: e.target.value || undefined })}>
               <option value="">None</option>
-              {projectOptions.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+              {projectOptions.map((p) => <option key={p.id} value={p.id}>{p.archived ? `${p.name} (archived)` : p.name}</option>)}
             </select>
           </Field>
         </div>
@@ -269,11 +284,57 @@ function NewProjectModal({ open, onClose, defaultDomain }: { open: boolean; onCl
   return (
     <Modal open={open} onClose={onClose} title="New project">
       <div className="form">
-        <Field label="Name"><input autoFocus value={name} onChange={(e) => setName(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && submit()} placeholder="e.g. Q4 launch, Home renovation" /></Field>
+        <Field label="Name"><input autoFocus value={name} onChange={(e) => setName(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); submit(); } }} placeholder="e.g. Q4 launch, Home renovation" /></Field>
         <Field label="Domain">
           <select value={domain} onChange={(e) => setDomain(e.target.value as Domain)}><option value="personal">Personal</option><option value="business">Business</option></select>
         </Field>
         <div className="form-actions"><Button variant="ghost" onClick={onClose}>Cancel</Button><Button variant="primary" onClick={submit} disabled={!name.trim()}>Add project</Button></div>
+      </div>
+    </Modal>
+  );
+}
+
+function ProjectEditor({ id, onClose }: { id: ID | null; onClose: () => void }) {
+  const { tasks, projects, updateProject, deleteProject } = useTasks();
+  const project = id ? projects[id] : undefined;
+  const [name, setName] = useState(() => project?.name ?? '');
+  const [domain, setDomain] = useState<Domain>(() => project?.domain ?? 'personal');
+  const [color, setColor] = useState(() => project?.color ?? PALETTE[0]);
+  if (!project) return null;
+  const trimmed = name.trim();
+  const duplicate = Object.values(projects).some((p) => p.id !== project.id && p.name.toLowerCase() === trimmed.toLowerCase());
+  const count = Object.values(tasks).filter((t) => t.projectId === project.id).length;
+  const submit = () => { if (!trimmed || duplicate) return; updateProject(project.id, { name: trimmed, domain, color }); onClose(); toast('Project updated'); };
+  const setArchived = () => { updateProject(project.id, { archived: !project.archived }); onClose(); toast(`Project “${project.name}” ${project.archived ? 'restored' : 'archived'}`); };
+  const remove = () => {
+    const kept = count === 0 ? 'No tasks are assigned to it.' : count === 1 ? 'Its 1 task is kept and becomes unassigned.' : `Its ${count} tasks are kept and become unassigned.`;
+    if (!confirm(`Delete project “${project.name}”? ${kept}`)) return;
+    deleteProject(project.id); onClose(); toast(`Project “${project.name}” deleted`);
+  };
+  return (
+    <Modal open onClose={onClose} title="Edit project">
+      <div className="form">
+        <Field label="Name"><input autoFocus maxLength={120} value={name} onChange={(e) => setName(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); submit(); } }} /></Field>
+        {duplicate && <span className="muted">A project named “{trimmed}” already exists</span>}
+        <Field label="Domain">
+          <select value={domain} onChange={(e) => setDomain(e.target.value as Domain)}><option value="personal">Personal</option><option value="business">Business</option></select>
+        </Field>
+        <div className="stack" style={{ gap: 5 }}>
+          <span className="muted" style={{ fontSize: 12, fontWeight: 500 }}>Color</span>
+          <div className="row" role="group" aria-label="Color" style={{ flexWrap: 'wrap' }}>
+            {PALETTE.map((hex) => (
+              <button key={hex} type="button" aria-label={`Color ${hex}`} aria-pressed={hex === color} onClick={() => setColor(hex)}
+                style={{ width: 26, height: 26, borderRadius: 999, background: hex, border: '1px solid var(--border)', boxShadow: hex === color ? '0 0 0 2px var(--bg-elev), 0 0 0 4px var(--accent)' : undefined }} />
+            ))}
+          </div>
+        </div>
+        <div className="form-actions">
+          <Button variant="ghost" onClick={setArchived}>{project.archived ? 'Unarchive project' : 'Archive project'}</Button>
+          <Button variant="ghost" className="danger" icon={Trash2} onClick={remove}>Delete project</Button>
+          <span className="grow" />
+          <Button variant="ghost" onClick={onClose}>Cancel</Button>
+          <Button variant="primary" onClick={submit} disabled={!trimmed || duplicate}>Save changes</Button>
+        </div>
       </div>
     </Modal>
   );
