@@ -6,6 +6,8 @@ Kaizen's roadmap connects public reviews to actionable issues, implementation pu
 
 ## October 2026 security and product fixes
 
+Implementation: [PR #17](https://github.com/calcuttin/Project-Kaizen/pull/17) · Release verification: [tracker #18](https://github.com/calcuttin/Project-Kaizen/issues/18).
+
 Source: [REV-2026-10-22-SECURITY-PRODUCT](docs/reviews/2026-10-22/review.md) · [Implementation, screenshots, and verification](docs/reviews/2026-10-22/fixes/README.md).
 
 The maintainer authorized Codex to implement and publish this work. The changes are proposed for review, **not yet merged or deployed**. Independent human validation is not recorded. Existing issue acceptance checklists remain open until their full scope is verified.

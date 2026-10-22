@@ -9,7 +9,7 @@
 
 ## Publication follow-up
 
-The original status and observations above describe the review before implementation. The maintainer subsequently authorized fixes and public publication. See the [implementation and verification record](fixes/README.md) for the proposed changes, regression evidence, and remaining deployment checks. Publication is not independent human validation or deployment approval.
+The original status and observations above describe the review before implementation. The maintainer subsequently authorized fixes and public publication. See the [implementation and verification record](fixes/README.md) for the proposed changes, regression evidence, and remaining deployment checks. Published in [PR #17](https://github.com/calcuttin/Project-Kaizen/pull/17) with follow-up [tracker #18](https://github.com/calcuttin/Project-Kaizen/issues/18). Publication is not independent human validation or deployment approval.
 
 ## Recommended order
 

@@ -2,6 +2,8 @@
 
 Proposed for review on `codex/security-product-fixes`, based on `95f552d`. AI-assisted implementation and verification by Codex, authorized by the maintainer. This records implementation evidence, not independent human approval. The maintainer authorized publication of this branch and the review to GitHub. The changes have not been merged or deployed.
 
+Published for review in [PR #17](https://github.com/calcuttin/Project-Kaizen/pull/17); remaining release checks are tracked in [#18](https://github.com/calcuttin/Project-Kaizen/issues/18).
+
 ## Implemented
 
 | Review finding | Change | Verification |
