@@ -1,14 +1,17 @@
 import { deleteWithUndo } from '@/core/undo';
-import { useState } from 'react';
-import { Activity, Flame, Plus, Target, Trash2 } from 'lucide-react';
+import { flushWorkspaceWrites } from '@/core/storage';
+import { useRef, useState } from 'react';
+import { Activity, Archive, Flame, Pencil, Plus, Target, Trash2 } from 'lucide-react';
 import { Button, Card, Empty, Field, Modal, PageHead, Ring, Stat, Stepper } from '@/components/ui';
 import { currentWeekKeys, daysUntil, humanDate, lastNDays, todayKey } from '@/core/dates';
 import { toast } from '@/components/Toast';
-import { goalProgress, habitDone, habitStreak, useHealth, weeklyCompletion, type Habit, type HealthGoal } from './store';
+import { goalProgress, habitDone, habitStreak, useHealth, validHabitSettings, weeklyCompletion, type Habit, type HealthGoal } from './store';
 
 export function HealthPage() {
   const { habits, logs, goals } = useHealth();
   const [newHabit, setNewHabit] = useState(false);
+  const [editingHabit, setEditingHabit] = useState<string | null>(null);
+  const [showArchived, setShowArchived] = useState(false);
   const [newGoal, setNewGoal] = useState(false);
   const [editGoal, setEditGoal] = useState<string | null>(null);
   const list = Object.values(habits).filter((h) => !h.archived).sort((a, b) => a.order - b.order);
@@ -32,7 +35,7 @@ export function HealthPage() {
           </div>
         </Card>
         <Card title="7-day consistency" icon={Activity} accent="var(--health)">
-          <div className="stats"><Stat value={`${Math.round(weekScore * 100)}%`} label="of intended days" /><Stat value={list.reduce((a, h) => Math.max(a, habitStreak(h, logs[h.id])), 0)} label="best streak" /></div>
+          <div className="stats"><Stat value={`${Math.round(weekScore * 100)}%`} label="of intended days" /><Stat value={list.reduce((a, h) => Math.max(a, habitStreak(h, logs[h.id])), 0)} label="best daily streak" /></div>
         </Card>
         <Card title="Last 4 weeks" icon={Flame} accent="var(--health)">
           <Heatmap habits={list} logs={logs} />
@@ -43,10 +46,11 @@ export function HealthPage() {
         {!list.length ? (
           <Empty icon={Flame} title="No habits yet" hint="Start with one. Something so small you can't say no." action={<Button size="sm" onClick={() => setNewHabit(true)}>Add a habit</Button>} />
         ) : (
-          <div className="list">{list.map((h) => <HabitRow key={h.id} habit={h} />)}</div>
+          <div className="list">{list.map((h) => <HabitRow key={h.id} habit={h} onEdit={() => setEditingHabit(h.id)} />)}</div>
         )}
       </Card>
 
+      {Object.values(habits).some((h) => h.archived) && <details open={showArchived} onToggle={(e) => setShowArchived(e.currentTarget.open)}><summary>Archived habits</summary>{Object.values(habits).filter((h) => h.archived).map((h) => <div className="between" key={h.id}><span>{h.name}</span><Button onClick={() => setEditingHabit(h.id)}>Edit / restore</Button></div>)}</details>}
       <div style={{ height: 16 }} />
       <Card title="Goals" icon={Target} accent="var(--health)">
         {!Object.keys(goals).length ? (
@@ -56,34 +60,36 @@ export function HealthPage() {
         )}
       </Card>
 
-      <NewHabitModal open={newHabit} onClose={() => setNewHabit(false)} />
+      <HabitModal key={editingHabit ?? String(newHabit)} open={newHabit || Boolean(editingHabit)} habit={editingHabit ? habits[editingHabit] : undefined} onClose={() => { setNewHabit(false); setEditingHabit(null); }} />
       <NewGoalModal open={newGoal} onClose={() => setNewGoal(false)} />
       <LogGoalModal id={editGoal} onClose={() => setEditGoal(null)} />
     </div>
   );
 }
 
-function HabitRow({ habit }: { habit: Habit }) {
-  const { logs, toggleLog, incrementLog, deleteHabit } = useHealth();
+function HabitRow({ habit, onEdit }: { habit: Habit; onEdit: () => void }) {
+  const { logs, toggleLog, incrementLog, deleteHabit, updateHabit } = useHealth();
   const log = logs[habit.id] ?? {};
   const week = currentWeekKeys();
   const today = todayKey();
   const streak = habitStreak(habit, log);
   const todayVal = log[today] ?? 0;
+  const valid = validHabitSettings(habit);
   return (
     <div className="habit-row">
       <div className="row" style={{ gap: 12 }}>
         <span style={{ fontSize: 22, width: 32, textAlign: 'center' }}>{habit.emoji}</span>
         <div className="grow">
           <div style={{ fontWeight: 500 }}>{habit.name}</div>
+          {!valid && <span role="status">This habit needs a valid target. Edit it to continue; history is preserved.</span>}
           <div className="faint" style={{ fontSize: 12 }}>
             {habit.kind === 'count' ? `${habit.target} ${habit.unit ?? ''} · ` : ''}{habit.daysPerWeek === 7 ? 'daily' : `${habit.daysPerWeek}×/week`}
             {streak > 0 && <> · <span className="streak"><Flame size={12} />{streak} day{streak === 1 ? '' : 's'}</span></>}
           </div>
         </div>
       </div>
-      <div className="row" style={{ gap: 14 }}>
-        {habit.kind === 'count' && (
+      <div className="row" style={{ gap: 14, flexWrap: 'wrap' }}>
+        {habit.kind === 'count' && valid && (
           <Stepper value={todayVal} onChange={(v) => incrementLog(habit.id, v - todayVal)} unit={habit.unit} />
         )}
         <div className="habit-days" role="group" aria-label={`${habit.name} this week`}>
@@ -91,7 +97,7 @@ function HabitRow({ habit }: { habit: Habit }) {
             const on = habitDone(habit, log[k]);
             const future = k > today;
             return (
-              <button key={k} className={`habit-day ${on ? 'on' : ''} ${k === today ? 'today' : ''}`} disabled={future} style={future ? { opacity: .35 } : undefined}
+              <button key={k} className={`habit-day ${on ? 'on' : ''} ${k === today ? 'today' : ''}`} disabled={future || !valid} aria-pressed={on} aria-label={`${habit.name}: ${k}`} style={future ? { opacity: .35 } : undefined}
                 title={`${humanDate(k)}${log[k] ? ` · ${log[k]}` : ''}`}
                 onClick={() => (habit.kind === 'count' ? incrementLog(habit.id, on ? -log[k] : habit.target, k) : toggleLog(habit.id, k))}>
                 {['M', 'T', 'W', 'T', 'F', 'S', 'S'][week.indexOf(k)]}
@@ -99,6 +105,8 @@ function HabitRow({ habit }: { habit: Habit }) {
             );
           })}
         </div>
+        <Button size="sm" icon={Pencil} aria-label={`Edit ${habit.name}`} onClick={onEdit} />
+        <Button size="sm" icon={Archive} aria-label={`Archive ${habit.name}`} disabled={!valid} onClick={() => updateHabit(habit.id, { archived: true })} />
         <button className="btn ghost icon sm" aria-label="Delete habit" onClick={() => { if (confirm(`Delete “${habit.name}” and its history?`)) deleteWithUndo(useHealth, () => deleteHabit(habit.id), 'Habit deleted'); }}><Trash2 size={14} /></button>
       </div>
     </div>
@@ -141,13 +149,26 @@ function GoalCard({ goal, onLog }: { goal: HealthGoal; onLog: () => void }) {
   );
 }
 
-function NewHabitModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+function HabitModal({ open, onClose, habit }: { open: boolean; onClose: () => void; habit?: Habit }) {
   const addHabit = useHealth((s) => s.addHabit);
-  const [name, setName] = useState(''); const [emoji, setEmoji] = useState('💧'); const [kind, setKind] = useState<'check' | 'count'>('check');
-  const [target, setTarget] = useState(8); const [unit, setUnit] = useState(''); const [days, setDays] = useState(7);
-  const submit = () => { if (!name.trim()) return; addHabit({ name, emoji, kind, target, unit: unit || undefined, daysPerWeek: days }); toast(`Habit “${name}” added`); setName(''); onClose(); };
+  const [name, setName] = useState(habit?.name ?? ''); const [emoji, setEmoji] = useState(habit?.emoji ?? '💧'); const [kind, setKind] = useState<'check' | 'count'>(habit?.kind ?? 'check');
+  const [target, setTarget] = useState(habit?.target ?? 8); const [unit, setUnit] = useState(habit?.unit ?? ''); const [days, setDays] = useState(habit?.daysPerWeek ?? 7);
+  const valid = name.trim().length > 0 && validHabitSettings({ target: kind === 'check' ? 1 : target, daysPerWeek: days });
+  const [saving, setSaving] = useState(false);
+  const savedId = useRef(habit?.id);
+  const submit = async (restore = false) => {
+    if (!valid || saving) return;
+    setSaving(true);
+    const values = { name, emoji, kind, target: kind === 'check' ? 1 : target, unit: unit || undefined, daysPerWeek: days };
+    try {
+      if (savedId.current) useHealth.getState().updateHabit(savedId.current, { ...values, ...(restore ? { archived: false } : {}) }); else savedId.current = addHabit(values).id;
+      await flushWorkspaceWrites();
+      toast(habit ? 'Habit updated; history kept' : `Habit “${name}” added`); onClose();
+    } catch { toast('Could not save this habit. Keep this window open and try again.'); }
+    finally { setSaving(false); }
+  };
   return (
-    <Modal open={open} onClose={onClose} title="New habit">
+    <Modal open={open} onClose={onClose} title={habit ? "Edit habit" : "New habit"}>
       <div className="form">
         <div className="form-row" style={{ gridTemplateColumns: '64px 1fr' }}>
           <Field label="Icon"><input value={emoji} onChange={(e) => setEmoji(e.target.value)} style={{ textAlign: 'center', fontSize: 20 }} /></Field>
@@ -159,11 +180,13 @@ function NewHabitModal({ open, onClose }: { open: boolean; onClose: () => void }
         </div>
         {kind === 'count' && (
           <div className="form-row">
-            <Field label="Daily target"><input type="number" min={1} value={target} onChange={(e) => setTarget(Number(e.target.value))} /></Field>
+            <Field label="Daily target"><input type="number" min={0.01} step="any" value={target} onChange={(e) => setTarget(Number(e.target.value))} /></Field>
             <Field label="Unit"><input value={unit} onChange={(e) => setUnit(e.target.value)} placeholder="glasses, min, km" /></Field>
           </div>
         )}
-        <div className="form-actions"><Button variant="ghost" onClick={onClose}>Cancel</Button><Button variant="primary" onClick={submit} disabled={!name.trim()}>Add habit</Button></div>
+        {!valid && name.trim() && <p role="status">Enter a positive target and choose 1–7 days per week.</p>}
+        {habit && <p className="muted">Your logs are kept. Changing the target also changes how past logs are scored.</p>}
+        <div className="form-actions"><Button variant="ghost" onClick={onClose}>Cancel</Button>{habit?.archived && <Button disabled={!valid || saving} onClick={() => void submit(true)}>Save & restore</Button>}<Button variant="primary" onClick={() => void submit()} disabled={!valid || saving}>{saving ? 'Saving…' : habit ? 'Save habit' : 'Add habit'}</Button></div>
       </div>
     </Modal>
   );

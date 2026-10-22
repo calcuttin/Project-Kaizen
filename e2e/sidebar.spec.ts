@@ -5,6 +5,7 @@ test('desktop navigation stays visible down a long page and works in short windo
   await page.goto('/');
   const sidebar = page.getByRole('complementary');
   await expect(sidebar).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Check in & keep going' })).toBeVisible();
   await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
   await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(100);
   await expect.poll(async () => (await sidebar.boundingBox())!.y).toBeCloseTo(0, 0);

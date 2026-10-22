@@ -1,6 +1,6 @@
 import { removeArtifacts } from './storage.ts';
-import { createClient } from 'npm:@supabase/supabase-js@2';
-import { createClerkClient, verifyToken } from 'npm:@clerk/backend@2';
+import { createClient } from 'npm:@supabase/supabase-js@2.115.0';
+import { createClerkClient, verifyToken } from 'npm:@clerk/backend@2.33.8';
 
 const cors = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'authorization, apikey, content-type' };
 

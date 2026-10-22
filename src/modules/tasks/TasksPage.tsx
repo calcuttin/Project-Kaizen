@@ -1,3 +1,4 @@
+import { useRecordLink } from '@/core/useRecordLink';
 import { deleteWithUndo } from '@/core/undo';
 import { Fragment, useMemo, useState, type DragEvent } from 'react';
 import { Calendar, CheckSquare, Columns3, Flag, FolderPlus, Inbox, List, Pencil, Plus, Trash2, X } from 'lucide-react';
@@ -47,6 +48,7 @@ export function TasksPage() {
   // A filter pointing at a hidden project would quietly attach new tasks to it.
   if (projectFilter !== 'all' && !projectList.some((p) => p.id === projectFilter)) setProjectFilter('all');
 
+  useRecordLink(tasks, setEditing);
   return (
     <div className="page">
       <PageHead
@@ -69,6 +71,7 @@ export function TasksPage() {
         />
         {quick && <Button size="sm" variant="primary" onClick={submitQuick}>Add</Button>}
       </div>
+      {preview?.warning && <p role="status" className="muted">{preview.warning}</p>}
       {preview && preview.title && (preview.domain || preview.project || preview.priority || preview.due || preview.tags.length > 0) && (
         <div className="hint-row">
           <span>Will create:</span>
@@ -103,10 +106,10 @@ export function TasksPage() {
         </label>
       </div>
 
-      {view === 'list' ? (
+      {!showDone && visible.length > 0 && openCount === 0 ? <Empty icon={CheckSquare} title="All caught up" hint="Your completed tasks are still here." action={<Button onClick={() => setShowDone(true)}>Show completed</Button>} /> : view === 'list' ? (
         <TaskList tasks={visible} showDone={showDone} onOpen={setEditing} />
       ) : (
-        <Board tasks={visible} onOpen={setEditing} />
+        <Board tasks={visible.filter((task) => showDone || task.status !== 'done')} onOpen={setEditing} />
       )}
 
       <TaskEditor id={editing} onClose={() => setEditing(null)} />

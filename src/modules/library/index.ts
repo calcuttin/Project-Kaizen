@@ -1,6 +1,7 @@
 import { Library } from 'lucide-react';
 import type { KaizenModule } from '@/app/modules';
-import { LibraryPage } from './LibraryPage';
+import { lazy } from 'react';
+const LibraryPage = lazy(() => import('./LibraryPage').then((module) => ({ default: module.LibraryPage })));
 import { ReadingWidget } from './widgets';
 
 export const libraryModule: KaizenModule = {

@@ -1,5 +1,6 @@
 import { create } from 'zustand';
-import { currentWorkspaceOwner, workspaceAvailable } from '@/core/storage';
+import { RequestQueue } from '@/core/requestQueue';
+import { currentWorkspaceOwner, onWorkspaceChange, workspaceAvailable } from '@/core/storage';
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { coverGradient, useLibrary, type Book } from './store';
 import { useUI } from '@/app/uiStore';
@@ -19,8 +20,10 @@ export function retryBookCovers() {
 
 const requests = new Map<string, Promise<CoverResult>>();
 const metadataRequests = new Map<string, Promise<BookMetadata | null>>();
-let nextRequestAt = 0;
-let searchQueue = Promise.resolve();
+const coverQueue = new RequestQueue();
+const cancelCoverRequests = () => { coverQueue.cancel(); requests.clear(); };
+useUI.subscribe((state, previous) => { if (state.externalBookCovers !== previous.externalBookCovers) cancelCoverRequests(); });
+onWorkspaceChange(cancelCoverRequests);
 
 const normalize = (value: string) => value.toLocaleLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
 const cleanIsbn = (isbn?: string) => {
@@ -52,24 +55,16 @@ export async function lookupOpenLibraryBook(isbn: string): Promise<BookMetadata 
   return request;
 }
 
-async function waitForSearchSlot() {
-  const slot = searchQueue.then(async () => {
-    const delay = Math.max(0, nextRequestAt - Date.now());
-    if (delay) await new Promise<void>((resolve) => window.setTimeout(resolve, delay));
-    nextRequestAt = Date.now() + 1100;
-  });
-  searchQueue = slot.catch(() => undefined);
-  await slot;
-}
-
 async function resolveOpenLibraryCover(title: string, author: string): Promise<CoverResult> {
   const key = `${normalize(title)}|${normalize(author)}`;
   if (requests.has(key)) return requests.get(key)!;
-  const request = (async () => {
-    await waitForSearchSlot();
+  const owner = currentWorkspaceOwner();
+  const request = coverQueue.run(
+    () => useUI.getState().externalBookCovers && workspaceAvailable() && currentWorkspaceOwner() === owner,
+    async (signal) => {
     try {
       const query = new URLSearchParams({ title, author, limit: '5', fields: 'title,author_name,cover_i' });
-      const response = await fetch(`https://openlibrary.org/search.json?${query}`);
+      const response = await fetch(`https://openlibrary.org/search.json?${query}`, { signal });
       if (!response.ok) return undefined;
       const payload = await response.json() as { docs?: SearchDoc[] };
       const titleKey = normalize(title);
@@ -80,8 +75,8 @@ async function resolveOpenLibraryCover(title: string, author: string): Promise<C
     } catch {
       return undefined;
     }
-  })();
-  void request.then((result) => { if (result === undefined) requests.delete(key); });
+  });
+  void request.then((result) => { if (result === undefined && requests.get(key) === request) requests.delete(key); });
   requests.set(key, request);
   return request;
 }

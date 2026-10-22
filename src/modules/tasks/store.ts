@@ -1,5 +1,6 @@
 import { createPersistedStore, registerStore } from '@/core/store';
 import { newId, nowIso } from '@/core/ids';
+import { isDateKey } from '@/core/dates';
 import type { BaseEntity, DateKey, Domain, ID } from '@/core/types';
 
 export type TaskStatus = 'inbox' | 'next' | 'doing' | 'waiting' | 'done';
@@ -63,6 +64,7 @@ export const useTasks = createPersistedStore<TasksState>('tasks', 1, (set, get) 
   projects: {},
 
   addTask: (input) => {
+    validateTaskDates(input);
     const now = nowIso();
     const status = input.status ?? 'inbox';
     const siblings = Object.values(get().tasks).filter((t) => t.status === status);
@@ -78,6 +80,7 @@ export const useTasks = createPersistedStore<TasksState>('tasks', 1, (set, get) 
   },
 
   updateTask: (id, patch) => set((s) => {
+    validateTaskDates(patch);
     const t = s.tasks[id]; if (!t) return s;
     return { tasks: { ...s.tasks, [id]: { ...t, ...patch, updatedAt: nowIso() } } };
   }),
@@ -134,6 +137,12 @@ export const useTasks = createPersistedStore<TasksState>('tasks', 1, (set, get) 
   },
 }));
 registerStore('tasks', useTasks);
+
+function validateTaskDates(input: Partial<Task>) {
+  for (const date of [input.due, input.scheduled]) {
+    if (date && !isDateKey(date)) throw new Error('Choose a valid calendar date.');
+  }
+}
 
 /* ── Selectors (pure helpers) ─────────────────────────── */
 export const sortTasks = (a: Task, b: Task) => {

@@ -7,7 +7,7 @@
  *   today / tomorrow / mon..sun / "in 3 days" / 2026-09-10 → due date
  */
 import { addDays, nextDay, type Day } from 'date-fns';
-import { toDateKey } from './dates';
+import { isDateKey, toDateKey } from './dates';
 import type { DateKey, Domain } from './types';
 
 export interface ParsedQuickAdd {
@@ -17,6 +17,7 @@ export interface ParsedQuickAdd {
   priority?: 0 | 1 | 2 | 3;
   due?: DateKey;
   tags: string[];
+  warning?: string;
 }
 
 const DAY_NAMES: Record<string, Day> = { sun: 0, mon: 1, tue: 2, wed: 3, thu: 4, fri: 5, sat: 6 };
@@ -40,13 +41,21 @@ export function parseQuickAdd(input: string, ref: Date = new Date()): ParsedQuic
     }
     if (lower === 'today') { out.due = toDateKey(ref); continue; }
     if (lower === 'tomorrow' || lower === 'tmrw') { out.due = toDateKey(addDays(ref, 1)); continue; }
-    if (/^\d{4}-\d{2}-\d{2}$/.test(w)) { out.due = w; continue; }
+    if (/^\d{4}-\d{2}-\d{2}$/.test(w)) {
+      if (isDateKey(w)) { out.due = w; continue; }
+      out.warning = 'That date does not exist. Correct it, or keep it as task text.';
+    }
     const dayKey = lower.slice(0, 3);
     if (lower.length >= 3 && dayKey in DAY_NAMES && /^(sun|mon|tue|wed|thu|fri|sat)(day|nes|rs|ur)?(day)?$/.test(lower)) {
       out.due = toDateKey(nextDay(ref, DAY_NAMES[dayKey])); continue;
     }
     if (lower === 'in' && /^\d+$/.test(words[i + 1] ?? '') && /^days?$/.test(words[i + 2] ?? '')) {
-      out.due = toDateKey(addDays(ref, parseInt(words[i + 1], 10))); i += 2; continue;
+      const days = Number(words[i + 1]);
+      if (Number.isSafeInteger(days) && days <= 36500) {
+        const candidate = addDays(ref, days);
+        if (!Number.isNaN(candidate.getTime())) { out.due = toDateKey(candidate); i += 2; continue; }
+      }
+      out.warning = 'That date is too far away. Keep it as text or choose a nearer date.';
     }
     kept.push(w);
   }

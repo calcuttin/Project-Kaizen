@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { Suspense, useEffect } from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { ClerkProvider } from '@clerk/react';
 import { modules } from './registry';
@@ -11,13 +11,14 @@ import { WorkspaceGate } from '@/core/auth/WorkspaceGate';
 import '@/core/auth/auth.css';
 import { CloudSync } from '@/core/sync/CloudSync';
 import { cloudConfigurationError, config } from '@/core/config';
-import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { ErrorBoundary, RecoveryScreen } from '@/components/ErrorBoundary';
 
 const router = createBrowserRouter([
   {
     path: '/',
     element: <Shell />,
-    children: modules.map((m) => ({ path: m.path === '/' ? undefined : m.path.slice(1), index: m.path === '/', element: <m.Page /> })),
+    errorElement: <RecoveryScreen />,
+    children: modules.map((m) => ({ path: m.path === '/' ? undefined : m.path.slice(1), index: m.path === '/', element: <Suspense fallback={<div className="page" role="status">Loading…</div>}><m.Page /></Suspense>, errorElement: <RecoveryScreen /> })),
   },
 ]);
 

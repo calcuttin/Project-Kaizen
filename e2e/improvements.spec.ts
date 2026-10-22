@@ -2,6 +2,7 @@ import { expect, test } from '@playwright/test';
 
 test('Today preferences survive reload, and the checklist can be reopened', async ({ page }) => {
   await page.goto('/');
+  await page.locator('summary').filter({ hasText: 'Make this space yours' }).click();
   await page.getByRole('button', { name: 'Dismiss checklist' }).click();
   await page.getByRole('button', { name: 'Customize Today' }).click();
   const dialog = page.getByRole('dialog', { name: 'Customize Today' });
@@ -20,6 +21,7 @@ test('Today preferences survive reload, and the checklist can be reopened', asyn
   await page.goto('/settings');
   await page.getByRole('button', { name: 'Show checklist on Today' }).click();
   await page.goto('/');
+  await page.locator('summary').filter({ hasText: 'Make this space yours' }).click();
   await expect(page.getByRole('button', { name: 'Dismiss checklist' })).toBeVisible();
 });
 

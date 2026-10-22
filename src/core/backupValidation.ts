@@ -1,5 +1,6 @@
 import { SHELF_THEMES } from '@/modules/library/themes';
 import { OBJECTS } from '@/modules/library/cabinet';
+import { isDateKey, isIsoDateTime } from './dates';
 type RecordValue = Record<string, unknown>;
 export const isRecord = (value: unknown): value is RecordValue => Boolean(value && typeof value === 'object' && !Array.isArray(value) && Object.getPrototypeOf(value) === Object.prototype);
 const strings = (value: unknown) => Array.isArray(value) && value.every((item) => typeof item === 'string');
@@ -35,12 +36,24 @@ export function validateBackupField(path: string, value: unknown, current: unkno
   if (Array.isArray(current) ? !Array.isArray(value) : isRecord(current) ? !isRecord(value) : path === 'studio.initialized' ? !['boolean', 'number'].includes(typeof value) : typeof value !== typeof current) fail();
   if (path.endsWith('.importedCollections') && !strings(value)) fail();
   if (path === 'library.goal' && !validateFields(value, { year: 'number', books: 'number', pagesPerDay: 'number' })) fail();
-  if (path === 'health.logs' && (!isRecord(value) || Object.values(value).some((dates) => !isRecord(dates) || Object.values(dates).some((n) => typeof n !== 'number' || !Number.isFinite(n))))) fail();
+  if (path === 'health.logs' && (!isRecord(value) || Object.values(value).some((dates) => !isRecord(dates) || Object.entries(dates).some(([date, n]) => !isDateKey(date) || typeof n !== 'number' || !Number.isFinite(n) || n < 0)))) fail();
   const schema = fields[path];
   if (!schema) return;
   for (const [key, item] of Object.entries(value as object)) {
     if (!validateFields(item, schema)) fail();
     const record = item as RecordValue;
+    if (record.date !== undefined && !isDateKey(record.date)) fail();
+    for (const field of ['due', 'scheduled', 'publishDate', 'deadline', 'startedAt', 'finishedAt']) {
+      if (record[field] !== undefined && record[field] !== '' && !isDateKey(record[field])) fail();
+    }
+    for (const field of ['createdAt', 'updatedAt']) {
+      if (record[field] !== undefined && !isIsoDateTime(record[field])) fail();
+    }
+    for (const field of ['completedAt', 'undoneAt']) {
+      if (record[field] !== undefined && record[field] !== '' && !isIsoDateTime(record[field])) fail();
+    }
+    if (path === 'journal.entries' && record.date !== key) fail();
+    if (path === 'health.habits' && (!(typeof record.target === 'number' && record.target > 0) || !Number.isInteger(record.daysPerWeek) || (record.daysPerWeek as number) < 1 || (record.daysPerWeek as number) > 7)) fail();
     if (schema.id && !['library.sessions', 'studio.snapshots', 'imports.runs'].includes(path) && !validateFields(record, { createdAt: 'string', updatedAt: 'string' })) fail();
     if (path === 'library.shelves') {
       if (record.cabinet !== undefined && (!validateFields(record.cabinet, { lighting: 'warm|moonlight|candle', layout: 'layered|balanced', brightness: 'number' }) || ((record.cabinet as RecordValue).brightness as number) < 35 || ((record.cabinet as RecordValue).brightness as number) > 100)) fail();
@@ -51,7 +64,7 @@ export function validateBackupField(path: string, value: unknown, current: unkno
     for (const field of ['archived', 'pinned', 'coverUnavailable']) if (record[field] !== undefined && typeof record[field] !== 'boolean') fail();
     if (!Array.isArray(value) && schema.id && record.id !== key) fail();
     if (path === 'tasks.tasks' && (record.subtasks as unknown[]).some((sub) => !validateFields(sub, { id: 'string', title: 'string', done: 'boolean' }))) fail();
-    if (path === 'health.goals' && (record.entries as unknown[]).some((entry) => !validateFields(entry, { date: 'string', value: 'number' }))) fail();
+    if (path === 'health.goals' && (record.entries as unknown[]).some((entry) => !validateFields(entry, { date: 'string', value: 'number' }) || !isDateKey((entry as RecordValue).date))) fail();
     if (path === 'studio.snapshots' && Object.values(record.values as object).some((n) => typeof n !== 'number' || !Number.isFinite(n))) fail();
     // Optional text is still text: malformed notes must never break renderers.
     for (const field of ['notes', 'intention', 'reflection', 'gratitude', 'isbn', 'coverUrl', 'takeaway', 'url', 'notionUrl', 'guest', 'publishDate', 'due', 'scheduled', 'completedAt', 'startedAt', 'finishedAt', 'undoneAt']) {

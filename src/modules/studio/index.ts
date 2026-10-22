@@ -1,7 +1,8 @@
 import { Lightbulb, Mic } from 'lucide-react';
 import type { KaizenModule } from '@/app/modules';
 import { toast } from '@/components/Toast';
-import { StudioPage } from './StudioPage';
+import { lazy } from 'react';
+const StudioPage = lazy(() => import('./StudioPage').then((module) => ({ default: module.StudioPage })));
 import { StudioWidget } from './widgets';
 import { useStudio } from './store';
 
