@@ -1,6 +1,7 @@
 import { HeartPulse } from 'lucide-react';
 import type { KaizenModule } from '@/app/modules';
-import { HealthPage } from './HealthPage';
+import { lazy } from 'react';
+const HealthPage = lazy(() => import('./HealthPage').then((module) => ({ default: module.HealthPage })));
 import { HabitsWidget } from './widgets';
 
 export const healthModule: KaizenModule = {

@@ -186,7 +186,9 @@
 .habit-row { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: center; padding: 10px 6px; border-radius: var(--radius-md); }
 .habit-row:hover { background: var(--surface-hover); }
 .habit-days { display: flex; gap: 5px; }
-.habit-day { width: 26px; height: 26px; border-radius: 8px; border: 1px solid var(--border); display: grid; place-items: center; font-size: 10px; color: var(--text-3); transition: all var(--dur) var(--ease); }
+.habit-day { width: 32px; height: 32px; flex: none; border-radius: 8px; border: 1px solid var(--border); display: grid; place-items: center; font-size: 11px; color: var(--text-3); transition: all var(--dur) var(--ease); }
+.habit-row > .row { min-width: 0; }
+@media (max-width: 900px) { .habit-row { grid-template-columns: minmax(0, 1fr); } }
 .habit-day.on { background: var(--health); border-color: var(--health); color: white; }
 .habit-day.today { box-shadow: 0 0 0 2px var(--accent-soft); border-color: var(--accent); }
 .habit-day:hover { border-color: var(--health); }

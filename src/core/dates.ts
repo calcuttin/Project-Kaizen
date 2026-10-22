@@ -7,6 +7,7 @@ import {
   isToday,
   isTomorrow,
   isYesterday,
+  isValid,
   parseISO,
   startOfWeek,
   startOfYear,
@@ -16,6 +17,14 @@ import type { DateKey } from './types';
 export const toDateKey = (d: Date = new Date()): DateKey => format(d, 'yyyy-MM-dd');
 export const fromDateKey = (k: DateKey): Date => parseISO(k);
 export const todayKey = (): DateKey => toDateKey(new Date());
+
+export function isDateKey(value: unknown): value is DateKey {
+  return typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value) && isValid(parseISO(value));
+}
+
+export function isIsoDateTime(value: unknown): value is string {
+  return typeof value === 'string' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(value) && isValid(parseISO(value));
+}
 
 export function shiftKey(k: DateKey, days: number): DateKey {
   return toDateKey(addDays(fromDateKey(k), days));
@@ -36,6 +45,7 @@ export function currentWeekKeys(ref: Date = new Date()): DateKey[] {
 
 export function humanDate(k: DateKey | undefined | null): string {
   if (!k) return '';
+  if (!isDateKey(k)) return 'Invalid date — please edit';
   const d = fromDateKey(k);
   if (isToday(d)) return 'Today';
   if (isTomorrow(d)) return 'Tomorrow';
@@ -47,10 +57,12 @@ export function humanDate(k: DateKey | undefined | null): string {
 
 export function isOverdue(k: DateKey | undefined | null): boolean {
   if (!k) return false;
+  if (!isDateKey(k)) return false;
   return differenceInCalendarDays(fromDateKey(k), new Date()) < 0;
 }
 
 export function daysUntil(k: DateKey): number {
+  if (!isDateKey(k)) return 0;
   return differenceInCalendarDays(fromDateKey(k), new Date());
 }
 

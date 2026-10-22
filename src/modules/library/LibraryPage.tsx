@@ -1,3 +1,4 @@
+import { useRecordLink } from '@/core/useRecordLink';
 import { useUI } from '@/app/uiStore';
 import { deleteWithUndo } from '@/core/undo';
 import { currentWorkspaceOwner, workspaceAvailable } from '@/core/storage';
@@ -51,6 +52,7 @@ export function LibraryPage() {
     setOpen({ id: b.id, anchor: e.detail === 0 && rect ? { x: rect.right, y: rect.top + 40 } : { x: e.clientX, y: e.clientY } });
   };
   const closeDetail = useCallback(() => setOpen(null), []);
+  useRecordLink(books, (id) => setOpen({ id, anchor: { x: window.innerWidth / 2, y: 100 } }));
   return <div className="page library-page">
     <PageHead eyebrow="A WORLD BETWEEN THE PAGES" title="Bookshelf" action={<>
       <Segmented value={view} onChange={setView} options={[{ value: 'shelves', label: 'Shelves', icon: Rows3 }, { value: 'grid', label: 'Grid', icon: LayoutGrid }]} />

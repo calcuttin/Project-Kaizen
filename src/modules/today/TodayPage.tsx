@@ -51,7 +51,6 @@ export function TodayPage() {
         <a className="btn ghost" href="/guides/using-kaizen.html"><HelpCircle size={16} />Getting started</a>
         <Button variant="ghost" onClick={() => setCustomizing(true)}>Customize Today</Button>
       </nav>
-      <GettingStarted />
 
       <section className="today-ritual" aria-label="Plan your day">
         {!todayHidden.includes('tasks') && <FocusWidget />}
@@ -69,6 +68,8 @@ export function TodayPage() {
           <div className="intention-note">A reminder to yourself, separate from your tasks. Saves as you type.</div>
         </Card>}
       </section>
+
+      <GettingStarted />
 
       {order.some((id) => !todayHidden.includes(id)) && <div className="today-working-head"><div><h2>Check in & keep going</h2></div><p>Your habits, reading, and plans in one place.</p></div>}
       <div className="grid dash today-dashboard">
@@ -144,8 +145,9 @@ function GettingStarted() {
     { label: 'Add a book or import your library (optional)', to: '/library', done: Object.keys(books).length > 0 || runs.length > 0 },
     { label: 'Download your first backup', to: '/settings', done: Boolean(lastBackupAt) },
   ];
-  return <Card className="getting-started" title="Make this space yours" action={<Button size="sm" variant="ghost" onClick={() => setGettingStarted(false)}>Dismiss checklist</Button>}>
+  return <details className="card getting-started"><summary>Make this space yours · {steps.filter((step) => step.done).length}/{steps.length} steps complete</summary>
     <p className="muted">Start anywhere. You can reopen this checklist in Settings.</p>
     <ul>{steps.map((step) => <li key={step.to}><span aria-label={step.done ? 'Complete' : 'To do'}>{step.done ? '✓' : '○'}</span><Link to={step.to}>{step.label}</Link></li>)}</ul>
-  </Card>;
+    <Button size="sm" variant="ghost" onClick={() => setGettingStarted(false)}>Dismiss checklist</Button>
+  </details>;
 }

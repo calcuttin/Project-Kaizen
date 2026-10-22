@@ -4,13 +4,35 @@ Kaizen's roadmap connects public reviews to actionable issues, implementation pu
 
 [Review archive](docs/reviews/README.md) · [Open roadmap issues](https://github.com/calcuttin/Project-Kaizen/issues?q=is%3Aissue%20is%3Aopen%20label%3Aroadmap) · [AI-assisted work](https://github.com/calcuttin/Project-Kaizen/issues?q=is%3Aissue%20label%3Aai-assisted)
 
+## October 2026 security and product fixes
+
+Implementation: [PR #17](https://github.com/calcuttin/Project-Kaizen/pull/17) · Release verification: [tracker #18](https://github.com/calcuttin/Project-Kaizen/issues/18).
+
+Source: [REV-2026-10-22-SECURITY-PRODUCT](docs/reviews/2026-10-22/review.md) · [Implementation, screenshots, and verification](docs/reviews/2026-10-22/fixes/README.md).
+
+The maintainer authorized Codex to implement and publish this work. The changes are proposed for review, **not yet merged or deployed**. Independent human validation is not recorded. Existing issue acceptance checklists remain open until their full scope is verified.
+
+| Scope | Progress in this change | Remaining verification or work |
+| --- | --- | --- |
+| Dependency advisories, invalid dates/habit targets, cover privacy, import limits | Implemented with regression checks; frontend dependency audit reports zero advisories | Deployed environment and edge dependency graph verification |
+| Browser security headers | nginx/Vercel parity and broader report-only CSP | Container validation, actual auth domains, deployed CSP compatibility before enforcement |
+| #2–4: dates, palette keyboard, completed tasks | Implemented with unit/browser evidence | Review full issue acceptance criteria before closure |
+| #5: saved-record search | Searches four areas; saved matches precede creation and open records | Complete per-area/lens/account-switch acceptance matrix |
+| #6–7: habit scoring and edit/archive/restore | Implemented; history preservation and reload tested | Broader boundary cases and independent acceptance review |
+| #8: accessibility | Larger labeled habit day controls with programmatic state | Project filters, board keyboard workflow, screen-reader/contrast/zoom audit |
+| #9: first actions | Today task capture precedes collapsed setup | Remaining Library/Studio onboarding and reading-goal work |
+| #12: initial loading | Five pages load on demand; main chunk 822.03 → 664.26 kB | Constrained-device measurements, remaining shared imports, measured size budget |
+| #10, #11, #16 | Remain planned | Mobile Feed, backup reminder/settings, recurring tasks |
+
+Verification: **58 unit tests, 20 device browser tests, and 1 mocked cloud isolation browser test passed**, along with the production build, schema fingerprint and targeted public-source check. Mocked cloud tests do not establish deployed database/storage isolation. See the linked implementation record for limits and follow-up checks.
+
 ## September 2026 application review
 
 Tracking issue: [#1 — September 2026 AI-assisted application review](https://github.com/calcuttin/Project-Kaizen/issues/1).
 
 Source: [REV-2026-09-08-APP — report and screenshots](docs/reviews/2026-09-08/review.md).
 
-Codex inspected the application, reproduced selected behaviors, reviewed source, and ran local checks. The maintainer requested the review and authorized publication. Independent human reproduction of the findings is not yet recorded. All items below are proposed fixes or improvements; publishing this roadmap does not mean they are implemented.
+Codex inspected the application, reproduced selected behaviors, reviewed source, and ran local checks. The maintainer requested the review and authorized publication. Independent human reproduction of the findings is not yet recorded. The table below preserves the original work items. The October progress table above and linked issues record implementation progress; publication alone does not mean a change is merged or live.
 
 | Priority | Work item | Review evidence | Tracking |
 | --- | --- | --- | --- |

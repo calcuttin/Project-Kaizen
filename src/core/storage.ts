@@ -9,13 +9,19 @@ import type { StateStorage } from 'zustand/middleware';
 export const cloudStorage = import.meta.env.VITE_KAIZEN_MODE?.toLowerCase() === 'cloud';
 let workspaceOwner: string | undefined;
 let locked = false;
+const workspaceListeners = new Set<() => void>();
+export function onWorkspaceChange(listener: () => void) {
+  workspaceListeners.add(listener);
+  return () => { workspaceListeners.delete(listener); };
+}
 
 /** An account switch gets a fresh document; an old callback can never target a new owner. */
 export function selectWorkspace(ownerId: string) {
   if (!ownerId || locked || (workspaceOwner && workspaceOwner !== ownerId)) throw new Error('Reload required to change workspace');
   workspaceOwner = ownerId;
+  workspaceListeners.forEach((listener) => listener());
 }
-export function lockWorkspace() { locked = true; }
+export function lockWorkspace() { locked = true; workspaceListeners.forEach((listener) => listener()); }
 export const workspaceAvailable = () => !locked && (!cloudStorage || Boolean(workspaceOwner));
 export const currentWorkspaceOwner = () => workspaceOwner;
 

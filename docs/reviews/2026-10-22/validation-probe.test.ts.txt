@@ -1,0 +1,35 @@
+import 'fake-indexeddb/auto';
+import { expect, it, vi } from 'vitest';
+import { inspectBackup } from './store';
+import { humanDate } from './dates';
+import { habitStreak, useHealth } from '@/modules/health/store';
+import { useTasks } from '@/modules/tasks/store';
+
+// Review-only safety bound: never allow a bad streak to block the test worker.
+const guard = vi.hoisted(() => ({ steps: 0 }));
+vi.mock('./dates', async (original) => {
+  const actual = await original<typeof import('./dates')>();
+  return { ...actual, shiftKey: (key: string, days: number) => {
+    if (++guard.steps > 1000) throw new Error('review safety limit reached');
+    return actual.shiftKey(key, days);
+  } };
+});
+
+it('demonstrates that backup inspection accepts a task date that crashes formatting', () => {
+  const task = useTasks.getState().addTask({ title: 'Synthetic review task', due: '2026-13-01' });
+  expect(() => inspectBackup({ app: 'kaizen', stores: { tasks: { tasks: { [task.id]: task } } } })).not.toThrow();
+  expect(() => humanDate(task.due)).toThrow(RangeError);
+});
+
+it('demonstrates acceptance of a zero target through the store and backup boundary', () => {
+  const habit = useHealth.getState().addHabit({ name: 'Synthetic review habit', emoji: 'X', kind: 'count', target: 0 });
+  expect(habit.target).toBe(0);
+  expect(() => inspectBackup({ app: 'kaizen', stores: { health: { habits: { [habit.id]: habit }, logs: { [habit.id]: {} } } } })).not.toThrow();
+});
+
+it('demonstrates that a zero-target streak traverses 1000 missing days instead of stopping', () => {
+  const habit = useHealth.getState().addHabit({ name: 'Synthetic review habit', emoji: 'X', kind: 'count', target: 0 });
+  guard.steps = 0;
+  expect(() => habitStreak(habit, {})).toThrow('review safety limit reached');
+  expect(guard.steps).toBe(1001);
+});

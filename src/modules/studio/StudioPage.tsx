@@ -1,3 +1,4 @@
+import { useRecordLink } from '@/core/useRecordLink';
 import { deleteWithUndo } from '@/core/undo';
 import { useEffect, useMemo, useState, type DragEvent } from 'react';
 import { CalendarDays, Columns3, Flame, LayoutDashboard, Lightbulb, LineChart, Mic, Pencil, Plus, Trash2 } from 'lucide-react';
@@ -34,6 +35,7 @@ export function StudioPage() {
     setQuick(''); toast('Idea captured');
   };
 
+  useRecordLink(pieces, setEditing);
   return (
     <div className="page">
       <PageHead eyebrow="Studio" title={<>Your channels <span className="faint">· {inFlight} in production</span></>}

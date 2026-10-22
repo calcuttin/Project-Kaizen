@@ -1,6 +1,6 @@
 import { createPersistedStore, registerStore } from '@/core/store';
 import { newId, nowIso } from '@/core/ids';
-import { lastNDays, shiftKey, todayKey } from '@/core/dates';
+import { isDateKey, isIsoDateTime, lastNDays, shiftKey, todayKey, toDateKey } from '@/core/dates';
 import type { BaseEntity, DateKey, ID } from '@/core/types';
 
 /** A habit is a recurring behavior. 'check' habits are binary; 'count' habits accumulate toward a target. */
@@ -48,6 +48,7 @@ export const useHealth = createPersistedStore<HealthState>('health', 1, (set, ge
   habits: {}, logs: {}, goals: {},
 
   addHabit: (input) => {
+    assertHabitSettings({ target: input.kind === 'count' ? (input.target ?? 1) : 1, daysPerWeek: input.daysPerWeek ?? 7 });
     const now = nowIso();
     const h: Habit = {
       id: newId(), createdAt: now, updatedAt: now, name: input.name.trim(), emoji: input.emoji || '✅', kind: input.kind,
@@ -57,10 +58,18 @@ export const useHealth = createPersistedStore<HealthState>('health', 1, (set, ge
     set((s) => ({ habits: { ...s.habits, [h.id]: h } }));
     return h;
   },
-  updateHabit: (id, patch) => set((s) => ({ habits: { ...s.habits, [id]: { ...s.habits[id], ...patch, updatedAt: nowIso() } } })),
+  updateHabit: (id, patch) => set((s) => {
+    if (!s.habits[id]) return s;
+    const habit = { ...s.habits[id], ...patch, updatedAt: nowIso() };
+    assertHabitSettings(habit);
+    return { habits: { ...s.habits, [id]: habit } };
+  }),
   deleteHabit: (id) => set((s) => { const { [id]: _, ...habits } = s.habits; const { [id]: __, ...logs } = s.logs; return { habits, logs }; }),
 
-  setLog: (habitId, date, value) => set((s) => ({ logs: { ...s.logs, [habitId]: { ...(s.logs[habitId] ?? {}), [date]: Math.max(0, value) } } })),
+  setLog: (habitId, date, value) => {
+    if (!isDateKey(date) || !Number.isFinite(value)) throw new Error('Choose a valid date and amount.');
+    set((s) => ({ logs: { ...s.logs, [habitId]: { ...(s.logs[habitId] ?? {}), [date]: Math.max(0, value) } } }));
+  },
   toggleLog: (habitId, date = todayKey()) => {
     const cur = get().logs[habitId]?.[date] ?? 0;
     get().setLog(habitId, date, cur > 0 ? 0 : 1);
@@ -87,22 +96,30 @@ export const useHealth = createPersistedStore<HealthState>('health', 1, (set, ge
 registerStore('health', useHealth);
 
 /* ── Derived helpers ──────────────────────────────────── */
-export const habitDone = (h: Habit, value: number | undefined) => (value ?? 0) >= h.target;
+export const validHabitSettings = (h: Pick<Habit, 'target' | 'daysPerWeek'>) => Number.isFinite(h.target) && h.target > 0 && Number.isInteger(h.daysPerWeek) && h.daysPerWeek >= 1 && h.daysPerWeek <= 7;
+function assertHabitSettings(h: Pick<Habit, 'target' | 'daysPerWeek'>) {
+  if (!validHabitSettings(h)) throw new Error('Use a positive target and 1–7 days per week.');
+}
+export const habitDone = (h: Habit, value: number | undefined) => validHabitSettings(h) && value !== undefined && Number.isFinite(value) && value >= h.target;
 
 export function habitStreak(h: Habit, logs: Record<DateKey, number> | undefined): number {
-  if (!logs) return 0;
+  if (!logs || !validHabitSettings(h) || h.daysPerWeek !== 7) return 0;
   let streak = 0;
   let d = todayKey();
   // Today doesn't break the streak if not yet done.
   if (!habitDone(h, logs[d])) d = shiftKey(d, -1);
-  while (habitDone(h, logs[d])) { streak++; d = shiftKey(d, -1); }
+  const start = isIsoDateTime(h.createdAt) ? toDateKey(new Date(h.createdAt)) : undefined;
+  const limit = Math.min(Object.keys(logs).length, 36500);
+  while (streak < limit && (!isDateKey(start) || d >= start) && habitDone(h, logs[d])) { streak++; d = shiftKey(d, -1); }
   return streak;
 }
 
 export function weeklyCompletion(h: Habit, logs: Record<DateKey, number> | undefined, days = 7): number {
-  const keys = lastNDays(days);
+  if (!validHabitSettings(h)) return 0;
+  const start = isIsoDateTime(h.createdAt) ? toDateKey(new Date(h.createdAt)) : undefined;
+  const keys = lastNDays(Math.min(365, Math.max(1, days))).filter((k) => !isDateKey(start) || k >= start);
   const done = keys.filter((k) => habitDone(h, logs?.[k])).length;
-  return done / Math.min(days, h.daysPerWeek || 7);
+  return keys.length ? Math.min(1, done / Math.min(keys.length, h.daysPerWeek)) : 0;
 }
 
 export function goalProgress(g: HealthGoal): { current: number; fraction: number } {

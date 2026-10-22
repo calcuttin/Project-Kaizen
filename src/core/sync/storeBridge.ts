@@ -1,3 +1,4 @@
+import { assertSafeJson, validateBackupField } from '@/core/backupValidation';
 import { registeredStores } from '@/core/store';
 import { queueSyncOperation, queueSyncOperations } from './outbox';
 import type { RemoteChange } from './types';
@@ -105,6 +106,7 @@ export function watchStoresForSync(): () => void {
 
 export function applyRemoteChanges(changes: RemoteChange[]) {
   const stores = registeredStores();
+  const pending = new Map<string, Record<string, unknown>>();
   applyingRemote = true;
   try {
     for (const change of changes) {
@@ -112,7 +114,15 @@ export function applyRemoteChanges(changes: RemoteChange[]) {
       if (!descriptor) continue;
       const store = stores.get(descriptor.store);
       if (!store) continue;
-      const state = store.getState() as Record<string, unknown>;
+      assertSafeJson(change);
+      if (['__proto__', 'constructor', 'prototype'].includes(change.entity_id)) throw new Error('Invalid synced record.');
+      const state = { ...store.getState(), ...pending.get(descriptor.store) } as Record<string, unknown>;
+      const stage = (value: unknown) => {
+        assertSafeJson(value);
+        try { validateBackupField(`${descriptor.store}.${descriptor.field}`, value, state[descriptor.field]); }
+        catch { throw new Error(`Invalid synced data in ${descriptor.store}. Your local data was kept. Correct the record on its original device and retry.`); }
+        pending.set(descriptor.store, { ...pending.get(descriptor.store), [descriptor.field]: value });
+      };
       if (descriptor.shape === 'nested-date-record') {
         const records = { ...((state[descriptor.field] as Record<string, Record<string, number>> | undefined) ?? {}) };
         const payload = change.payload as { habitId?: string; date?: string; value?: number } | null;
@@ -123,22 +133,23 @@ export function applyRemoteChanges(changes: RemoteChange[]) {
           const dates = { ...(records[habitId] ?? {}) };
           if (change.operation === 'delete') delete dates[date]; else dates[date] = payload?.value ?? 0;
           if (Object.keys(dates).length) records[habitId] = dates; else delete records[habitId];
-          store.setState({ [descriptor.field]: records });
+          stage(records);
         }
       } else if (descriptor.shape === 'singleton') {
-        if (change.operation !== 'delete' && change.payload) store.setState({ [descriptor.field]: { ...change.payload, revision: change.revision } });
+        if (change.operation !== 'delete' && change.payload) stage({ ...change.payload, revision: change.revision });
       } else if (descriptor.shape === 'array') {
         const list = [...((state[descriptor.field] as Entity[] | undefined) ?? [])];
         const index = list.findIndex((item) => item.id === change.entity_id);
         if (change.operation === 'delete') { if (index >= 0) list.splice(index, 1); }
         else if (change.payload) { const entity = { ...change.payload, id: change.entity_id, revision: change.revision } as Entity; if (index >= 0) list[index] = entity; else list.push(entity); }
-        store.setState({ [descriptor.field]: list });
+        stage(list);
       } else {
         const records = { ...((state[descriptor.field] as Record<string, Entity> | undefined) ?? {}) };
         if (change.operation === 'delete') delete records[change.entity_id];
         else if (change.payload) records[change.entity_id] = { ...change.payload, id: change.entity_id, revision: change.revision } as Entity;
-        store.setState({ [descriptor.field]: records });
+        stage(records);
       }
     }
+    for (const [name, patch] of pending) stores.get(name)!.setState(patch);
   } finally { applyingRemote = false; }
 }

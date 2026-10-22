@@ -1,3 +1,4 @@
+import { useRecordLink } from '@/core/useRecordLink';
 import { deleteWithUndo } from '@/core/undo';
 import { safeExternalUrl } from '@/core/urls';
 import { useMemo, useState } from 'react';
@@ -18,6 +19,7 @@ export function FeedPage() {
   const [kindFilter, setKindFilter] = useState<SourceKind | 'all'>('all');
   const [newSource, setNewSource] = useState(false);
   const [newItem, setNewItem] = useState(false);
+  const [searchItem, setSearchItem] = useState<string | null>(null);
   const [finishing, setFinishing] = useState<string | null>(null);
 
   const srcList = Object.values(sources).filter((s) => !s.archived && inLens(s.domain, lens)).filter((s) => kindFilter === 'all' || s.kind === kindFilter);
@@ -37,6 +39,7 @@ export function FeedPage() {
   const doneWeek = done.filter((i) => i.completedAt && new Date(i.completedAt).getTime() > weekAgo);
   const minWeek = doneWeek.reduce((a, i) => a + (i.durationMin ?? 0), 0);
 
+  useRecordLink(items, setSearchItem);
   return (
     <div className="page">
       <PageHead eyebrow="Feed" title="Podcasts & letters" lead="Your Notion reading list plus everything you subscribe to, in one queue. Finish something → capture the one takeaway. Skip freely; the queue should never own you."
@@ -109,6 +112,7 @@ export function FeedPage() {
 
       <NewSourceModal open={newSource} onClose={() => setNewSource(false)} defaultDomain={lens === 'business' ? 'business' : undefined} />
       <NewItemModal open={newItem} onClose={() => setNewItem(false)} sources={srcList} defaultSource={sourceFilter !== 'all' ? sourceFilter : undefined} />
+      <Modal open={Boolean(searchItem && items[searchItem])} onClose={() => setSearchItem(null)} title="Saved feed item">{searchItem && items[searchItem] && <><ItemRow item={items[searchItem]} source={sources[items[searchItem].sourceId]} onFinish={() => { setFinishing(searchItem); setSearchItem(null); }} /><p>{items[searchItem].takeaway}</p><Button onClick={() => setSearchItem(null)}>Close</Button></>}</Modal>
       <FinishModal id={finishing} onClose={() => setFinishing(null)} />
     </div>
   );

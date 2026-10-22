@@ -1,3 +1,6 @@
+// Register all data stores even when their route has not been visited.
+import '@/modules/journal/store';
+import '@/core/imports/store';
 /**
  * Register every module here. Order = sidebar order.
  * To add a life area: create src/modules/<area>/index.ts exporting a KaizenModule and add it to this list.
