@@ -10,7 +10,7 @@ Implementation: [PR #17](https://github.com/calcuttin/Project-Kaizen/pull/17) ·
 
 Source: [REV-2026-10-22-SECURITY-PRODUCT](docs/reviews/2026-10-22/review.md) · [Implementation, screenshots, and verification](docs/reviews/2026-10-22/fixes/README.md).
 
-The maintainer authorized Codex to implement and publish this work. The changes are proposed for review, **not yet merged or deployed**. Independent human validation is not recorded. Existing issue acceptance checklists remain open until their full scope is verified.
+The maintainer authorized Codex to implement and publish this work. The implementation merged in PR #17 on 2026-10-22. Deployment verification is tracked separately in #18. Independent human validation is not recorded. Existing issue acceptance checklists remain open until their full scope is verified.
 
 | Scope | Progress in this change | Remaining verification or work |
 | --- | --- | --- |
@@ -19,10 +19,12 @@ The maintainer authorized Codex to implement and publish this work. The changes 
 | #2–4: dates, palette keyboard, completed tasks | Implemented with unit/browser evidence | Review full issue acceptance criteria before closure |
 | #5: saved-record search | Searches four areas; saved matches precede creation and open records | Complete per-area/lens/account-switch acceptance matrix |
 | #6–7: habit scoring and edit/archive/restore | Implemented; history preservation and reload tested | Broader boundary cases and independent acceptance review |
-| #8: accessibility | Larger labeled habit day controls with programmatic state | Project filters, board keyboard workflow, screen-reader/contrast/zoom audit |
+| #8: accessibility | Larger labeled habit day controls with programmatic state | Board keyboard workflow, screen-reader/contrast/zoom audit (project filters already have native buttons) |
 | #9: first actions | Today task capture precedes collapsed setup | Remaining Library/Studio onboarding and reading-goal work |
 | #12: initial loading | Five pages load on demand; main chunk 822.03 → 664.26 kB | Constrained-device measurements, remaining shared imports, measured size budget |
 | #10, #11, #16 | Remain planned | Mobile Feed, backup reminder/settings, recurring tasks |
+
+Release follow-up: [repeatable container, edge and public HTTP checks](docs/reviews/2026-10-22/follow-up/release-verification.md).
 
 Verification: **58 unit tests, 20 device browser tests, and 1 mocked cloud isolation browser test passed**, along with the production build, schema fingerprint and targeted public-source check. Mocked cloud tests do not establish deployed database/storage isolation. See the linked implementation record for limits and follow-up checks.
 
