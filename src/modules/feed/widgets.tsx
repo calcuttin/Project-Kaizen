@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { Card, Empty } from '@/components/ui';
 import { useUI } from '@/app/uiStore';
 import { inLens } from '@/core/types';
-import { FinishModal, ItemRow } from './FeedPage';
+import { FinishModal, ItemRow } from './shared';
 import { useFeed } from './store';
 
 export function UpNextWidget() {

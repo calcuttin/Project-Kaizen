@@ -23,6 +23,7 @@ jobs:
       - run: pnpm check:schema-types
       - run: pnpm check:public-source
       - run: pnpm build
+      - run: pnpm check:bundle
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm test:e2e
       - run: pnpm test:e2e:cloud

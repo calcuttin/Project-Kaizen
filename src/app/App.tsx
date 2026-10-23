@@ -1,17 +1,15 @@
-import { Suspense, useEffect } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import { ClerkProvider } from '@clerk/react';
 import { modules } from './registry';
 import { useUI } from './uiStore';
 import { Shell } from '@/components/Shell';
 import { toast } from '@/components/Toast';
-import { ClerkAuthProvider, DeviceAuthProvider } from '@/core/auth/AuthProvider';
-import { AuthGate } from '@/core/auth/AuthGate';
-import { WorkspaceGate } from '@/core/auth/WorkspaceGate';
+import { DeviceAuthProvider } from '@/core/auth/AuthProvider';
 import '@/core/auth/auth.css';
-import { CloudSync } from '@/core/sync/CloudSync';
 import { cloudConfigurationError, config } from '@/core/config';
 import { ErrorBoundary, RecoveryScreen } from '@/components/ErrorBoundary';
+
+const CloudApplication = lazy(() => import('./CloudApplication'));
 
 const router = createBrowserRouter([
   {
@@ -34,5 +32,5 @@ export function App() {
   const app = <RouterProvider router={router} />;
   if (config.mode === 'device') return <ErrorBoundary><DeviceAuthProvider>{app}</DeviceAuthProvider></ErrorBoundary>;
   if (!config.clerkPublishableKey || cloudConfigurationError()) return <ErrorBoundary><div className="auth-shell"><div className="auth-card"><h1>Cloud mode needs configuration</h1><p>{cloudConfigurationError()}</p></div></div></ErrorBoundary>;
-  return <ErrorBoundary><ClerkProvider publishableKey={config.clerkPublishableKey} afterSignOutUrl={config.appUrl}><ClerkAuthProvider><WorkspaceGate><AuthGate><CloudSync />{app}</AuthGate></WorkspaceGate></ClerkAuthProvider></ClerkProvider></ErrorBoundary>;
+  return <ErrorBoundary><Suspense fallback={<div className="auth-shell" role="status">Loading sign-in…</div>}><CloudApplication>{app}</CloudApplication></Suspense></ErrorBoundary>;
 }

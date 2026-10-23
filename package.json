@@ -15,6 +15,8 @@
     "test:watch": "vitest --exclude 'e2e/**'",
     "test:e2e": "playwright test",
     "test:e2e:cloud": "playwright test -c playwright.cloud.config.ts",
+    "check:bundle": "node scripts/check-bundle-budget.mjs",
+    "measure:load": "node scripts/measure-initial-load.mjs",
     "check:schema-types": "node scripts/check-schema-types.mjs",
     "check:public-source": "node scripts/check-public-source.mjs"
   },
