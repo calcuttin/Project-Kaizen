@@ -37,3 +37,4 @@ jobs:
       - run: supabase start
       - run: supabase db reset
       - run: supabase test db
+      - run: node scripts/check-deletion-concurrency.mjs

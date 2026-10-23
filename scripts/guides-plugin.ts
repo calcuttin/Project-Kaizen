@@ -21,6 +21,7 @@ const sources = [
   'supabase/migrations/202609040001_product_foundation.sql',
   'supabase/migrations/202609060002_clerk_auth.sql',
   'supabase/migrations/202609060003_restrict_anonymous_rpc.sql',
+  'supabase/migrations/202610220004_account_deletion_fence.sql',
   'supabase/functions/delete-account/index.ts',
   'supabase/functions/delete-account/storage.ts',
 ];

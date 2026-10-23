@@ -28,8 +28,10 @@ No pre-existing account was changed. Fixture identifiers, credentials, and token
 
 ## Remaining verification
 
-Concurrent sync, deletion during active sync, CSP feature compatibility, and operational rate-limit/backup configuration need separate evidence. Header presence does not establish that every sign-in/import/camera path is compatible with enforcement. CSP stays report-only for those broader restrictions. Use disposable development accounts and synthetic data; do not test against another person's records.
+Controlled concurrent sync passed: eight same-record writers produced one acceptance and seven conflicts; three identical retries retained revision one. A separate live test reproduced a stale-token write after deletion; see [the deletion follow-up](account-deletion.md). Verification of that new protection after deployment, CSP feature compatibility, and operational rate-limit/backup configuration need separate evidence. Header presence does not establish that every sign-in/import/camera path is compatible with enforcement. CSP stays report-only for those broader restrictions. Use disposable development accounts and synthetic data; do not test against another person's records.
 
 The linked Clerk application has a development instance; no production instance is configured. Credentials and fixture identities stay outside this public record. Cloud-provider backup and abuse controls must be verified by an operator with the relevant access.
 
 Reference: [Deno dependency audit](https://docs.deno.com/runtime/reference/cli/audit/) checks the resolved lockfile; frontend pnpm auditing alone does not cover edge imports.
+
+Read-only provider metadata showed the development project as active/healthy after reactivation. Its backup response reported point-in-time recovery disabled and no listed backup records. No restore was attempted and no provider configuration was changed. This does not establish backup coverage; the operator must choose and verify a recovery method before a production-readiness claim.
