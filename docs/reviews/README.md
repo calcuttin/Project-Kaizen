@@ -44,3 +44,5 @@ The historical security review stays at its existing path to preserve links. Its
 GitHub issues are the live source of implementation status. Roadmap priorities describe intended order, not deadlines or delivery promises. A passing test run is evidence only for the checks that actually ran.
 
 Public review material is intended to make AI-assisted work inspectable and correctable by contributors. Sensitive security reports and private user data belong outside this public archive.
+
+- [REV-2026-10-22-REMAINING-CHECKS — accessibility fixes and release verification](2026-10-22/remaining-checks/README.md): keyboard activation, focus, CSP feature checks, abuse controls and deferred backup/physical-device work.

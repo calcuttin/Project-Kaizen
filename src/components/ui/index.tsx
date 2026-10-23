@@ -74,9 +74,9 @@ export function LensSwitch({ value, onChange }: { value: Lens; onChange: (l: Len
     { v: 'business', label: 'Business', color: 'var(--business)' },
   ];
   return (
-    <div className="lens" role="tablist" aria-label="Life lens">
+    <div className="lens" role="group" aria-label="Life lens">
       {opts.map((o) => (
-        <button key={o.v} role="tab" aria-selected={value === o.v} className={value === o.v ? 'active' : ''} onClick={() => onChange(o.v)}>
+        <button key={o.v} type="button" aria-pressed={value === o.v} className={value === o.v ? 'active' : ''} onClick={() => onChange(o.v)}>
           {o.color && <span className="dot" style={{ background: o.color }} />}
           {o.label}
         </button>
@@ -90,7 +90,7 @@ export function Segmented<T extends string>({ value, onChange, options }: { valu
   return (
     <div className="seg">
       {options.map((o) => (
-        <button key={o.value} className={value === o.value ? 'active' : ''} onClick={() => onChange(o.value)}>
+        <button key={o.value} type="button" aria-pressed={value === o.value} className={value === o.value ? 'active' : ''} onClick={() => onChange(o.value)}>
           {o.icon && <o.icon />}{o.label}
         </button>
       ))}
@@ -151,8 +151,13 @@ export function Modal({ open, onClose, title, children }: { open: boolean; onClo
   const ref = useRef<HTMLDialogElement>(null);
   useEffect(() => {
     const dialog = ref.current;
+    const opener = document.activeElement;
     if (open && !dialog?.open) dialog?.showModal();
     else if (!open && dialog?.open) dialog.close();
+    return () => {
+      if (dialog?.open) dialog.close();
+      if (open && opener instanceof HTMLElement && opener.isConnected) opener.focus();
+    };
   }, [open]);
   return <dialog ref={ref} className="modal" aria-label={title} onCancel={(event) => { event.preventDefault(); onClose(); }} onClick={(event) => { if (event.target === event.currentTarget) { const rect = event.currentTarget.getBoundingClientRect(); if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) onClose(); } }}>
     {open && <>{title && <h2>{title}</h2>}{children}</>}

@@ -112,7 +112,7 @@ export function TasksPage() {
         <Board tasks={visible.filter((task) => showDone || task.status !== 'done')} onOpen={setEditing} />
       )}
 
-      <TaskEditor id={editing} onClose={() => { const id = editing; setEditing(null); requestAnimationFrame(() => document.getElementById(`task-card-${id}`)?.focus()); }} />
+      <TaskEditor id={editing} onClose={() => { const id = editing; setEditing(null); requestAnimationFrame(() => { if (document.activeElement === document.body) document.getElementById(`task-card-${id}`)?.focus(); }); }} />
       <NewProjectModal open={newProject} onClose={() => setNewProject(false)} defaultDomain={lens === 'business' ? 'business' : 'personal'} />
       <ProjectEditor key={editingProject} id={editingProject} onClose={() => setEditingProject(null)} />
     </div>

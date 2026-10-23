@@ -27,6 +27,10 @@ The maintainer authorized Codex to implement and publish this work. The implemen
 
 #2, #3 and #14 are complete. All seven follow-up PRs retain AI-assisted attribution and evidence limits. Bases merged before their dependent PRs: #29 before #30, #32 before #33, and #28 before #34. Live GitHub issue bodies record current deployment and checklist status.
 
+## Remaining checks — 2026-10-22
+
+[Fresh evidence and accessibility fixes](docs/reviews/2026-10-22/remaining-checks/README.md) cover task-list keyboard activation, selected states and dialog focus. Live auth/sync, cover lookup and import-worker preview passed; Clerk abuse settings and bounded rejection checks were inspected. #8 retains spoken screen-reader and physical-device/actual-zoom verification. #18 retains complete CSP/camera/custom-domain and data-service throttling coverage. Hosted backup/recovery work is deferred at the maintainer’s request; no physical device is available for the remaining mobile checks. Current fix/deployment status is recorded in the issues.
+
 ## September 2026 application review
 
 Tracking issue: [#1 — September 2026 AI-assisted application review](https://github.com/calcuttin/Project-Kaizen/issues/1).

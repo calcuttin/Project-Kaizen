@@ -21,3 +21,7 @@ AI-assisted implementation and validation at the maintainer's request. This inde
 - #8 still needs full operating-system screen-reader and physical-device/zoom verification. #18 still needs broader CSP feature coverage, web deployment tracking, and provider backup/restore and abuse-limit evidence. Local/mocked checks do not establish those results.
 
 Public search terms: REV-2026-09-08-APP, REV-2026-10-22-SECURITY-PRODUCT, account deletion, stale token, concurrency, onboarding, backup reminder, recurring tasks, initial load, keyboard, contrast. Independent human validation is not claimed.
+
+## Remaining-check follow-up
+
+[Fresh screenshots, keyboard fixes, live feature checks and deferred criteria](../remaining-checks/README.md). This follow-up records new evidence for #8 and #18 without closing unverified manual or recovery work.
