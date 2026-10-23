@@ -25,6 +25,28 @@ describe('duplicate matching', () => {
 });
 
 describe('Kindle clippings importer', () => {
+  it('extracts only a final non-nested author suffix', () => {
+    const parse = (title: string) => parseKindleClippings(`${title}\n- Your Highlight | Added on 2024-01-01T13:00:00Z\n\nText`).clippings[0];
+    expect(parse('A Book (Revised) (An Author)')).toMatchObject({ title: 'A Book (Revised)', author: 'An Author', annotatedAt: '2024-01-01T13:00:00.000Z' });
+    expect(parse('A Book (An (Author))')).toMatchObject({ title: 'A Book (An (Author))', author: '' });
+    expect(parse('A Book (Author) extra')).toMatchObject({ title: 'A Book (Author) extra', author: '' });
+    expect(parse('A Book ()')).toMatchObject({ title: 'A Book', author: '' });
+  });
+
+  it('handles long whitespace runs and malformed dates without backtracking', () => {
+    const title = `Book${' '.repeat(100_000)}without an author suffix`;
+    const result = parseKindleClippings(`${title}\n- Your Highlight | Added on ${' '.repeat(100_000)}\u2028invalid\n\nText`);
+    expect(result.clippings).toHaveLength(1);
+    expect(result.clippings[0]).toMatchObject({ title, author: '', content: 'Text', annotatedAt: undefined });
+  });
+
+  it('handles repeated date markers and requires whitespace before a date', () => {
+    const parse = (meta: string) => parseKindleClippings(`Book (Author)\n${meta}\n\nText`).clippings[0];
+    expect(parse(`- Your Highlight | ${'added on !'.repeat(25_000)}\u2028invalid`).annotatedAt).toBeUndefined();
+    expect(parse('- Your Highlight | Added on2024-01-01T13:00:00Z').annotatedAt).toBeUndefined();
+    expect(parse('- Your Highlight | aDdEd On\t2024-01-01T13:00:00Z').annotatedAt).toBe('2024-01-01T13:00:00.000Z');
+  });
+
   it('groups books and produces stable source references', () => {
     const text = `A Book (An Author)\n- Your Highlight on page 12 | Location 120-122 | Added on Monday, January 1, 2024 1:00:00 PM\n\nA useful idea.\n==========\nA Book (An Author)\n- Your Note on Location 123 | Added on Monday, January 1, 2024 1:01:00 PM\n\nRemember this.\n==========`;
     const first = parseKindleClippings(text);

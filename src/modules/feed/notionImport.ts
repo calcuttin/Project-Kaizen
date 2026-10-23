@@ -68,7 +68,8 @@ function sourceFor(link: string | null, type: NotionReadingRow['type']): MappedS
 }
 
 export function cleanTitle(name: string): string {
-  let t = name.replace(/^\(\d+\)\s*/, '').replace(/\s*[-|–·]\s*(YouTube|LinkedIn)\s*$/i, '').replace(/&#39;/g, "'").replace(/&amp;/g, '&').replace(/&quot;/g, '"').trim();
+  // Decode exactly one layer: replacements must not become input to a later decoder.
+  let t = name.replace(/^\(\d+\)\s*/, '').replace(/\s*[-|–·]\s*(YouTube|LinkedIn)\s*$/i, '').replace(/&#39;|&amp;|&quot;/g, entity => entity === '&#39;' ? "'" : entity === '&amp;' ? '&' : '"').trim();
   if (/^https?:\/\//.test(t)) t = `Link · ${hostOf(t) ?? 'untitled'}`;
   if (t.length > 140) t = t.slice(0, 120).trimEnd() + '…';
   return t;
