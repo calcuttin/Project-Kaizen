@@ -120,7 +120,7 @@ export function SettingsPage() {
             {config.enableBundledImports && <div className="between"><span className="muted">Re-apply developer bundled imports</span><Button icon={RefreshCw} onClick={() => { void import('@/app/imports').then(({ reimportAll }) => { const r = reimportAll(); toast(`Added ${r.books} books, ${r.items} items`); }); }}>Re-import</Button></div>}
             <p className="muted" style={{ fontSize: 12.5, margin: 0 }}>Kaizen opens your saved workspace automatically. Sample data is optional and adds example records to your workspace.</p>
             <div className="between"><span className="muted">Add sample data to explore</span><Button icon={Sparkles} onClick={() => { seedSampleData(); toast('Sample data loaded'); }}>Load samples</Button></div>
-            <div className="between"><span className="muted" style={{ color: 'var(--danger)' }}>Erase this workspace on this device</span><Button variant="danger" icon={Trash2} onClick={() => { if (confirm(config.mode === 'cloud' ? 'Erase the local cache and pending changes for this workspace? Cloud records will download again. Export first if you want a copy.' : 'Erase all Kaizen data on this device? Export first if you want a copy.')) { stopCloudSync(); resetAll(); } }}>Reset</Button></div>
+
           </div>
         </Card>
         <Card title="Privacy">
@@ -152,6 +152,7 @@ export function SettingsPage() {
             Project Kaizen is a placeholder name. Other companies and projects use similar names in other fields; we plan to differentiate the name or choose another before a broader launch.
           </p>
         </Card>
+        <Card title="Workspace reset" className="span-2"><div className="between"><span className="muted" style={{ color: 'var(--danger)' }}>Erase this workspace on this device</span><Button variant="danger" icon={Trash2} onClick={() => { if (confirm(config.mode === 'cloud' ? 'Erase the local cache and pending changes for this workspace? Cloud records will download again. Export first if you want a copy.' : 'Erase all Kaizen data on this device? Export first if you want a copy.')) { stopCloudSync(); resetAll(); } }}>Reset</Button></div></Card>
         {config.mode === 'cloud' && <Card title="Danger zone" className="span-2"><div className="between"><span className="muted">Permanently delete your cloud account and all synced data</span><Button variant="danger" icon={Trash2} onClick={() => void deleteAccount()}>Delete account</Button></div></Card>}
       </div>
       <Modal open={Boolean(backup)} onClose={() => { if (!restoring) setBackup(null); }} title="Review backup restore">

@@ -40,13 +40,14 @@ export function StudioPage() {
     <div className="page">
       <PageHead eyebrow="Studio" title={<>Your channels <span className="faint">· {inFlight} in production</span></>}
         lead="The content you make: Substack posts and podcast episodes under one brand. Ship on cadence, watch the audience grow."
-        action={<><Button icon={Mic} onClick={() => setEditChannel('new')}>Add channel</Button><Button variant="primary" icon={Plus} onClick={() => setNewPiece('idea')} disabled={!channelList.length}>New piece</Button></>} />
+        action={<><Button variant={!channelList.length ? 'primary' : undefined} icon={Mic} onClick={() => setEditChannel('new')}>{channelList.length ? 'Add channel' : 'Add your first channel'}</Button>{channelList.length > 0 && <Button variant="primary" icon={Plus} onClick={() => setNewPiece('idea')}>New piece</Button>}</>} />
 
-      <div className="quick-add" style={{ marginBottom: 16 }}>
+      {!channelList.length && <p className="muted" style={{ marginBottom: 16 }}>Create a channel to plan your work. This is manual planning; adding a channel does not connect to or publish to an external service.</p>}
+      {channelList.length > 0 && <div className="quick-add" style={{ marginBottom: 16 }}>
         <Lightbulb />
         <input placeholder="Capture an idea… episode angle, post title, guest to invite" value={quick} onChange={(e) => setQuick(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && addIdea()} aria-label="Capture idea" />
         {quick && <Button size="sm" variant="primary" onClick={addIdea}>Add idea</Button>}
-      </div>
+      </div>}
 
       <div className="between" style={{ marginBottom: 16, flexWrap: 'wrap' }}>
         <Segmented value={view} onChange={setView} options={[{ value: 'overview', label: 'Overview', icon: LayoutDashboard }, { value: 'pipeline', label: 'Pipeline', icon: Columns3 }, { value: 'schedule', label: 'Schedule', icon: CalendarDays }]} />

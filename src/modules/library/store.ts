@@ -44,7 +44,7 @@ export interface ReadingAnnotation extends BaseEntity {
   annotatedAt?: string;
 }
 
-export interface ReadingGoal { year: number; books: number; pagesPerDay: number }
+export interface ReadingGoal { enabled?: boolean; year: number; books: number; pagesPerDay: number }
 
 interface LibraryState {
   shelves: Record<ID, Shelf>;
@@ -87,7 +87,7 @@ export const useLibrary = createPersistedStore<LibraryState>('library', 2, (set,
   setAtmosphere: (atmosphere) => set({ atmosphere }),
   setShelfCabinet: (id, cabinet) => set((s) => s.shelves[id] ? ({ shelves: { ...s.shelves, [id]: { ...s.shelves[id], cabinet, updatedAt: nowIso() } } }) : s),
   setShelfObjects: (id, objects) => set((s) => s.shelves[id] ? ({ shelves: { ...s.shelves, [id]: { ...s.shelves[id], objects, updatedAt: nowIso() } } }) : s),
-  goal: { year: new Date().getFullYear(), books: 24, pagesPerDay: 20 },
+  goal: { enabled: false, year: new Date().getFullYear(), books: 24, pagesPerDay: 20 },
   importCollection: (collectionId, shelves) => {
     let sc = 0, bc = 0;
     const titles = new Set(Object.values(get().books).map((b) => b.title.toLowerCase()));

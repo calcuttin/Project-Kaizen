@@ -1,8 +1,10 @@
+import { useState } from 'react';
+import { BackupReminder } from './BackupReminder';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { Moon, Search, Settings, Sun } from 'lucide-react';
 import { modules } from '@/app/registry';
 import { usePalette, useUI } from '@/app/uiStore';
-import { LensSwitch } from './ui';
+import { LensSwitch, Modal } from './ui';
 import { CommandPalette } from './CommandPalette';
 import { Toaster } from './Toast';
 import { SyncBadge } from '@/core/sync/CloudSync';
@@ -11,6 +13,7 @@ export function Shell() {
   const { lens, setLens, theme, toggleTheme } = useUI();
   const setPalette = usePalette((s) => s.setOpen);
   const nav = useNavigate();
+  const [moreOpen, setMoreOpen] = useState(false);
   return (
     <div className="shell">
       <aside className="sidebar">
@@ -38,16 +41,18 @@ export function Shell() {
           <div className="mobile-save-status"><SyncBadge /></div>
           <button className="btn ghost sm quick-add" aria-label="Quick add" onClick={() => setPalette(true)}><Search size={14} /><span className="quick-add-label">Quick add</span><span className="kbd">⌘K</span></button>
         </header>
+        <BackupReminder />
         <Outlet />
         <nav className="tabbar" aria-label="Primary (mobile)">
-          {modules.filter((m) => !m.hidden).map((m) => (
+          {modules.filter((m) => ['today', 'tasks', 'library'].includes(m.id)).map((m) => (
             <NavLink key={m.id} to={m.path} end={m.path === '/'} className={({ isActive }) => `tab ${isActive ? 'active' : ''}`}>
               <m.icon /><span>{m.name}</span>
             </NavLink>
           ))}
-          <NavLink to="/settings" className={({ isActive }) => `tab ${isActive ? 'active' : ''}`}><Settings /><span>More</span></NavLink>
+          <button type="button" className="tab" aria-expanded={moreOpen} onClick={() => setMoreOpen(true)}><Settings /><span>More</span></button>
         </nav>
       </div>
+      <Modal open={moreOpen} onClose={() => setMoreOpen(false)} title="More areas"><nav className="stack" aria-label="All areas">{modules.filter(m => !m.hidden).map(m => <NavLink key={m.id} to={m.path} className="nav-item" onClick={() => setMoreOpen(false)}><m.icon />{m.name}</NavLink>)}<NavLink to="/settings" className="nav-item" onClick={() => setMoreOpen(false)}>Settings</NavLink></nav></Modal>
       <CommandPalette />
       <Toaster />
     </div>

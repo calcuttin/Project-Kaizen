@@ -11,7 +11,7 @@ export function ReadingWidget() {
   const finished = finishedThisYear(Object.values(books), new Date().getFullYear()).length;
   const [pageFor, setPageFor] = useState<Record<string, string>>({});
   return (
-    <Card title="Reading" icon={BookOpen} accent="var(--library)" action={<Link to="/library" className="faint" style={{ fontSize: 12 }}>{finished}/{goal.books} this year <ArrowRight size={11} style={{ verticalAlign: '-1px' }} /></Link>}>
+    <Card title="Reading" icon={BookOpen} accent="var(--library)" action={<Link to="/library" className="faint" style={{ fontSize: 12 }}>{goal.enabled === false ? 'Choose a goal' : `${finished}/${goal.books} this year`} <ArrowRight size={11} style={{ verticalAlign: '-1px' }} /></Link>}>
       {!reading.length ? <Empty icon={BookOpen} title="Pick your next read" hint="Add a book or mark one on your shelves as Reading." action={<Link className="btn" to="/library">Open your library <ArrowRight size={14} /></Link>} /> : (
         <div className="stack" style={{ gap: 12 }}>
           {reading.map((b) => (
