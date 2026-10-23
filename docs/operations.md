@@ -70,6 +70,8 @@ From the installed repository root:
 pnpm exec supabase functions deploy delete-account --project-ref YOUR_PROJECT_REF --use-api
 ```
 
+Before deploying this version, apply [the deletion-fence migration](../supabase/migrations/202610220004_account_deletion_fence.sql). The endpoint refuses cleanup if the database guard is unavailable. A failed cleanup retains the guard and can be retried; the minimal private subject tombstone prevents still-valid old tokens from recreating records. Do not remove the guard as a routine recovery step.
+
 This deploys `index.ts` and its imported `storage.ts`. The function verifies Clerk tokens itself; its committed configuration disables the incompatible legacy Supabase JWT check. Verify the matching `CLERK_SECRET_KEY` exists in that project's Edge Function secrets.
 
 Test account deletion only with disposable accounts. Verify their rows and files disappear and another account's data remains intact.

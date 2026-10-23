@@ -64,6 +64,7 @@ A migration is a SQL file that sets up or updates the database. For a fresh proj
 | 1 | [202609040001_product_foundation.sql](../supabase/migrations/202609040001_product_foundation.sql) | Tables, sync functions, indexes, and private storage |
 | 2 | [202609060002_clerk_auth.sql](../supabase/migrations/202609060002_clerk_auth.sql) | Account ownership using Clerk user IDs |
 | 3 | [202609060003_restrict_anonymous_rpc.sql](../supabase/migrations/202609060003_restrict_anonymous_rpc.sql) | Restricts sync functions to authenticated accounts |
+| 4 | [202610220004_account_deletion_fence.sql](../supabase/migrations/202610220004_account_deletion_fence.sql) | Blocks stale sessions and in-flight writes during account deletion |
 
 For each file:
 
@@ -191,7 +192,7 @@ This alternative deploys only the function. You still need steps 3–4 for authe
 | Vercel cannot find the repository | Grant its GitHub app access to your exact repository, then retry the import. Renaming/replacing a repository can require reconnecting it. |
 | The website has no sign-in | Set `VITE_KAIZEN_MODE=cloud` for the deployment's environment and redeploy. |
 | “Cloud mode needs configuration” | Check all three public keys/URL variables from step 6; remove placeholder text and redeploy. |
-| Sign-in works but sync fails | Confirm step 3's Clerk domain matches the key's instance, all three migrations succeeded, and the Supabase project is running. Read the error under **Account & sync**. |
+| Sign-in works but sync fails | Confirm step 3's Clerk domain matches the key's instance, all four migrations succeeded, and the Supabase project is running. Read the error under **Account & sync**. |
 | Redirects to the wrong address | Correct `VITE_APP_URL`, redeploy, and check any custom Clerk redirect settings. Use your stable URL. |
 | A returning account is empty | Confirm the site address, email, Clerk instance, and Supabase project before restoring anything. See [workspace recovery](user-guide.md#my-workspace-looks-empty). |
 | Delete account fails | Confirm the function's exact name, both files, its legacy JWT setting, and its Clerk secret. Inspect function logs without exposing credentials. |
