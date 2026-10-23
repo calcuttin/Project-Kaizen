@@ -29,7 +29,7 @@ The maintainer authorized Codex to implement and publish this work. The implemen
 
 ## Remaining checks — 2026-10-22
 
-[Fresh evidence and accessibility fixes](docs/reviews/2026-10-22/remaining-checks/README.md) cover task-list keyboard activation, selected states and dialog focus. Live auth/sync, cover lookup and import-worker preview passed; Clerk abuse settings and bounded rejection checks were inspected. #8 retains spoken screen-reader and physical-device/actual-zoom verification. #18 retains complete CSP/camera/font/custom-domain and data-service throttling coverage. Hosted backup/recovery work is deferred at the maintainer’s request; no physical device is available for the remaining mobile checks. Current fix/deployment status is recorded in the issues.
+[Fresh evidence and accessibility fixes](docs/reviews/2026-10-22/remaining-checks/README.md) cover task-list keyboard activation, selected states and dialog focus. Live auth/sync, cover lookup and import-worker preview passed; Clerk abuse settings and bounded rejection checks were inspected. #8 retains spoken screen-reader and physical-device/actual-zoom verification. #18 retains complete CSP/camera/custom-domain and data-service throttling coverage. Hosted backup/recovery work is deferred at the maintainer’s request; no physical device is available for the remaining mobile checks. Current fix/deployment status is recorded in the issues.
 
 ## September 2026 application review
 

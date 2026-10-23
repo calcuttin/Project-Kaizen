@@ -40,7 +40,7 @@ All five screenshots were captured during this run, saved, and inspected before 
 | Live auth and sync | Disposable development identity signed in and a synthetic task reached “Saved” |
 | Live metadata/cover lookup | ISBN lookup succeeded; cover image finished loading with nonzero natural dimensions |
 | Live import worker | CSV preview succeeded; no imported records were committed |
-| Fonts | Heading computed style named Fraunces and text rendered; individual font download/use was not independently established |
+| Fonts | Live browser FontFaceSet reported `loaded`, with 34 declared faces and positive checks for `500 30px Fraunces` and `400 14px Inter`; heading computed style named Fraunces. No font/CSP errors were recorded |
 | Camera | Scan UI opened, but successful video playback/decoding was not established in this browser. Scan was canceled; no hardware-camera verification claimed |
 | Custom auth domains / enforcing broader CSP | Not configured/tested here. Keep the broader policy report-only until the intended production domain and complete feature matrix are verified |
 | Provider abuse controls | Read-only Clerk configuration verified, plus bounded API rejection checks below. No provider settings changed or stress test performed |
