@@ -31,6 +31,10 @@ The maintainer authorized Codex to implement and publish this work. The implemen
 
 [Fresh evidence and accessibility fixes](docs/reviews/2026-10-22/remaining-checks/README.md) cover task-list keyboard activation, selected states and dialog focus. Live auth/sync, cover lookup and import-worker preview passed; Clerk abuse settings and bounded rejection checks were inspected. #8 retains spoken screen-reader and physical-device/actual-zoom verification. #18 retains complete CSP/camera/custom-domain and data-service throttling coverage. Hosted backup/recovery work is deferred at the maintainer’s request; no physical device is available for the remaining mobile checks. Current fix/deployment status is recorded in the issues.
 
+## Scanner, throttled sync and native zoom — 2026-10-22
+
+[Review and evidence](docs/reviews/2026-10-22/resilience/README.md): scanner cancellation/error cleanup and client HTTP 429 cooldown/retry fixes are tracked in #18. Native Safari 200% task creation, keyboard editor opening, scrolling and return focus were verified for #8. Full spoken screen-reader, native 400%/physical-device coverage, real camera/custom-domain checks and server-enforced quotas remain open. Client cooldown is not server-side abuse prevention. Hosted backup/recovery remains deferred. The issues record PR and deployment status.
+
 ## September 2026 application review
 
 Tracking issue: [#1 — September 2026 AI-assisted application review](https://github.com/calcuttin/Project-Kaizen/issues/1).

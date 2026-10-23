@@ -1,6 +1,7 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { cloudConfigurationError, config } from './config';
 import type { Database } from './database.types';
+import { createRateLimitedFetch } from './rateLimitedFetch';
 
 let client: SupabaseClient<Database> | null = null;
 let accessTokenProvider: () => Promise<string | null> = async () => null;
@@ -20,6 +21,7 @@ export function getSupabaseClient(): SupabaseClient<Database> | null {
   const ownerSession = sessionId;
   const tokenProvider = accessTokenProvider;
   client ??= createClient(config.supabaseUrl!, config.supabasePublishableKey!, {
+    global: { fetch: createRateLimitedFetch(config.supabaseUrl!) },
     accessToken: async () => {
       if (sessionId !== ownerSession) throw new Error('Session changed');
       const token = await tokenProvider();

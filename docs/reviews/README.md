@@ -18,6 +18,8 @@ The historical security review stays at its existing path to preserve links. Its
 
 [Searchable PR/evidence index](2026-10-22/follow-up/README.md) covers release/security, tasks, accessibility, search, habits, onboarding, Feed, backups, loading, and recurrence. It records PR dependencies, combined verification, and the remaining manual/operational checks.
 
+[Scanner, throttled-sync and native-zoom follow-up](2026-10-22/resilience/README.md) records camera lifecycle fixes, HTTP 429 recovery, Safari 200% task verification and remaining operational limits.
+
 ## Search
 
 - GitHub issues: use `is:issue label:roadmap`, `is:issue label:ai-assisted`, or a review ID such as `REV-2026-09-08-APP`.

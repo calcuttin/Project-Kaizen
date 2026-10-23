@@ -87,3 +87,39 @@ it('keeps edits made during an in-flight download instead of overwriting them', 
   expect((await readOutbox('concurrent'))[0].payload).toEqual({ title: 'Local edit' });
   expect(useSyncStatus.getState().pending).toBe(1);
 });
+
+it('retains throttled edits, ignores early retries and automatically resumes at the deadline', async () => {
+  vi.useFakeTimers({ toFake: ['Date', 'setTimeout', 'clearTimeout'] });
+  try {
+    const deadline = Date.now() + 60_000;
+    mocks.rpc.mockImplementationOnce(() => ({ abortSignal: () => Promise.resolve({ data: null, error: { code: 'KAIZEN_RATE_LIMITED', details: String(deadline) } }) }))
+      .mockImplementation((name, args) => ({ abortSignal: () => Promise.resolve({ error: null, data: name === 'push_changes' ? args.p_mutations.map((item: { mutationId: string }) => ({ mutation_id: item.mutationId, status: 'accepted' })) : [] }) }));
+    setSyncScope('limited');
+    await queueSyncOperation({ entityId: 'one', entityType: 'tasks', operation: 'put', payload: { title: 'Keep me' } });
+    startCloudSync(); await syncNow();
+    expect(useSyncStatus.getState()).toMatchObject({ pending: 1, status: 'error', retryAt: deadline });
+    await queueSyncOperation({ entityId: 'two', entityType: 'tasks', operation: 'put', payload: { title: 'Keep me too' } });
+    await syncNow();
+    await vi.advanceTimersByTimeAsync(59_999);
+    expect(mocks.rpc).toHaveBeenCalledTimes(1); expect(await readOutbox('limited')).toHaveLength(2);
+    await vi.advanceTimersByTimeAsync(1);
+    await vi.waitFor(() => expect(useSyncStatus.getState()).toMatchObject({ pending: 0, status: 'idle', retryAt: undefined }));
+    expect(await readOutbox('limited')).toEqual([]);
+    expect(mocks.rpc).toHaveBeenCalledTimes(3);
+  } finally { stopCloudSync(); vi.useRealTimers(); }
+});
+
+it('cancels a throttled account retry when switching accounts', async () => {
+  vi.useFakeTimers({ toFake: ['Date', 'setTimeout', 'clearTimeout'] });
+  try {
+    mocks.rpc.mockImplementationOnce(() => ({ abortSignal: () => Promise.resolve({ data: null, error: { code: 'KAIZEN_RATE_LIMITED', details: String(Date.now() + 60_000) } }) }));
+    setSyncScope('limited_a'); startCloudSync(); await syncNow();
+    expect(useSyncStatus.getState().retryAt).toBeDefined();
+    mocks.rpc.mockImplementation(() => ({ abortSignal: () => Promise.resolve({ data: [], error: null }) }));
+    setSyncScope('fresh_b'); startCloudSync(); await syncNow();
+    expect(useSyncStatus.getState().retryAt).toBeUndefined();
+    await vi.advanceTimersByTimeAsync(60_001);
+    expect(mocks.rpc).toHaveBeenCalledTimes(2);
+    expect(useSyncStatus.getState().status).toBe('idle');
+  } finally { stopCloudSync(); vi.useRealTimers(); }
+});

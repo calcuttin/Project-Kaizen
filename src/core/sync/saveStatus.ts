@@ -2,6 +2,7 @@ import type { SyncState } from './engine';
 
 export function saveStatus(state: SyncState) {
   if (state.localError) return 'Backup needed';
+  if (state.retryAt && state.status !== 'offline') return 'Saving paused · will retry';
   if (state.status === 'error') return 'Couldn’t save';
   if (state.writing) return 'Saving on this device…';
   if (state.status === 'offline') return 'Offline · saved on this device';

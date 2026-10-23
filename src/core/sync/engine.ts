@@ -7,28 +7,33 @@ import { addConflict, getSyncScope, onOutboxChange, readConflicts, readOutbox, r
 import type { RemoteChange } from './types';
 import type { Json } from '@/core/database.types';
 import { workspaceAvailable } from '@/core/storage';
+import { RATE_LIMIT_CODE } from '@/core/rateLimitedFetch';
 
-export type SyncState = { status: 'device' | 'idle' | 'syncing' | 'offline' | 'error'; pending: number; writing: number; conflicts: number; localError?: boolean; lastSyncedAt?: string; error?: string };
+export type SyncState = { status: 'device' | 'idle' | 'syncing' | 'offline' | 'error'; pending: number; writing: number; conflicts: number; localError?: boolean; lastSyncedAt?: string; error?: string; retryAt?: number };
 export const useSyncStatus = create<SyncState>(() => ({ status: 'device', pending: 0, writing: 0, conflicts: 0 }));
 
 let activeSync: Promise<void> | null = null;
-let syncSession: { owner: string; controller: AbortController } | null = null;
+let syncSession: { owner: string; controller: AbortController; retryAt?: number; retryTimer?: ReturnType<typeof setTimeout> } | null = null;
 let stopCurrentSync: (() => void) | undefined;
 export function stopCloudSync() { stopCurrentSync?.(); stopCurrentSync = undefined; }
 
 export async function syncNow() {
   const session = syncSession;
   if (!session || session.controller.signal.aborted || useSyncStatus.getState().localError) return;
+  if (session.retryAt && Date.now() < session.retryAt) return;
   const current = () => syncSession === session && !session.controller.signal.aborted && workspaceAvailable();
   const supabase = getSupabaseClient();
   if (!supabase) return;
   if (activeSync) return activeSync;
   activeSync = (async () => {
+    session.retryAt = undefined;
+    clearTimeout(session.retryTimer);
+    useSyncStatus.setState({ retryAt: undefined });
     try {
       const operations = await readOutbox(session.owner);
       if (!current()) return;
       if (!navigator.onLine) { useSyncStatus.setState({ status: 'offline', pending: operations.length }); return; }
-      useSyncStatus.setState({ status: 'syncing', pending: operations.length, error: undefined });
+      useSyncStatus.setState({ status: 'syncing', pending: operations.length, error: undefined, retryAt: undefined });
       for (let offset = 0; offset < operations.length; offset += 100) {
         if (!current()) return;
         const batch = operations.slice(offset, offset + 100);
@@ -70,6 +75,20 @@ export async function syncNow() {
     } catch (error) {
       const pending = await readOutbox(session.owner).then((items) => items.length, () => useSyncStatus.getState().pending);
       if (!current()) return;
+      if (error && typeof error === 'object' && 'code' in error && error.code === RATE_LIMIT_CODE) {
+        const deadline = Number('details' in error ? error.details : NaN);
+        session.retryAt = Number.isFinite(deadline) && deadline > Date.now() ? deadline : Date.now() + 60_000;
+        const retry = () => {
+          if (!current()) return;
+          const remaining = session.retryAt! - Date.now();
+          if (remaining > 0) session.retryTimer = setTimeout(retry, Math.min(remaining, 2_147_483_647));
+          else void syncNow();
+        };
+        clearTimeout(session.retryTimer);
+        retry();
+        useSyncStatus.setState({ status: 'error', pending, retryAt: session.retryAt, error: 'Cloud saving is temporarily paused. Your changes are on this device and will retry automatically.' });
+        return;
+      }
       useSyncStatus.setState({ status: 'error', pending, error: error instanceof Error ? error.message : 'Sync failed' });
     }
   })().finally(() => { if (current()) activeSync = null; });
@@ -78,10 +97,10 @@ export async function syncNow() {
 
 export function startCloudSync() {
   stopCloudSync();
-  const session = { owner: getSyncScope(), controller: new AbortController() };
+  const session: NonNullable<typeof syncSession> = { owner: getSyncScope(), controller: new AbortController() };
   syncSession = session;
   activeSync = null;
-  useSyncStatus.setState({ status: 'syncing', pending: 0, writing: 0, conflicts: 0, lastSyncedAt: undefined, error: undefined, localError: false });
+  useSyncStatus.setState({ status: 'syncing', pending: 0, writing: 0, conflicts: 0, lastSyncedAt: undefined, error: undefined, localError: false, retryAt: undefined });
   let saveTimer: ReturnType<typeof setTimeout> | undefined;
   const scheduleSave = () => {
     clearTimeout(saveTimer);
@@ -98,7 +117,7 @@ export function startCloudSync() {
       useSyncStatus.setState((state) => ({ writing: Math.max(0, state.writing - 1), ...(phase === 'error' ? { status: 'error' as const, localError: true, error: 'Could not save changes on this device. Export a backup before reloading.' } : {}) }));
       if (phase === 'ready') void readOutbox(owner).then((operations) => {
         if (syncSession !== session || session.controller.signal.aborted || useSyncStatus.getState().localError) return;
-        useSyncStatus.setState({ pending: operations.length, status: navigator.onLine ? 'syncing' : 'offline' });
+        useSyncStatus.setState({ pending: operations.length, status: !navigator.onLine ? 'offline' : session.retryAt && Date.now() < session.retryAt ? 'error' : 'syncing' });
         if (navigator.onLine) scheduleSave();
       }).catch(() => { if (syncSession === session) useSyncStatus.setState({ status: 'error', localError: true }); });
     }
@@ -112,7 +131,7 @@ export function startCloudSync() {
   document.addEventListener('visibilitychange', onVisibility);
   const timer = window.setInterval(() => void syncNow(), 60_000);
   void syncNow();
-  const stop = () => { session.controller.abort(); clearTimeout(saveTimer); stopQueue(); if (syncSession === session) { syncSession = null; activeSync = null; useSyncStatus.setState({ status: 'device', pending: 0, writing: 0, conflicts: 0, lastSyncedAt: undefined, error: undefined, localError: false }); } stopWatching(); window.removeEventListener('online', onOnline); window.removeEventListener('offline', onOffline); document.removeEventListener('visibilitychange', onVisibility); window.clearInterval(timer); };
+  const stop = () => { session.controller.abort(); clearTimeout(saveTimer); clearTimeout(session.retryTimer); stopQueue(); if (syncSession === session) { syncSession = null; activeSync = null; useSyncStatus.setState({ status: 'device', pending: 0, writing: 0, conflicts: 0, lastSyncedAt: undefined, error: undefined, localError: false, retryAt: undefined }); } stopWatching(); window.removeEventListener('online', onOnline); window.removeEventListener('offline', onOffline); document.removeEventListener('visibilitychange', onVisibility); window.clearInterval(timer); };
   stopCurrentSync = stop;
   return stop;
 }
