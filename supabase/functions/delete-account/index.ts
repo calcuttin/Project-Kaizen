@@ -24,6 +24,8 @@ Deno.serve(async (request) => {
   const url = Deno.env.get('SUPABASE_URL')!;
   const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
   const admin = createClient(url, serviceKey, { auth: { persistSession: false } });
+  const { error: fenceError } = await admin.rpc('begin_account_deletion', { p_owner_id: userId });
+  if (fenceError) return Response.json({ error: 'Unable to start account deletion. Please retry.' }, { status: 500, headers: cors });
   try { await removeArtifacts(admin.storage.from('import-artifacts'), userId); }
   catch { return Response.json({ error: 'Unable to remove account files. Please retry.' }, { status: 500, headers: cors }); }
 
@@ -39,6 +41,9 @@ Deno.serve(async (request) => {
 
   const clerk = createClerkClient({ secretKey: clerkSecretKey });
   try { await clerk.users.deleteUser(userId); }
-  catch { return Response.json({ error: 'Unable to finish account deletion. Please retry.' }, { status: 500, headers: cors }); }
+  catch (error) {
+    // Retrying a completed deletion with an unexpired JWT is safe and idempotent.
+    if (!(error && typeof error === 'object' && 'status' in error && error.status === 404)) return Response.json({ error: 'Unable to finish account deletion. Please retry.' }, { status: 500, headers: cors });
+  }
   return Response.json({ deleted: true }, { headers: cors });
 });

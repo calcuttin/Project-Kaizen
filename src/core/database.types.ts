@@ -1,4 +1,4 @@
-// Migration SHA-256: c237dcc9301eeb1b8794a0bcd486f0839b718bd831476d8d5b34c68ef62414a0
+// Migration SHA-256: bec9aee5ae13a9222280185bd30e71f6c0018a60c8207333f368ce880c89fff9
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
 type EntityRow = { owner_id: string; space_id: string | null; id: string; payload: Json; revision: number; source: string | null; source_ref: string | null; created_at: string; updated_at: string; deleted_at: string | null };
@@ -19,6 +19,8 @@ export type Database = {
     };
     Views: Record<string, never>;
     Functions: {
+      account_is_active: { Args: Record<string, never>; Returns: boolean };
+      begin_account_deletion: { Args: { p_owner_id: string }; Returns: undefined };
       push_changes: { Args: { p_device_id: string; p_mutations: Json }; Returns: Json };
       pull_changes: { Args: { p_after_seq?: number }; Returns: { seq: number; entity_type: string; entity_id: string; operation: string; payload: Json; revision: number; changed_at: string }[] };
     };
