@@ -11,6 +11,8 @@ interface UIState {
   todayHidden: string[];
   gettingStarted: boolean | null;
   lastBackupAt: string | null;
+  backupReminderDismissedUntil: string | null;
+  dismissBackupReminder: () => void;
   setTodayLayout: (order: string[], hidden: string[]) => void;
   setGettingStarted: (show: boolean) => void;
   markBackup: () => void;
@@ -28,9 +30,11 @@ export const useUI = createPersistedStore<UIState>('ui', 1, (set, get) => ({
   todayHidden: [],
   gettingStarted: null,
   lastBackupAt: null,
+  backupReminderDismissedUntil: null,
+  dismissBackupReminder: () => set({ backupReminderDismissedUntil: new Date(Date.now() + 7 * 86400000).toISOString() }),
   setTodayLayout: (todayOrder, todayHidden) => set({ todayOrder, todayHidden }),
   setGettingStarted: (gettingStarted) => set({ gettingStarted }),
-  markBackup: () => set({ lastBackupAt: new Date().toISOString() }),
+  markBackup: () => set({ lastBackupAt: new Date().toISOString(), backupReminderDismissedUntil: null }),
   lens: 'all',
   theme: 'dark',
   externalBookCovers: false,

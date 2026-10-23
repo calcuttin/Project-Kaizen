@@ -423,3 +423,9 @@ dialog.modal:not([open]) { display: none; }
   .between { gap: 12px; flex-wrap: wrap; }
 }
 .conflict-preview { max-height: 220px; white-space: pre-wrap; overflow-wrap: anywhere; overflow: auto; font-size: 12px; }
+
+.backup-reminder { margin: 12px 28px 0; padding: 14px; border: 1px solid var(--border); border-radius: var(--radius-md); display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.backup-reminder p { max-width: 65ch; }
+.backup-reminder .row { flex-wrap: wrap; }
+.feed-statistics summary { cursor: pointer; padding: 12px 0; color: var(--text-2); }
+@media (max-width: 600px) { .backup-reminder { margin: 12px 12px 0; } }

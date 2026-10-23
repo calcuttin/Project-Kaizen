@@ -35,7 +35,7 @@ export function validateBackupField(path: string, value: unknown, current: unkno
   const fail = () => { throw new Error(`Invalid backup data in ${path}. Nothing was restored.`); };
   if (Array.isArray(current) ? !Array.isArray(value) : isRecord(current) ? !isRecord(value) : path === 'studio.initialized' ? !['boolean', 'number'].includes(typeof value) : typeof value !== typeof current) fail();
   if (path.endsWith('.importedCollections') && !strings(value)) fail();
-  if (path === 'library.goal' && !validateFields(value, { year: 'number', books: 'number', pagesPerDay: 'number' })) fail();
+  if (path === 'library.goal' && (!validateFields(value, { year: 'number', books: 'number', pagesPerDay: 'number' }) || (isRecord(value) && value.enabled !== undefined && typeof value.enabled !== 'boolean'))) fail();
   if (path === 'health.logs' && (!isRecord(value) || Object.values(value).some((dates) => !isRecord(dates) || Object.entries(dates).some(([date, n]) => !isDateKey(date) || typeof n !== 'number' || !Number.isFinite(n) || n < 0)))) fail();
   const schema = fields[path];
   if (!schema) return;

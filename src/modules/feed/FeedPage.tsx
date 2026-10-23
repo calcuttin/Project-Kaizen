@@ -44,19 +44,7 @@ export function FeedPage() {
   return (
     <div className="page">
       <PageHead eyebrow="Feed" title="Podcasts & letters" lead="Your Notion reading list plus everything you subscribe to, in one queue. Finish something → capture the one takeaway. Skip freely; the queue should never own you."
-        action={<><Button icon={Rss} onClick={() => setNewSource(true)}>Add source</Button><Button variant="primary" icon={Plus} onClick={() => setNewItem(true)} disabled={!srcList.length}>Add episode / issue</Button></>} />
-
-      <div className="grid cols-3" style={{ marginBottom: 20 }}>
-        <Card tint="var(--feed-soft)">
-          <div className="stats"><Stat value={queue.length} label="in queue" /><Stat value={`${Math.round(queuedMin / 60 * 10) / 10}h`} label="to get through" /></div>
-        </Card>
-        <Card title="This week" icon={Headphones} accent="var(--feed)">
-          <div className="stats"><Stat value={doneWeek.length} label="finished" /><Stat value={`${Math.round(minWeek / 60 * 10) / 10}h`} label="consumed" /></div>
-        </Card>
-        <Card title="Takeaways" icon={Lightbulb} accent="var(--feed)">
-          <div className="stats"><Stat value={done.filter((i) => i.takeaway).length} label="ideas captured" /><Stat value={srcList.length} label="sources" /></div>
-        </Card>
-      </div>
+        action={<><Button variant={!srcList.length ? 'primary' : undefined} icon={Rss} onClick={() => setNewSource(true)}>Add source</Button>{srcList.length > 0 && <Button variant="primary" icon={Plus} onClick={() => setNewItem(true)}>Add episode / issue</Button>}</>} />
 
       <div className="between" style={{ marginBottom: 14, flexWrap: 'wrap' }}>
         <Segmented value={view} onChange={setView} options={[{ value: 'queue', label: 'Queue', icon: ListMusic }, { value: 'takeaways', label: 'Takeaways', icon: Lightbulb }, { value: 'sources', label: 'Sources', icon: Rss }]} />
@@ -110,6 +98,18 @@ export function FeedPage() {
           })}
         </div>
       )}
+
+      <details className="feed-statistics" style={{ marginTop: 20 }}><summary>Activity summary · {doneWeek.length} finished this week</summary><div className="grid cols-3" style={{ marginBottom: 20 }}>
+        <Card tint="var(--feed-soft)">
+          <div className="stats"><Stat value={queue.length} label="in queue" /><Stat value={`${Math.round(queuedMin / 60 * 10) / 10}h`} label="to get through" /></div>
+        </Card>
+        <Card title="This week" icon={Headphones} accent="var(--feed)">
+          <div className="stats"><Stat value={doneWeek.length} label="finished" /><Stat value={`${Math.round(minWeek / 60 * 10) / 10}h`} label="consumed" /></div>
+        </Card>
+        <Card title="Takeaways" icon={Lightbulb} accent="var(--feed)">
+          <div className="stats"><Stat value={done.filter((i) => i.takeaway).length} label="ideas captured" /><Stat value={srcList.length} label="sources" /></div>
+        </Card>
+      </div></details>
 
       <NewSourceModal open={newSource} onClose={() => setNewSource(false)} defaultDomain={lens === 'business' ? 'business' : undefined} />
       <NewItemModal open={newItem} onClose={() => setNewItem(false)} sources={srcList} defaultSource={sourceFilter !== 'all' ? sourceFilter : undefined} />

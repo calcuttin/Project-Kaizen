@@ -55,35 +55,37 @@ export function LibraryPage() {
   useRecordLink(books, (id) => setOpen({ id, anchor: { x: window.innerWidth / 2, y: 100 } }));
   return <div className="page library-page">
     <PageHead eyebrow="A WORLD BETWEEN THE PAGES" title="Bookshelf" action={<>
-      <Segmented value={view} onChange={setView} options={[{ value: 'shelves', label: 'Shelves', icon: Rows3 }, { value: 'grid', label: 'Grid', icon: LayoutGrid }]} />
-      <Button icon={CheckCheck} onClick={() => setMarkMode((m) => !m)} className={markMode ? 'primary' : ''} title="Tap books to toggle Finished / Want to read">{markMode ? 'Done marking' : 'Mark read'}</Button>
+      {all.length > 0 && <Segmented value={view} onChange={setView} options={[{ value: 'shelves', label: 'Shelves', icon: Rows3 }, { value: 'grid', label: 'Grid', icon: LayoutGrid }]} />}
+      {all.length > 0 && <Button icon={CheckCheck} onClick={() => setMarkMode((m) => !m)} className={markMode ? 'primary' : ''} title="Tap books to toggle Finished / Want to read">{markMode ? 'Done marking' : 'Mark read'}</Button>}
       <Button icon={Upload} onClick={() => setImporting(true)}>Import</Button>
       <Button variant="primary" icon={Plus} onClick={() => setAdding(true)}>Add book</Button>
-      <button className="atmosphere-toggle" aria-pressed={atmosphere && !reducedMotion} disabled={reducedMotion} onClick={() => setAtmosphere(!atmosphere)} title={reducedMotion ? 'Your system preference reduces motion' : 'Pause or play all ambient motion'}><Sun size={16} /><span>{reducedMotion ? 'Motion reduced' : 'Atmosphere'}</span><b>{atmosphere && !reducedMotion ? 'On' : 'Off'}</b></button>
+      {all.length > 0 && <button className="atmosphere-toggle" aria-pressed={atmosphere && !reducedMotion} disabled={reducedMotion} onClick={() => setAtmosphere(!atmosphere)} title={reducedMotion ? 'Your system preference reduces motion' : 'Pause or play all ambient motion'}><Sun size={16} /><span>{reducedMotion ? 'Motion reduced' : 'Atmosphere'}</span><b>{atmosphere && !reducedMotion ? 'On' : 'Off'}</b></button>}
     </>} />
+    {!all.length && !shelfList.length && <Empty icon={BookOpen} title="Add your first book" hint="Shelves are optional. Start with one book or import a list, then organize it whenever you like." action={<Button onClick={() => setImporting(true)}>Import books</Button>} />}
     <div className="library-toolbar"><div className="library-summary">
       <button className="library-goal" onClick={() => setGoalEdit(true)} aria-label={`Edit ${year} reading goal`}>
-        <Ring value={finished.length} max={goal.books} color="var(--library)" label={finished.length} sub={`of ${goal.books}`} size={55} />
-        <span><small>{year} reading goal</small><strong>{finished.length} read <i>/</i> {Math.max(0, goal.books - finished.length)} to go</strong></span>
+        {goal.enabled === false ? <span><strong>Choose a reading goal</strong><small>Optional · set your own pace</small></span> : <><Ring value={finished.length} max={goal.books} color="var(--library)" label={finished.length} sub={`of ${goal.books}`} size={55} />
+        <span><small>{year} reading goal</small><strong>{finished.length} read <i>/</i> {Math.max(0, goal.books - finished.length)} to go</strong></span></>}
       </button>
-      <div className="library-rhythm"><BookOpen size={15} /><span><strong>{pages7} pages</strong><small>this week · {goal.pagesPerDay} a day to aim for</small></span></div>
+      <div className="library-rhythm"><BookOpen size={15} /><span><strong>{pages7} pages</strong><small>this week{goal.enabled !== false && <> · {goal.pagesPerDay} a day to aim for</>}</small></span></div>
       <div className="library-current"><small>ON YOUR NIGHTSTAND</small>{reading.length ? <button onClick={onBookClick(reading[0])}>{reading[0].title}</button> : <span>Your next chapter is waiting.</span>}</div>
 
     </div>
-    <div className="library-filterbar">
+    {all.length > 0 && <div className="library-filterbar">
       <div className="library-status" role="group" aria-label="Filter books by status">
         <button aria-pressed={tab === 'all'} className={tab === 'all' ? 'active' : ''} onClick={() => setTab('all')}>All <span>{all.length}</span></button>
         {(['reading', 'want', 'finished', 'paused'] as BookStatus[]).map((s) => <button key={s} aria-pressed={tab === s} className={tab === s ? 'active' : ''} onClick={() => setTab(s)}>{BOOK_STATUS[s]} <span>{count(s)}</span></button>)}
       </div>
       <div className="library-shelf-filter"><select aria-label="Choose shelf" value={shelfFilter} onChange={(e) => setShelfFilter(e.target.value)}><option value="all">All shelves · {shelfList.length}</option>{shelfList.map((s) => <option key={s.id} value={`shelf:${s.id}`}>{s.name} · {count(`shelf:${s.id}`)}</option>)}</select><button className="btn sm ghost" onClick={() => { setShelfName(''); setAddingShelf(true); }}><Plus size={13} />Shelf</button></div>
+    </div>}
+    {!all.length && <Button size="sm" onClick={() => { setShelfName(''); setAddingShelf(true); }}>Shelf</Button>}
     </div>
-    </div>
-    <div className="library-search row"><input type="search" aria-label="Search books" placeholder="Search by title, author, or ISBN" value={query} onChange={(e) => setQuery(e.target.value)} />{(query || tab !== 'all' || shelfFilter !== 'all') && <Button onClick={() => { setQuery(''); setTab('all'); setShelfFilter('all'); }}>Clear filters</Button>}<span className="muted" role="status">{visible.length} of {all.length} books</span></div>
-    <div className="library-cover-help">
+    {all.length > 0 && <div className="library-search row"><input type="search" aria-label="Search books" placeholder="Search by title, author, or ISBN" value={query} onChange={(e) => setQuery(e.target.value)} />{(query || tab !== 'all' || shelfFilter !== 'all') && <Button onClick={() => { setQuery(''); setTab('all'); setShelfFilter('all'); }}>Clear filters</Button>}<span className="muted" role="status">{visible.length} of {all.length} books</span></div>}
+    {all.length > 0 && <div className="library-cover-help">
       {externalBookCovers ? <><span>Online covers are on. Missing artwork may be unavailable from Open Library.</span><Button size="sm" onClick={() => { retryBookCovers(); toast('Retrying visible covers. Scroll to load more.'); }}>Retry covers</Button></> : <><span>Online covers are off. Enabling them sends book details and your IP address to Open Library.</span><Button size="sm" onClick={() => setExternalBookCovers(true)}>Enable online covers</Button></>}
-    </div>
+    </div>}
     {markMode && <div className="library-mark-note">Mark-read mode: select a book to toggle Finished / Want to read.</div>}
-    {!visible.length && (query || tab !== 'all' || shelfFilter !== 'all') ? <Empty icon={BookOpen} title="No matching books" hint="Try a different search or clear your filters." /> : view === 'shelves' ? <Bookcase shelves={shelfList.filter((s) => shelfFilter === 'all' || shelfFilter === `shelf:${s.id}`)} books={visible} tab={tab} markMode={markMode} onBookClick={onBookClick} atmosphere={atmosphere && !reducedMotion} onComputer={() => setComputer(true)} onDeleteShelf={(s) => { if (confirm(`Remove shelf “${s.name}”? Books stay in your library.`)) { deleteShelf(s.id); setShelfFilter('all'); } }} /> : !visible.length ? <Empty icon={BookOpen} title="No books here" hint="Try another shelf or add a book." action={<Button size="sm" onClick={() => setAdding(true)}>Add a book</Button>} /> : <div className="book-grid">{visible.map((b) => <BookCard key={b.id} book={b} onClick={onBookClick(b)} />)}</div>}
+    {!visible.length && (query || tab !== 'all' || shelfFilter !== 'all') ? <Empty icon={BookOpen} title="No matching books" hint="Try a different search or clear your filters." /> : !all.length && !shelfList.length ? null : view === 'shelves' ? <Bookcase shelves={shelfList.filter((s) => shelfFilter === 'all' || shelfFilter === `shelf:${s.id}`)} books={visible} tab={tab} markMode={markMode} onBookClick={onBookClick} atmosphere={atmosphere && !reducedMotion} onComputer={() => setComputer(true)} onDeleteShelf={(s) => { if (confirm(`Remove shelf “${s.name}”? Books stay in your library.`)) { deleteShelf(s.id); setShelfFilter('all'); } }} /> : !visible.length ? <Empty icon={BookOpen} title="No books here" hint="Try another shelf or add a book." action={<Button size="sm" onClick={() => setAdding(true)}>Add a book</Button>} /> : <div className="book-grid">{visible.map((b) => <BookCard key={b.id} book={b} onClick={onBookClick(b)} />)}</div>}
     <p className="library-footnote">{all.length} books · {shelfList.length} shelves · Countless places to go.</p>
     {adding && <AddBookModal open onClose={() => setAdding(false)} defaultShelf={shelfFilter.startsWith('shelf:') ? shelfFilter.slice(6) : undefined} />}
     <Modal open={addingShelf} onClose={() => setAddingShelf(false)} title="Create a shelf"><form className="form" onSubmit={(e) => { e.preventDefault(); const name = shelfName.trim(); if (!name) return; addShelf(name, themeForShelfName(name)); setAddingShelf(false); setShelfFilter('all'); setTab('all'); setQuery(''); setView('shelves'); }}><Field label="Shelf name"><input autoFocus value={shelfName} maxLength={120} onChange={(e) => setShelfName(e.target.value)} placeholder="Office, Fantasy, or a world of your own" /></Field><p className="muted">Each shelf comes with a display cabinet you can customize.</p><div className="form-actions"><button type="button" className="btn ghost" onClick={() => setAddingShelf(false)}>Cancel</button><button type="submit" className="btn primary" disabled={!shelfName.trim()}>Create shelf</button></div></form></Modal>
@@ -291,14 +293,14 @@ function BookDetail({ id, onClose }: { id: string; onClose: () => void }) {
 
 function GoalForm({ onDone }: { onDone: () => void }) {
   const { goal, setGoal } = useLibrary();
-  const [books, setBooks] = useState(String(goal.books)); const [ppd, setPpd] = useState(String(goal.pagesPerDay));
+  const [books, setBooks] = useState(goal.enabled === false ? '' : String(goal.books)); const [ppd, setPpd] = useState(String(goal.pagesPerDay));
   return (
     <div className="form">
       <div className="form-row">
         <Field label="Books this year"><input type="number" min={1} value={books} onChange={(e) => setBooks(e.target.value)} /></Field>
         <Field label="Pages per day"><input type="number" min={1} value={ppd} onChange={(e) => setPpd(e.target.value)} /></Field>
       </div>
-      <div className="form-actions"><Button variant="primary" onClick={() => { setGoal({ books: Number(books) || 1, pagesPerDay: Number(ppd) || 1 }); onDone(); }}>Save</Button></div>
+      <div className="form-actions"><Button variant="primary" disabled={!Number.isInteger(Number(books)) || Number(books) < 1 || !Number.isInteger(Number(ppd)) || Number(ppd) < 1} onClick={() => { setGoal({ enabled: true, year: new Date().getFullYear(), books: Number(books), pagesPerDay: Number(ppd) }); onDone(); }}>Save</Button></div>
     </div>
   );
 }
