@@ -13,6 +13,7 @@ AI-assisted implementation and verification by Codex, requested by the maintaine
 
 - Deno 2.9.8: edge type check passed; dependency audit reported no known vulnerabilities. Lifecycle scripts were not enabled.
 - Read-only HTTP checks passed against the documented evaluation deployment, `https://project-kaizen-gamma.vercel.app`, for the root document, hashed script and `/tasks` deep link.
+- The new container and edge jobs passed on GitHub. An independent database run failed while resolving the latest CLI release due to an unauthenticated GitHub rate limit. CI now uses setup-cli v3 with the fixed npm-published CLI 2.116.0, matching the application tool version.
 - The existing main CI passed after a retry of a Microsoft package-server 403; no application failure caused that run's installation error.
 
 ## Remaining verification
