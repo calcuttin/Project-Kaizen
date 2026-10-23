@@ -1,3 +1,4 @@
+import { validRecurrence } from '@/modules/tasks/recurrence';
 import { SHELF_THEMES } from '@/modules/library/themes';
 import { OBJECTS } from '@/modules/library/cabinet';
 import { isDateKey, isIsoDateTime } from './dates';
@@ -51,6 +52,11 @@ export function validateBackupField(path: string, value: unknown, current: unkno
     }
     for (const field of ['completedAt', 'undoneAt']) {
       if (record[field] !== undefined && record[field] !== '' && !isIsoDateTime(record[field])) fail();
+    }
+    if (path === 'tasks.tasks') {
+      if (record.recurrence !== undefined && (!validRecurrence(record.recurrence) || !isDateKey(record.due))) fail();
+      if (record.occurrence !== undefined && (!Number.isSafeInteger(record.occurrence) || (record.occurrence as number) < 0)) fail();
+      for (const field of ['seriesId', 'nextOccurrenceId']) if (record[field] !== undefined && typeof record[field] !== 'string') fail();
     }
     if (path === 'journal.entries' && record.date !== key) fail();
     if (path === 'health.habits' && (!(typeof record.target === 'number' && record.target > 0) || !Number.isInteger(record.daysPerWeek) || (record.daysPerWeek as number) < 1 || (record.daysPerWeek as number) > 7)) fail();

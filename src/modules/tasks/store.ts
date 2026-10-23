@@ -1,6 +1,7 @@
 import { createPersistedStore, registerStore } from '@/core/store';
 import { newId, nowIso } from '@/core/ids';
-import { isDateKey } from '@/core/dates';
+import { isDateKey, todayKey } from '@/core/dates';
+import { nextRecurringDate, validRecurrence, type Recurrence } from './recurrence';
 import type { BaseEntity, DateKey, Domain, ID } from '@/core/types';
 
 export type TaskStatus = 'inbox' | 'next' | 'doing' | 'waiting' | 'done';
@@ -32,6 +33,11 @@ export interface Task extends BaseEntity {
   due?: DateKey;
   scheduled?: DateKey;
   completedAt?: string;
+  recurrence?: Recurrence;
+  seriesId?: ID;
+  occurrence?: number;
+  /** Kept after reopening/deleting a successor to avoid generating it twice. */
+  nextOccurrenceId?: ID;
   tags: string[];
   subtasks: Subtask[];
   /** Position within its status column (kanban ordering). */
@@ -65,6 +71,7 @@ export const useTasks = createPersistedStore<TasksState>('tasks', 1, (set, get) 
 
   addTask: (input) => {
     validateTaskDates(input);
+    validateRecurrence(input);
     const now = nowIso();
     const status = input.status ?? 'inbox';
     const siblings = Object.values(get().tasks).filter((t) => t.status === status);
@@ -73,6 +80,7 @@ export const useTasks = createPersistedStore<TasksState>('tasks', 1, (set, get) 
       title: input.title.trim(), notes: input.notes, domain: input.domain ?? 'personal',
       projectId: input.projectId, status, priority: input.priority ?? 0,
       due: input.due, scheduled: input.scheduled, completedAt: input.completedAt ?? (status === 'done' ? now : undefined), tags: input.tags ?? [], subtasks: input.subtasks ?? [],
+      recurrence: input.recurrence, seriesId: input.seriesId, occurrence: input.occurrence, nextOccurrenceId: input.nextOccurrenceId,
       order: siblings.length ? Math.min(...siblings.map((s) => s.order)) - 1 : 0,
     };
     set((s) => ({ tasks: { ...s.tasks, [task.id]: task } }));
@@ -82,7 +90,10 @@ export const useTasks = createPersistedStore<TasksState>('tasks', 1, (set, get) 
   updateTask: (id, patch) => set((s) => {
     validateTaskDates(patch);
     const t = s.tasks[id]; if (!t) return s;
-    return { tasks: { ...s.tasks, [id]: { ...t, ...patch, updatedAt: nowIso() } } };
+    const updated = { ...t, ...patch, updatedAt: nowIso() };
+    validateRecurrence(updated);
+    if (patch.status !== undefined && patch.status !== t.status) updated.completedAt = patch.status === 'done' ? nowIso() : undefined;
+    return { tasks: completeOccurrence(s.tasks, t, updated) };
   }),
 
   deleteTask: (id) => set((s) => { const { [id]: _, ...rest } = s.tasks; return { tasks: rest }; }),
@@ -100,7 +111,7 @@ export const useTasks = createPersistedStore<TasksState>('tasks', 1, (set, get) 
     column.splice(at, 0, { ...t, status });
     const tasks = { ...s.tasks };
     column.forEach((x, i) => { tasks[x.id] = { ...x, order: i, updatedAt: nowIso(), ...(x.id === id ? { completedAt: status === 'done' ? nowIso() : undefined } : {}) }; });
-    return { tasks };
+    return { tasks: completeOccurrence(tasks, t, tasks[id]) };
   }),
 
   toggleSubtask: (taskId, subId) => {
@@ -142,6 +153,30 @@ function validateTaskDates(input: Partial<Task>) {
   for (const date of [input.due, input.scheduled]) {
     if (date && !isDateKey(date)) throw new Error('Choose a valid calendar date.');
   }
+}
+
+function validateRecurrence(task: Partial<Task>) {
+  if (task.recurrence !== undefined && (!validRecurrence(task.recurrence) || !isDateKey(task.due))) throw new Error('A repeating task needs a valid frequency and due date.');
+}
+
+function completeOccurrence(current: Record<ID, Task>, before: Task, updated: Task): Record<ID, Task> {
+  const tasks = { ...current, [updated.id]: updated };
+  if (before.status === 'done' || updated.status !== 'done' || !updated.recurrence || !updated.due || updated.nextOccurrenceId) return tasks;
+  const due = nextRecurringDate(updated.due, updated.recurrence, todayKey());
+  if (!due) return tasks;
+  const seriesId = updated.seriesId ?? updated.id;
+  const occurrence = (updated.occurrence ?? 0) + 1;
+  const id = `${seriesId}:repeat:${occurrence}`;
+  tasks[updated.id] = { ...updated, nextOccurrenceId: id };
+  // Same identity on every device, including when completion is retried.
+  if (!tasks[id]) tasks[id] = {
+    ...updated, id, seriesId, occurrence, nextOccurrenceId: undefined,
+    revision: 0, deletedAt: undefined, source: undefined, sourceRef: undefined,
+    status: 'next', due, scheduled: undefined, completedAt: undefined,
+    createdAt: updated.updatedAt, updatedAt: updated.updatedAt,
+    subtasks: updated.subtasks.map(step => ({ ...step, done: false })),
+  };
+  return tasks;
 }
 
 /* ── Selectors (pure helpers) ─────────────────────────── */
