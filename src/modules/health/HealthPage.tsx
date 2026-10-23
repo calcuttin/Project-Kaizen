@@ -42,6 +42,7 @@ export function HealthPage() {
         </Card>
       </div>
 
+      <p className="muted" style={{ marginBottom: 16 }}>Consistency uses the last seven days, starting on the day you created each habit. Daily habits count every tracked day. Weekly habits reach 100% at their weekly target, or at every tracked day if the habit is newer. Daily streaks apply only to everyday habits.</p>
       <Card title="Habits" icon={Flame} accent="var(--health)">
         {!list.length ? (
           <Empty icon={Flame} title="No habits yet" hint="Start with one. Something so small you can't say no." action={<Button size="sm" onClick={() => setNewHabit(true)}>Add a habit</Button>} />
@@ -185,7 +186,7 @@ function HabitModal({ open, onClose, habit }: { open: boolean; onClose: () => vo
           </div>
         )}
         {!valid && name.trim() && <p role="status">Enter a positive target and choose 1–7 days per week.</p>}
-        {habit && <p className="muted">Your logs are kept. Changing the target also changes how past logs are scored.</p>}
+        {habit && <p className="muted">Your logs are kept. Changing the daily target or days per week recalculates past consistency using the new settings. Switching away from Every day hides the daily streak; switching back recalculates it.</p>}
         <div className="form-actions"><Button variant="ghost" onClick={onClose}>Cancel</Button>{habit?.archived && <Button disabled={!valid || saving} onClick={() => void submit(true)}>Save & restore</Button>}<Button variant="primary" onClick={() => void submit()} disabled={!valid || saving}>{saving ? 'Saving…' : habit ? 'Save habit' : 'Add habit'}</Button></div>
       </div>
     </Modal>
