@@ -25,13 +25,16 @@ export function parseKindleClippings(text: string): KindlePreview {
     const titleLine = lines[0];
     const meta = lines[1];
     if (!titleLine || !meta) return [];
-    const titleMatch = titleLine.match(/^(.*?)\s*\(([^()]*)\)\s*$/);
-    const title = (titleMatch?.[1] ?? titleLine).trim();
-    const author = (titleMatch?.[2] ?? '').trim();
+    // Split the final author suffix without backtracking across an arbitrary title.
+    const authorStart = titleLine.lastIndexOf('(');
+    const authorCandidate = titleLine.slice(authorStart + 1, -1);
+    const hasAuthor = titleLine.endsWith(')') && authorStart >= 0 && !authorCandidate.includes(')');
+    const title = (hasAuthor ? titleLine.slice(0, authorStart) : titleLine).trim();
+    const author = hasAuthor ? authorCandidate.trim() : '';
     const kind: KindleClipping['kind'] = /note/i.test(meta) ? 'note' : /bookmark/i.test(meta) ? 'bookmark' : 'highlight';
     const location = meta.match(/Location\s+([\d-]+)/i)?.[1];
     const page = Number(meta.match(/page\s+(\d+)/i)?.[1]);
-    const dateText = meta.match(/Added on\s+(.+)$/i)?.[1];
+    const dateText = meta.match(/Added on\s+(\S.*)$/i)?.[1];
     const parsedDate = dateText ? new Date(dateText) : null;
     const content = lines.slice(2).filter(Boolean).join('\n').trim();
     if (kind !== 'bookmark' && !content) { warnings.push(`Clipping ${index + 1} was skipped because it was empty.`); return []; }

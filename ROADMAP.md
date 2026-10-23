@@ -4,6 +4,10 @@ Kaizen's roadmap connects public reviews to actionable issues, implementation pu
 
 [Review archive](docs/reviews/README.md) · [Open roadmap issues](https://github.com/calcuttin/Project-Kaizen/issues?q=is%3Aissue%20is%3Aopen%20label%3Aroadmap) · [AI-assisted work](https://github.com/calcuttin/Project-Kaizen/issues?q=is%3Aissue%20label%3Aai-assisted)
 
+## Repository monitoring — 2026-10-23
+
+Dependabot alerts/security updates, secret scanning, push protection and GitHub-managed CodeQL default setup are enabled. [Configuration and scan evidence](docs/reviews/2026-10-23/security-monitoring.md) records results and limits; [#18](https://github.com/calcuttin/Project-Kaizen/issues/18) remains the live security tracker. Hosted backup/recovery remains deferred.
+
 ## October 2026 security and product fixes
 
 Implementation: [PR #17](https://github.com/calcuttin/Project-Kaizen/pull/17) · Release verification: [tracker #18](https://github.com/calcuttin/Project-Kaizen/issues/18).
