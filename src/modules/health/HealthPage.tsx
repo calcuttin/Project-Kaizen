@@ -97,10 +97,10 @@ function HabitRow({ habit, onEdit }: { habit: Habit; onEdit: () => void }) {
             const on = habitDone(habit, log[k]);
             const future = k > today;
             return (
-              <button key={k} className={`habit-day ${on ? 'on' : ''} ${k === today ? 'today' : ''}`} disabled={future || !valid} aria-pressed={on} aria-label={`${habit.name}: ${k}`} style={future ? { opacity: .35 } : undefined}
+              <button key={k} className={`habit-day ${on ? 'on' : ''} ${k === today ? 'today' : ''}`} disabled={future || !valid} aria-pressed={on} aria-label={`${habit.name}: ${new Date(`${k}T12:00:00`).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}`} style={future ? { opacity: .35 } : undefined}
                 title={`${humanDate(k)}${log[k] ? ` · ${log[k]}` : ''}`}
                 onClick={() => (habit.kind === 'count' ? incrementLog(habit.id, on ? -log[k] : habit.target, k) : toggleLog(habit.id, k))}>
-                {['M', 'T', 'W', 'T', 'F', 'S', 'S'][week.indexOf(k)]}
+                <span aria-hidden="true">{['M', 'T', 'W', 'T', 'F', 'S', 'S'][week.indexOf(k)]}{on ? ' ✓' : ''}</span>
               </button>
             );
           })}
