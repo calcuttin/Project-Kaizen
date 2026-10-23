@@ -14,18 +14,18 @@ The maintainer authorized Codex to implement and publish this work. The implemen
 
 ## Follow-up implementation PRs — 2026-10-22
 
-[Review/evidence index](docs/reviews/2026-10-22/follow-up/README.md). These are proposed, tested changes; none of these follow-up PRs is merged yet.
+[Review/evidence index](docs/reviews/2026-10-22/follow-up/README.md). All seven follow-up PRs are merged. [Deployment and live verification record](docs/reviews/2026-10-22/follow-up/deployment.md); current web deployment status is recorded in [#18](https://github.com/calcuttin/Project-Kaizen/issues/18).
 
 | Scope | Implementation | Remaining |
 | --- | --- | --- |
 | #4 and #8: task states and accessibility | #29: distinct empty/filter/completed states, board keyboard actions, habit labels/targets, measured contrast | Full screen-reader and physical-device/zoom validation for #8 |
-| #5–7: search and habits | #30: area grouping, workspace/lens checks, scoring explanation and boundary/edit/archive tests | Review and merge after #29 |
-| #9–11: first actions, mobile Feed, backups | #31: explicit reading goals, manual Studio setup, queue-first Feed, More navigation, weekly reminder and separate reset | Review and merge |
-| #12: initial loading | #32: 17.7% less initial JS in the measured device-mode profile; reproducible evidence and size budget | Review and merge; no live-cloud performance claim |
-| #16: recurring tasks | #33: daily/weekly/monthly repeats with retained history and duplicate protection | Review and merge after #32 |
-| #18: release/security | #28: verified container/edge checks and live table/storage isolation; #34: confirmed stale-session deletion fix | Deploy and verify deletion guard after merge; broader CSP and operational backup/abuse checks |
+| #5–7: search and habits | #30: area grouping, workspace/lens checks, scoring explanation and boundary/edit/archive tests | Complete |
+| #9–11: first actions, mobile Feed, backups | #31: explicit reading goals, manual Studio setup, queue-first Feed, More navigation, weekly reminder and separate reset | Complete |
+| #12: initial loading | #32: 17.7% less initial JS in the measured device-mode profile; reproducible evidence and size budget | Complete; no live-cloud performance claim |
+| #16: recurring tasks | #33: daily/weekly/monthly repeats with retained history and duplicate protection | Complete |
+| #18: release/security | #28: verified container/edge checks and live table/storage isolation; #34: confirmed stale-session deletion fix | Deletion guard deployed and verified; broader CSP and operational backup/abuse checks remain |
 
-#2, #3 and #14 are complete. All seven new PRs retain AI-assisted attribution and evidence limits. #30 depends on #29, #33 on #32, and #34 on #28. Live GitHub issue bodies record current checklist status; completed implementation does not imply deployment.
+#2, #3 and #14 are complete. All seven follow-up PRs retain AI-assisted attribution and evidence limits. Bases merged before their dependent PRs: #29 before #30, #32 before #33, and #28 before #34. Live GitHub issue bodies record current deployment and checklist status.
 
 ## September 2026 application review
 
