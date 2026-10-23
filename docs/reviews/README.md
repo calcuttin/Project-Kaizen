@@ -14,6 +14,10 @@ Kaizen develops in the open. This archive records what was reviewed, what was ob
 
 The historical security review stays at its existing path to preserve links. Its statements describe the situation at the time of that review.
 
+## October implementation follow-up
+
+[Searchable PR/evidence index](2026-10-22/follow-up/README.md) covers release/security, tasks, accessibility, search, habits, onboarding, Feed, backups, loading, and recurrence. It records PR dependencies, combined verification, and the remaining manual/operational checks.
+
 ## Search
 
 - GitHub issues: use `is:issue label:roadmap`, `is:issue label:ai-assisted`, or a review ID such as `REV-2026-09-08-APP`.
