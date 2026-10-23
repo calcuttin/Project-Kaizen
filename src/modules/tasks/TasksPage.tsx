@@ -106,13 +106,13 @@ export function TasksPage() {
         </label>
       </div>
 
-      {!showDone && visible.length > 0 && openCount === 0 ? <Empty icon={CheckSquare} title="All caught up" hint="Your completed tasks are still here." action={<Button onClick={() => setShowDone(true)}>Show completed</Button>} /> : view === 'list' ? (
+      {visible.length === 0 ? (Object.keys(tasks).length === 0 ? <Empty icon={Inbox} title="No tasks yet" hint="Add your first task above. Small steps count." /> : <Empty icon={Inbox} title="No matching tasks" hint="Your tasks are still saved. Clear the project and workspace filters to see them." action={<Button onClick={() => { setProjectFilter('all'); useUI.getState().setLens('all'); }}>Clear filters</Button>} />) : !showDone && openCount === 0 ? <Empty icon={CheckSquare} title="All caught up" hint="Your completed tasks are still here." action={<Button onClick={() => setShowDone(true)}>Show completed</Button>} /> : view === 'list' ? (
         <TaskList tasks={visible} showDone={showDone} onOpen={setEditing} />
       ) : (
         <Board tasks={visible.filter((task) => showDone || task.status !== 'done')} onOpen={setEditing} />
       )}
 
-      <TaskEditor id={editing} onClose={() => setEditing(null)} />
+      <TaskEditor id={editing} onClose={() => { const id = editing; setEditing(null); requestAnimationFrame(() => document.getElementById(`task-card-${id}`)?.focus()); }} />
       <NewProjectModal open={newProject} onClose={() => setNewProject(false)} defaultDomain={lens === 'business' ? 'business' : 'personal'} />
       <ProjectEditor key={editingProject} id={editingProject} onClose={() => setEditingProject(null)} />
     </div>
@@ -195,7 +195,7 @@ function Board({ tasks, onOpen }: { tasks: Task[]; onOpen: (id: ID) => void }) {
             {items.map((t) => {
               const project = t.projectId ? projects[t.projectId] : undefined;
               return (
-                <div key={t.id} className={`tcard ${dragging === t.id ? 'dragging' : ''}`} draggable
+                <button type="button" id={`task-card-${t.id}`} aria-label={`Open task: ${t.title}`} key={t.id} className={`tcard ${dragging === t.id ? 'dragging' : ''}`} draggable
                   onDragStart={(e) => { e.dataTransfer.setData('text/kaizen-task', t.id); setDragging(t.id); }}
                   onDragEnd={() => { setDragging(null); setOver(null); }}
                   onClick={() => onOpen(t.id)}>
@@ -205,7 +205,7 @@ function Board({ tasks, onOpen }: { tasks: Task[]; onOpen: (id: ID) => void }) {
                     {project && <span className="chip"><span style={{ width: 7, height: 7, borderRadius: 4, background: project.color }} />{project.name}</span>}
                     {t.due && <Chip icon={Calendar} tone={isOverdue(t.due) && t.status !== 'done' ? 'danger' : undefined}>{humanDate(t.due)}</Chip>}
                   </div>
-                </div>
+                </button>
               );
             })}
             {!items.length && <div className="faint" style={{ fontSize: 12, textAlign: 'center', padding: 16 }}>Drop here</div>}
