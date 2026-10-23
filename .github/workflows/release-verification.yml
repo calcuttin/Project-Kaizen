@@ -1,0 +1,39 @@
+name: Release verification
+on:
+  pull_request:
+    paths: ['Dockerfile', 'docker/**', 'supabase/functions/**', 'scripts/check-release-http.mjs', '.github/workflows/release-verification.yml', 'package.json', 'pnpm-lock.yaml']
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  container:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 24 }
+      - run: docker build --tag kaizen-release-check .
+      - run: docker run --detach --name kaizen-release-check --publish 8080:8080 kaizen-release-check
+      - run: docker exec kaizen-release-check nginx -t
+      - name: Verify document, assets, deep link and error headers
+        run: |
+          for attempt in $(seq 1 20); do
+            if curl --fail --silent http://127.0.0.1:8080/ > /dev/null; then break; fi
+            sleep 1
+          done
+          node scripts/check-release-http.mjs http://127.0.0.1:8080 --container
+      - if: always()
+        run: docker logs kaizen-release-check
+  edge:
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: supabase/functions/delete-account
+    steps:
+      - uses: actions/checkout@v4
+      - uses: denoland/setup-deno@v2
+        with: { deno-version: v2.9.8 }
+      - run: deno task check
+      - run: deno task audit

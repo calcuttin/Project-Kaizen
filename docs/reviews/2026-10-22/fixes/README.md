@@ -1,6 +1,6 @@
 # Fixes following REV-2026-10-22-SECURITY-PRODUCT
 
-Proposed for review on `codex/security-product-fixes`, based on `95f552d`. AI-assisted implementation and verification by Codex, authorized by the maintainer. This records implementation evidence, not independent human approval. The maintainer authorized publication of this branch and the review to GitHub. The changes have not been merged or deployed.
+Proposed for review on `codex/security-product-fixes`, based on `95f552d`. AI-assisted implementation and verification by Codex, authorized by the maintainer. This records implementation evidence, not independent human approval. The maintainer authorized publication of this branch and the review to GitHub. The changes merged in PR #17. Live release verification remains tracked in #18.
 
 Published for review in [PR #17](https://github.com/calcuttin/Project-Kaizen/pull/17); remaining release checks are tracked in [#18](https://github.com/calcuttin/Project-Kaizen/issues/18).
 
@@ -37,4 +37,6 @@ Published for review in [PR #17](https://github.com/calcuttin/Project-Kaizen/pul
 - Real two-account database/storage policy checks, concurrent sync conflict handling, account deletion during active sync, and operational rate-limit/backup checks remain separate controlled-environment work. No live users or production data were modified.
 - Recurring tasks (#16), the remaining mobile Feed refinements (#10), backup reminder UX (#11), and broader accessibility work (#8) are roadmap features beyond the confirmed fixes implemented here.
 
-The original [review](../review.md) remains a dated record. These changes are ready for code review and deployment verification; they are not a security certification.
+The original [review](../review.md) remains a dated record. These changes are merged, with release verification continuing; they are not a security certification.
+
+Follow-up: [release verification](../follow-up/release-verification.md).
