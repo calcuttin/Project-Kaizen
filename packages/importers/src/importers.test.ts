@@ -40,6 +40,13 @@ describe('Kindle clippings importer', () => {
     expect(result.clippings[0]).toMatchObject({ title, author: '', content: 'Text', annotatedAt: undefined });
   });
 
+  it('handles repeated date markers and requires whitespace before a date', () => {
+    const parse = (meta: string) => parseKindleClippings(`Book (Author)\n${meta}\n\nText`).clippings[0];
+    expect(parse(`- Your Highlight | ${'added on !'.repeat(25_000)}\u2028invalid`).annotatedAt).toBeUndefined();
+    expect(parse('- Your Highlight | Added on2024-01-01T13:00:00Z').annotatedAt).toBeUndefined();
+    expect(parse('- Your Highlight | aDdEd On\t2024-01-01T13:00:00Z').annotatedAt).toBe('2024-01-01T13:00:00.000Z');
+  });
+
   it('groups books and produces stable source references', () => {
     const text = `A Book (An Author)\n- Your Highlight on page 12 | Location 120-122 | Added on Monday, January 1, 2024 1:00:00 PM\n\nA useful idea.\n==========\nA Book (An Author)\n- Your Note on Location 123 | Added on Monday, January 1, 2024 1:01:00 PM\n\nRemember this.\n==========`;
     const first = parseKindleClippings(text);

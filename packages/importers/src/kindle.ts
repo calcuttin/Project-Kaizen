@@ -34,7 +34,10 @@ export function parseKindleClippings(text: string): KindlePreview {
     const kind: KindleClipping['kind'] = /note/i.test(meta) ? 'note' : /bookmark/i.test(meta) ? 'bookmark' : 'highlight';
     const location = meta.match(/Location\s+([\d-]+)/i)?.[1];
     const page = Number(meta.match(/page\s+(\d+)/i)?.[1]);
-    const dateText = meta.match(/Added on\s+(\S.*)$/i)?.[1];
+    const dateMarker = 'added on';
+    const dateStart = meta.toLowerCase().indexOf(dateMarker);
+    const dateSuffix = dateStart < 0 ? '' : meta.slice(dateStart + dateMarker.length);
+    const dateText = dateSuffix[0]?.trim() === '' ? dateSuffix.trim() : undefined;
     const parsedDate = dateText ? new Date(dateText) : null;
     const content = lines.slice(2).filter(Boolean).join('\n').trim();
     if (kind !== 'bookmark' && !content) { warnings.push(`Clipping ${index + 1} was skipped because it was empty.`); return []; }
