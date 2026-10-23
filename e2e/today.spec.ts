@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { readPersistedValue } from './persistence';
 
 test('Today offers direct entry actions and preserves the daily check-in', async ({ page }) => {
   await page.goto('/');
@@ -10,6 +11,7 @@ test('Today offers direct entry actions and preserves the daily check-in', async
   await page.getByRole('textbox', { name: 'Add a win', exact: true }).fill('Read a chapter');
   await page.getByRole('button', { name: 'Add win', exact: true }).click();
   await expect(page.getByText('Read a chapter', { exact: true })).toBeVisible();
+  await expect.poll(() => readPersistedValue(page, 'journal')).toContain('"Read a chapter"');
   await page.reload();
   await expect(page.getByText('Plan the week', { exact: true })).toBeVisible();
   await expect(page.getByRole('textbox', { name: "Today's intention", exact: true })).toHaveValue('Make time for a walk');
