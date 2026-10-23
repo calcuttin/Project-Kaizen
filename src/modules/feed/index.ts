@@ -1,6 +1,7 @@
 import { Rss } from 'lucide-react';
 import type { KaizenModule } from '@/app/modules';
-import { FeedPage } from './FeedPage';
+import { lazy } from 'react';
+const FeedPage = lazy(() => import('./FeedPage').then(m => ({ default: m.FeedPage })));
 import { UpNextWidget } from './widgets';
 
 export const feedModule: KaizenModule = {

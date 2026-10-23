@@ -1,0 +1,92 @@
+{
+  "profile": "Chromium, 390x844, cold cache, 4x CPU slowdown, 150ms latency, 1.6Mbps download; three runs; device mode; gzip server",
+  "results": [
+    {
+      "readyMs": 1790.3999999985099,
+      "fcpMs": 1528,
+      "scripts": [
+        {
+          "name": "/assets/store-q2nkW2Ec.js",
+          "gzipBytes": 18496,
+          "decodedBytes": 54132
+        },
+        {
+          "name": "/assets/index-COOqlIaF.js",
+          "gzipBytes": 190135,
+          "decodedBytes": 664267
+        },
+        {
+          "name": "/assets/preload-helper-Czpn1I53.js",
+          "gzipBytes": 675,
+          "decodedBytes": 1196
+        },
+        {
+          "name": "/assets/TodayPage-ODVUQEYp.js",
+          "gzipBytes": 3395,
+          "decodedBytes": 8926
+        }
+      ],
+      "scriptMs": 77.19,
+      "taskMs": 251.70199999999997,
+      "jsGzipBytes": 212701
+    },
+    {
+      "readyMs": 1784.7999999970198,
+      "fcpMs": 1524,
+      "scripts": [
+        {
+          "name": "/assets/index-COOqlIaF.js",
+          "gzipBytes": 190135,
+          "decodedBytes": 664267
+        },
+        {
+          "name": "/assets/preload-helper-Czpn1I53.js",
+          "gzipBytes": 675,
+          "decodedBytes": 1196
+        },
+        {
+          "name": "/assets/store-q2nkW2Ec.js",
+          "gzipBytes": 18496,
+          "decodedBytes": 54132
+        },
+        {
+          "name": "/assets/TodayPage-ODVUQEYp.js",
+          "gzipBytes": 3395,
+          "decodedBytes": 8926
+        }
+      ],
+      "scriptMs": 69.631,
+      "taskMs": 239.052,
+      "jsGzipBytes": 212701
+    },
+    {
+      "readyMs": 1784.8999999985099,
+      "fcpMs": 1524,
+      "scripts": [
+        {
+          "name": "/assets/store-q2nkW2Ec.js",
+          "gzipBytes": 18496,
+          "decodedBytes": 54132
+        },
+        {
+          "name": "/assets/index-COOqlIaF.js",
+          "gzipBytes": 190135,
+          "decodedBytes": 664267
+        },
+        {
+          "name": "/assets/preload-helper-Czpn1I53.js",
+          "gzipBytes": 675,
+          "decodedBytes": 1196
+        },
+        {
+          "name": "/assets/TodayPage-ODVUQEYp.js",
+          "gzipBytes": 3395,
+          "decodedBytes": 8926
+        }
+      ],
+      "scriptMs": 69.478,
+      "taskMs": 238.35,
+      "jsGzipBytes": 212701
+    }
+  ]
+}

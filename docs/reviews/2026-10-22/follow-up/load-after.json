@@ -1,0 +1,137 @@
+{
+  "profile": "Chromium, 390x844, cold cache, 4x CPU slowdown, 150ms latency, 1.6Mbps download; three runs; device mode; gzip server",
+  "results": [
+    {
+      "readyMs": 1614,
+      "fcpMs": 1344,
+      "scripts": [
+        {
+          "name": "/assets/store-q2nkW2Ec.js",
+          "gzipBytes": 18496,
+          "decodedBytes": 54132
+        },
+        {
+          "name": "/assets/index-Blox2fwx.js",
+          "gzipBytes": 106249,
+          "decodedBytes": 370259
+        },
+        {
+          "name": "/assets/preload-helper-Czpn1I53.js",
+          "gzipBytes": 675,
+          "decodedBytes": 1196
+        },
+        {
+          "name": "/assets/ui-oV0QalWG.js",
+          "gzipBytes": 2979,
+          "decodedBytes": 7423
+        },
+        {
+          "name": "/assets/react-dom-CtEwR1Ku.js",
+          "gzipBytes": 42475,
+          "decodedBytes": 132637
+        },
+        {
+          "name": "/assets/Toast-e5xhnByW.js",
+          "gzipBytes": 704,
+          "decodedBytes": 1401
+        },
+        {
+          "name": "/assets/TodayPage-BS4xCseV.js",
+          "gzipBytes": 3422,
+          "decodedBytes": 8986
+        }
+      ],
+      "scriptMs": 69.283,
+      "taskMs": 249.964,
+      "jsGzipBytes": 175000
+    },
+    {
+      "readyMs": 1605.3999999985099,
+      "fcpMs": 1344,
+      "scripts": [
+        {
+          "name": "/assets/store-q2nkW2Ec.js",
+          "gzipBytes": 18496,
+          "decodedBytes": 54132
+        },
+        {
+          "name": "/assets/react-dom-CtEwR1Ku.js",
+          "gzipBytes": 42475,
+          "decodedBytes": 132637
+        },
+        {
+          "name": "/assets/index-Blox2fwx.js",
+          "gzipBytes": 106249,
+          "decodedBytes": 370259
+        },
+        {
+          "name": "/assets/preload-helper-Czpn1I53.js",
+          "gzipBytes": 675,
+          "decodedBytes": 1196
+        },
+        {
+          "name": "/assets/ui-oV0QalWG.js",
+          "gzipBytes": 2979,
+          "decodedBytes": 7423
+        },
+        {
+          "name": "/assets/Toast-e5xhnByW.js",
+          "gzipBytes": 704,
+          "decodedBytes": 1401
+        },
+        {
+          "name": "/assets/TodayPage-BS4xCseV.js",
+          "gzipBytes": 3422,
+          "decodedBytes": 8986
+        }
+      ],
+      "scriptMs": 66.432,
+      "taskMs": 236.924,
+      "jsGzipBytes": 175000
+    },
+    {
+      "readyMs": 1619.1000000014901,
+      "fcpMs": 1348,
+      "scripts": [
+        {
+          "name": "/assets/store-q2nkW2Ec.js",
+          "gzipBytes": 18496,
+          "decodedBytes": 54132
+        },
+        {
+          "name": "/assets/index-Blox2fwx.js",
+          "gzipBytes": 106249,
+          "decodedBytes": 370259
+        },
+        {
+          "name": "/assets/preload-helper-Czpn1I53.js",
+          "gzipBytes": 675,
+          "decodedBytes": 1196
+        },
+        {
+          "name": "/assets/ui-oV0QalWG.js",
+          "gzipBytes": 2979,
+          "decodedBytes": 7423
+        },
+        {
+          "name": "/assets/Toast-e5xhnByW.js",
+          "gzipBytes": 704,
+          "decodedBytes": 1401
+        },
+        {
+          "name": "/assets/react-dom-CtEwR1Ku.js",
+          "gzipBytes": 42475,
+          "decodedBytes": 132637
+        },
+        {
+          "name": "/assets/TodayPage-BS4xCseV.js",
+          "gzipBytes": 3422,
+          "decodedBytes": 8986
+        }
+      ],
+      "scriptMs": 71.262,
+      "taskMs": 247.114,
+      "jsGzipBytes": 175000
+    }
+  ]
+}

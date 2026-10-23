@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react';
 import { guidesPlugin } from './scripts/guides-plugin.ts';
 
 export default defineConfig({
+  build: { manifest: true },
   plugins: [react(), guidesPlugin()],
   resolve: {
     // '/src' is resolved relative to the project root by Vite.

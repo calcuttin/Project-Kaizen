@@ -7,7 +7,7 @@ import { todayKey } from '@/core/dates';
 import { parseQuickAdd } from '@/core/parse';
 import { inLens } from '@/core/types';
 import { sortTasks, useTasks } from './store';
-import { TaskEditor, TaskRow } from './TasksPage';
+import { TaskEditor, TaskRow } from './shared';
 
 /** Today's focus: overdue + due today + scheduled today + in-progress, then top priorities to fill. */
 export function FocusWidget() {

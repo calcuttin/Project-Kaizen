@@ -2,7 +2,8 @@ import { CheckSquare, Plus } from 'lucide-react';
 import type { KaizenModule } from '@/app/modules';
 import { parseQuickAdd } from '@/core/parse';
 import { toast } from '@/components/Toast';
-import { TasksPage } from './TasksPage';
+import { lazy } from 'react';
+const TasksPage = lazy(() => import('./TasksPage').then(m => ({ default: m.TasksPage })));
 import { FocusWidget } from './widgets';
 import { useTasks } from './store';
 
