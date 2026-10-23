@@ -75,3 +75,34 @@ test('cloud accounts have separate data and survive reload and sign-out', async 
   await page.goto('/library');
   await expect(page.getByRole('button', { name: 'Account A Private Book' })).toBeVisible();
 });
+
+test('a throttled upload stays local and resumes after Retry-After', async ({ page }) => {
+  await page.route('**/node_modules/.vite/deps/@clerk_react.js*', route => route.fulfill({
+    contentType: 'application/javascript',
+    body: clerkFixture.replace('/node_modules/.vite/deps/react.js', `/node_modules/.vite/deps/react.js${new URL(route.request().url()).search}`),
+  }));
+  const pushes: { at: number; body: string }[] = [];
+  await page.route('https://account-isolation.invalid/**', route => {
+    if (route.request().url().endsWith('/push_changes')) {
+      pushes.push({ at: Date.now(), body: route.request().postData() ?? '' });
+      if (pushes.length === 1) return route.fulfill({ status: 429, headers: { 'Retry-After': '3', 'Access-Control-Expose-Headers': 'Retry-After' }, json: { message: 'Slow down' } });
+      const body = route.request().postDataJSON() as { p_mutations: { mutationId: string }[] };
+      return route.fulfill({ json: body.p_mutations.map(item => ({ mutation_id: item.mutationId, status: 'accepted', revision: 1 })) });
+    }
+    return route.fulfill({ json: [] });
+  });
+  await page.goto('/tasks');
+  const quick = page.getByRole('textbox', { name: 'Quick add task', exact: true });
+  await quick.fill('Throttled task'); await quick.press('Enter');
+  await expect.poll(() => pushes.length).toBe(1);
+  await page.getByRole('link', { name: 'Settings', exact: true }).click();
+  await expect(page.getByRole('status').filter({ hasText: 'Saving paused' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Save now', exact: true })).toBeDisabled();
+  await expect(page.getByText('Cloud saving is temporarily paused.', { exact: false })).toBeVisible();
+  await expect.poll(() => pushes.length, { timeout: 10_000 }).toBe(2);
+  expect(pushes[1].at - pushes[0].at).toBeGreaterThanOrEqual(2900);
+  expect(pushes[1].body).toBe(pushes[0].body);
+  await expect(page.getByRole('status').filter({ hasText: /^Saved$/ }).first()).toBeVisible();
+  await page.getByRole('link', { name: 'Tasks', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Open task: Throttled task', exact: true })).toBeVisible();
+});

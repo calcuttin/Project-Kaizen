@@ -1,3 +1,4 @@
+import { startBarcodeScan } from './barcodeScanner';
 import { useRecordLink } from '@/core/useRecordLink';
 import { useUI } from '@/app/uiStore';
 import { deleteWithUndo } from '@/core/undo';
@@ -198,33 +199,13 @@ function AddBookModal({ open, onClose, defaultShelf }: { open: boolean; onClose:
 function BarcodeScanner({ onCode, onClose }: { onCode: (code: string) => void; onClose: () => void }) {
   const video = useRef<HTMLVideoElement>(null);
   const [message, setMessage] = useState('Point the camera at the ISBN barcode.');
+  const onCodeRef = useRef(onCode);
+  onCodeRef.current = onCode;
   useEffect(() => {
-    type Detection = { rawValue?: string };
-    type Detector = { detect(source: CanvasImageSource): Promise<Detection[]> };
-    type DetectorConstructor = new (options: { formats: string[] }) => Detector;
-    const Detector = (window as unknown as { BarcodeDetector?: DetectorConstructor }).BarcodeDetector;
-    if (!Detector || !navigator.mediaDevices?.getUserMedia) { setMessage('Barcode scanning is not supported in this browser. Enter the ISBN above.'); return; }
-    let active = true, stream: MediaStream | undefined, timer = 0;
-    const detector = new Detector({ formats: ['ean_13'] });
-    void navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' } }, audio: false }).then(async (nextStream) => {
-      stream = nextStream;
-      if (!active || !video.current) { nextStream.getTracks().forEach((track) => track.stop()); return; }
-      video.current.srcObject = nextStream;
-      await video.current.play();
-      const scan = async () => {
-        if (!active || !video.current) return;
-        try {
-          const result = await detector.detect(video.current);
-          const code = result[0]?.rawValue?.replace(/\D/g, '');
-          if (code?.length === 13 && /^(978|979)/.test(code)) { onCode(code); return; }
-        } catch { /* The video may not have a decodable frame yet. */ }
-        timer = window.setTimeout(scan, 250);
-      };
-      void scan();
-    }).catch(() => setMessage('Camera access was unavailable. Enter the ISBN above.'));
-    return () => { active = false; window.clearTimeout(timer); stream?.getTracks().forEach((track) => track.stop()); };
-  }, [onCode]);
-  return <div className="barcode-scanner"><video ref={video} muted playsInline /><div className="barcode-target" /><span>{message}</span><Button size="sm" onClick={onClose}>Cancel scan</Button></div>;
+    if (!video.current) return;
+    return startBarcodeScan(video.current, code => onCodeRef.current(code), setMessage);
+  }, []);
+  return <div className="barcode-scanner"><video ref={video} muted playsInline /><div className="barcode-target" /><span role="status">{message}</span><Button size="sm" onClick={onClose}>Cancel scan</Button></div>;
 }
 
 /** Book detail — rendered inside the click-anchored Popover. */
