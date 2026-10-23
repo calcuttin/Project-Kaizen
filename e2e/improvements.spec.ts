@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { readPersistedValue } from './persistence';
 
 test('Today preferences survive reload, and the checklist can be reopened', async ({ page }) => {
   await page.goto('/');
@@ -9,6 +10,7 @@ test('Today preferences survive reload, and the checklist can be reopened', asyn
   await dialog.getByRole('checkbox', { name: 'Studio', exact: true }).uncheck();
   await dialog.getByRole('button', { name: 'Move Reading up' }).click();
   await dialog.getByRole('button', { name: 'Close', exact: true }).click();
+  await expect.poll(async () => JSON.parse(await readPersistedValue(page, 'ui') ?? '{}')).toMatchObject({ state: { todayHidden: ['studio'], gettingStarted: false } });
   await page.reload();
   await expect(page.getByRole('link', { name: 'Explore Studio' })).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Dismiss checklist' })).toHaveCount(0);
@@ -20,6 +22,7 @@ test('Today preferences survive reload, and the checklist can be reopened', asyn
   await dialog.getByRole('button', { name: 'Close', exact: true }).click();
   await page.goto('/settings');
   await page.getByRole('button', { name: 'Show checklist on Today' }).click();
+  await expect.poll(async () => JSON.parse(await readPersistedValue(page, 'ui') ?? '{}')).toMatchObject({ state: { gettingStarted: true } });
   await page.goto('/');
   await page.locator('summary').filter({ hasText: 'Make this space yours' }).click();
   await expect(page.getByRole('button', { name: 'Dismiss checklist' })).toBeVisible();

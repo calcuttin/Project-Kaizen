@@ -40,6 +40,7 @@ test('habit controls expose full dates and completion without relying on color a
   const form = page.getByRole('dialog', { name: 'New habit', exact: true });
   await form.getByRole('textbox', { name: 'Habit', exact: true }).fill('Walk');
   await form.getByRole('button', { name: 'Add habit' }).click();
+  await expect(form).toBeHidden();
   const day = page.locator('.habit-day.today');
   await expect(day).toHaveAttribute('aria-label', /Walk: (Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday),/);
   await day.focus(); await page.keyboard.press('Space');
