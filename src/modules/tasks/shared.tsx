@@ -2,8 +2,9 @@ import { deleteWithUndo } from '@/core/undo';
 import { useState } from 'react';
 import { Calendar, CheckSquare, Trash2, X } from 'lucide-react';
 import { Button, CheckBox, Chip, DomainChip, Field, Modal } from '@/components/ui';
-import { humanDate, isOverdue } from '@/core/dates';
+import { humanDate, isOverdue, todayKey } from '@/core/dates';
 import { type Domain, type ID } from '@/core/types';
+import type { Recurrence } from './recurrence';
 import { TASK_STATUSES, useTasks, type Priority, type Task, type TaskStatus } from './store';
 
 const PRIO_LABEL: Record<Priority, string> = { 0: 'None', 1: 'Low', 2: 'Medium', 3: 'High' };
@@ -24,6 +25,7 @@ export function TaskRow({ task, onOpen, compact }: { task: Task; onOpen: () => v
             {project && <span className="chip"><span style={{ width: 7, height: 7, borderRadius: 4, background: project.color }} />{project.name}</span>}
             {task.due && <Chip icon={Calendar} tone={isOverdue(task.due) && task.status !== 'done' ? 'danger' : undefined}>{humanDate(task.due)}</Chip>}
             {task.subtasks.length > 0 && <Chip icon={CheckSquare}>{subDone}/{task.subtasks.length}</Chip>}
+            {task.recurrence && <Chip>Repeats {task.recurrence.frequency}</Chip>}
             {task.tags.map((t) => <Chip key={t}>+{t}</Chip>)}
           </div>
         )}
@@ -69,9 +71,16 @@ export function TaskEditor({ id, onClose }: { id: ID | null; onClose: () => void
           </Field>
         </div>
         <div className="form-row">
-          <Field label="Due"><input type="date" value={task.due ?? ''} onChange={(e) => updateTask(task.id, { due: e.target.value || undefined })} /></Field>
+          <Field label="Due"><input type="date" value={task.due ?? ''} onChange={(e) => updateTask(task.id, { due: e.target.value || undefined, recurrence: e.target.value && task.recurrence ? { ...task.recurrence, anchorDay: Number(e.target.value.slice(-2)) } : undefined })} /></Field>
           <Field label="Scheduled (work on it)"><input type="date" value={task.scheduled ?? ''} onChange={(e) => updateTask(task.id, { scheduled: e.target.value || undefined })} /></Field>
         </div>
+        <Field label="Repeat">
+          <select disabled={task.status === 'done' || !!task.nextOccurrenceId} value={task.recurrence?.frequency ?? ''} onChange={(e) => {
+            const due = task.due || todayKey();
+            updateTask(task.id, { due: e.target.value ? due : task.due, recurrence: e.target.value ? { frequency: e.target.value as Recurrence['frequency'], anchorDay: Number(due.slice(-2)) } : undefined });
+          }}><option value="">Does not repeat</option><option value="daily">Daily</option><option value="weekly">Weekly</option><option value="monthly">Monthly</option></select>
+        </Field>
+        {(task.recurrence || task.nextOccurrenceId) && <p className="muted">{task.nextOccurrenceId ? 'The next occurrence has already been created. Edit that task to change or stop the series; reopening this task will not create another copy.' : 'Completing this task creates one next occurrence after today, using its due-date schedule. Missed dates are skipped. Monthly repeats keep the original day, using the last day in shorter months. Clearing the due date stops repeating.'}</p>}
         <Field label="Notes"><textarea value={task.notes ?? ''} onChange={(e) => updateTask(task.id, { notes: e.target.value })} placeholder="Context, links, next physical action…" /></Field>
         <Field label="Steps">
           <div className="list">
