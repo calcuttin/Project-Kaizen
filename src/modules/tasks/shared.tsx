@@ -14,22 +14,22 @@ export function TaskRow({ task, onOpen, compact }: { task: Task; onOpen: () => v
   const project = task.projectId ? projects[task.projectId] : undefined;
   const subDone = task.subtasks.filter((s) => s.done).length;
   return (
-    <div className={`list-item ${task.status === 'done' ? 'done' : ''}`} onClick={onOpen} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter') onOpen(); }}>
+    <div className={`list-item ${task.status === 'done' ? 'done' : ''}`}>
       <span className={`prio p${task.priority}`} />
-      <CheckBox on={task.status === 'done'} onToggle={() => toggleDone(task.id)} />
-      <div className="grow">
-        <div className="title truncate">{task.title}</div>
+      <CheckBox on={task.status === 'done'} onToggle={() => toggleDone(task.id)} label={`${task.status === 'done' ? 'Mark incomplete' : 'Mark complete'}: ${task.title}`} />
+      <button type="button" id={`task-card-${task.id}`} className="task-open grow" aria-label={`Open task: ${task.title}`} onClick={onOpen}>
+        <span className="title truncate">{task.title}</span>
         {!compact && (
-          <div className="meta">
+          <span className="meta">
             <DomainChip domain={task.domain} />
             {project && <span className="chip"><span style={{ width: 7, height: 7, borderRadius: 4, background: project.color }} />{project.name}</span>}
             {task.due && <Chip icon={Calendar} tone={isOverdue(task.due) && task.status !== 'done' ? 'danger' : undefined}>{humanDate(task.due)}</Chip>}
             {task.subtasks.length > 0 && <Chip icon={CheckSquare}>{subDone}/{task.subtasks.length}</Chip>}
             {task.recurrence && <Chip>Repeats {task.recurrence.frequency}</Chip>}
             {task.tags.map((t) => <Chip key={t}>+{t}</Chip>)}
-          </div>
+          </span>
         )}
-      </div>
+      </button>
       {compact && task.due && <Chip icon={Calendar} tone={isOverdue(task.due) ? 'danger' : undefined}>{humanDate(task.due)}</Chip>}
     </div>
   );

@@ -7,7 +7,7 @@ test('invalid task dates preserve the draft and completed tasks have a recovery 
   await expect(page.getByText('That date does not exist.', { exact: false })).toBeVisible();
   await input.press('Enter');
   await expect(page.getByText('Review 2026-13-01', { exact: true })).toBeVisible();
-  await page.getByRole('checkbox', { name: 'Mark complete', exact: true }).click();
+  await page.getByRole('checkbox', { name: 'Mark complete: Review 2026-13-01', exact: true }).click();
   await expect(page.getByText('All caught up', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Show completed' }).click();
   await expect(page.getByText('Review 2026-13-01', { exact: true })).toBeVisible();

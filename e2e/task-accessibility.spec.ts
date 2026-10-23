@@ -16,7 +16,7 @@ test('empty, filtered and completed task states work in both views', async ({ pa
   await page.getByRole('button', { name: 'List', exact: true }).click();
   await expect(page.getByText('No matching tasks', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Clear filters', exact: true }).click();
-  await page.getByRole('checkbox', { name: 'Mark complete', exact: true }).click();
+  await page.getByRole('checkbox', { name: 'Mark complete: Keep this task', exact: true }).click();
   await expect(page.getByText('All caught up', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Board', exact: true }).click();
   await expect(page.getByText('All caught up', { exact: true })).toBeVisible();
@@ -65,4 +65,31 @@ for (const theme of ['dark', 'light']) test(`${theme} secondary text and habit c
     return [...['--text-2', '--text-3'].flatMap(text => ['--bg', '--bg-elev', '--bg-elev-2'].map(bg => ({ pair: `${text}/${bg}`, ratio: contrast(text, bg) }))), { pair: 'habit completion', ratio: contrast('--health-ink', '--health') }];
   }, theme);
   for (const { pair, ratio } of ratios) expect(ratio, `${theme} ${pair}`).toBeGreaterThanOrEqual(4.5);
+});
+
+test('task list separates keyboard actions and restores focus after editing', async ({ page }) => {
+  await page.goto('/tasks');
+  const input = page.getByRole('textbox', { name: 'Quick add task', exact: true });
+  await input.fill('Keyboard task'); await input.press('Enter');
+  const list = page.getByRole('button', { name: 'List', exact: true });
+  const board = page.getByRole('button', { name: 'Board', exact: true });
+  await expect(list).toHaveAttribute('aria-pressed', 'true');
+  await expect(board).toHaveAttribute('aria-pressed', 'false');
+  const opener = page.getByRole('button', { name: 'Open task: Keyboard task', exact: true });
+  await opener.focus(); await page.keyboard.press('Space');
+  const dialog = page.getByRole('dialog', { name: 'Task', exact: true });
+  await expect(dialog).toBeVisible();
+  await page.keyboard.press('Escape'); await expect(opener).toBeFocused();
+  const complete = page.getByRole('checkbox', { name: 'Mark complete: Keyboard task', exact: true });
+  await complete.focus(); await page.keyboard.press('Enter');
+  await expect(dialog).toBeHidden();
+  await expect(page.getByText('All caught up', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Show completed' }).click();
+  await opener.press('Enter');
+  await dialog.getByRole('combobox', { name: 'Status', exact: true }).selectOption('next');
+  await page.keyboard.press('Escape'); await expect(opener).toBeFocused();
+  const lens = page.getByRole('group', { name: 'Life lens' });
+  await lens.getByRole('button', { name: 'Business', exact: true }).press('Space');
+  await expect(lens.getByRole('button', { name: 'Business', exact: true })).toHaveAttribute('aria-pressed', 'true');
+  await expect(lens.getByRole('button', { name: 'Everything', exact: true })).toHaveAttribute('aria-pressed', 'false');
 });

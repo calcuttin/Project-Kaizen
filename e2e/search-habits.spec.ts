@@ -18,7 +18,7 @@ test('search groups four record types, opens each and explains lens behavior', a
     useStudio.getState().addPiece({ channelId: channel.id, title: 'Search fixture piece' });
   });
   for (const [area, title, dialog] of [['Tasks', 'task', 'Task'], ['Library', 'book', 'Book details'], ['Feed', 'feed', 'Saved feed item'], ['Studio', 'piece', 'Piece']]) {
-    await page.getByRole('tab', { name: 'Personal', exact: true }).click();
+    await page.getByRole('button', { name: 'Personal', exact: true }).click();
     await page.getByRole('button', { name: 'Search & add' }).click();
     const search = page.getByRole('combobox', { name: 'Search records and commands' });
     await search.fill('Search fixture');
@@ -27,7 +27,7 @@ test('search groups four record types, opens each and explains lens behavior', a
     await group.getByRole('option').filter({ hasText: `Search fixture ${title}` }).click();
     await expect(page.getByRole('dialog', { name: dialog, exact: true })).toBeVisible();
     await page.keyboard.press('Escape');
-    await expect(page.getByRole('tab', { name: 'Everything', exact: true })).toHaveClass(/active/);
+    await expect(page.getByRole('button', { name: 'Everything', exact: true })).toHaveClass(/active/);
   }
   await page.getByRole('button', { name: 'Search & add' }).click();
   await page.getByRole('combobox', { name: 'Search records and commands' }).fill('nonexistent-record-query');

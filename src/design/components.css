@@ -115,6 +115,8 @@
 .list-item + .list-item { border-top: 1px solid var(--border); }
 .list-item.done .title { color: var(--text-3); text-decoration: line-through; }
 .list-item .title { font-weight: 500; }
+.task-open { min-width: 0; padding: 0; text-align: left; }
+.task-open > .title { display: block; }
 .list-item .meta { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin-top: 2px; }
 
 /* ───────── Check control ───────── */
