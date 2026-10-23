@@ -49,9 +49,18 @@ test('cloud accounts have separate data and survive reload and sign-out', async 
   await page.reload();
   await expect(page.getByRole('button', { name: 'Account A Private Book' })).toBeVisible();
 
+  await page.getByRole('button', { name: 'Search & add' }).click();
+  await page.getByRole('combobox', { name: 'Search records and commands' }).fill('Account A Private Book');
+  await expect(page.getByRole('group', { name: 'Saved · Library', exact: true })).toBeVisible();
+  await page.keyboard.press('Escape');
   await page.getByRole('button', { name: 'Test account B' }).click();
   await expect(page.getByRole('heading', { name: 'Bookshelf' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Account A Private Book' })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Search & add' }).click();
+  await page.getByRole('combobox', { name: 'Search records and commands' }).fill('Account A Private Book');
+  await expect(page.getByRole('group', { name: 'Saved · Library', exact: true })).toHaveCount(0);
+  await expect(page.getByText('No saved records match.', { exact: false })).toBeVisible();
+  await page.keyboard.press('Escape');
   await page.goto('/settings');
   await expect(page.getByText('user_b@example.test')).toBeVisible();
   await page.getByRole('button', { name: 'Save now', exact: true }).click();

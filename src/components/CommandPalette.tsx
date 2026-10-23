@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CornerDownLeft, Search } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
@@ -11,6 +11,7 @@ import { useLibrary } from '@/modules/library/store';
 import { useFeed } from '@/modules/feed/store';
 import { useStudio } from '@/modules/studio/store';
 import { searchRecords } from '@/core/search';
+import { onWorkspaceChange } from '@/core/storage';
 import { Modal, Chip, DomainChip } from './ui';
 
 interface Entry { id: string; group: string; label: string; hint?: string; icon: LucideIcon; run: () => void; preview?: boolean }
@@ -35,7 +36,9 @@ export function CommandPalette() {
     return () => window.removeEventListener('keydown', onKey);
   }, [toggle]);
 
-  useEffect(() => { if (paletteOpen) { setQ(''); setIdx(0); setTimeout(() => inputRef.current?.focus(), 10); } }, [paletteOpen]);
+  useLayoutEffect(() => { if (paletteOpen) { setQ(''); setIdx(0); } }, [paletteOpen]);
+
+  useEffect(() => onWorkspaceChange(() => { setQ(''); setPalette(false); }), [setPalette]);
 
   const close = () => setPalette(false);
   const go = (path: string) => { nav(path); close(); };
@@ -47,7 +50,7 @@ export function CommandPalette() {
       ...Object.values(books).map((b) => ({ id: b.id, title: b.title, detail: b.author, area: 'Library', path: '/library' })),
       ...Object.values(items).map((i) => ({ id: i.id, title: i.title, detail: i.takeaway, area: 'Feed', path: '/feed' })),
       ...Object.values(pieces).map((p) => ({ id: p.id, title: p.title, area: 'Studio', path: '/studio' })),
-    ]).map((record) => ({ id: `${record.path}:${record.id}`, group: 'Saved records', label: record.title, hint: record.area, icon: Search, run: () => { setLens('all'); go(`${record.path}?record=${encodeURIComponent(record.id)}`); } }));
+    ]).map((record) => ({ id: `${record.path}:${record.id}`, group: `Saved · ${record.area}`, label: record.title, hint: record.area, icon: Search, run: () => { setLens('all'); go(`${record.path}?record=${encodeURIComponent(record.id)}`); } }));
     // Input-accepting actions: always offer them with the current text as payload.
     for (const m of modules) for (const a of m.quickActions ?? []) {
       if (a.acceptsInput && query) {
@@ -90,6 +93,8 @@ export function CommandPalette() {
             }} />
           <span className="kbd">esc</span>
         </div>
+        <p className="muted" style={{ padding: 12 }}>Searches Everything in this workspace. Opening a result switches to Everything.</p>
+        {q.trim() && !entries.some((entry) => entry.group.startsWith('Saved ·')) && <p role="status" style={{ padding: 12 }}>No saved records match. You can still capture something new.</p>}
         <div className="palette-list" id="palette-results" role="listbox" aria-label="Search results">
           {groups.map((g) => (
             <div key={g} role="group" aria-label={g}>
