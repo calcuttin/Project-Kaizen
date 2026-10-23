@@ -22,7 +22,7 @@ async function until(predicate, message) {
   const end = Date.now() + 10000;
   while (!predicate()) { assert.ok(Date.now() < end, message); await new Promise(resolve => setTimeout(resolve, 50)); }
 }
-const auth = `set role authenticated; select set_config('request.jwt.claims','{"sub":"${id}","role":"authenticated"}',false);`;
+const auth = `set role authenticated; select set_config('request.jwt.claims','{"sub":"${id}"}',false);`;
 const waiting = name => sql(`select count(*) from pg_stat_activity where application_name='${name}' and wait_event='advisory'`) === '1';
 const timeout = setTimeout(() => children.forEach(c => c.kill('SIGKILL')), 30000);
 try {

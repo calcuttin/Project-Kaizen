@@ -9,7 +9,7 @@ select ok(not has_schema_privilege('authenticated', 'kaizen_private', 'USAGE'), 
 select is((select count(*)::int from pg_trigger where tgname='account_write_guard' and not tgisinternal), 25, 'all 24 public tables and storage have write guards');
 
 set local role authenticated;
-select set_config('request.jwt.claims', '{"sub":"deletion-a","role":"authenticated"}', true);
+select set_config('request.jwt.claims', '{"sub":"deletion-a"}', true);
 select lives_ok($$select public.ensure_profile()$$, 'active owner can create a profile');
 insert into public.tasks(owner_id,id,payload) values('deletion-a','task','{"title":"Synthetic"}');
 insert into storage.objects(bucket_id,name) values('import-artifacts','deletion-a/nested/file.txt');
@@ -25,7 +25,7 @@ select ok(exists(select 1 from pg_locks where pid=pg_backend_pid() and locktype=
 
 reset role;
 set local role authenticated;
-select set_config('request.jwt.claims', '{"sub":"deletion-a","role":"authenticated"}', true);
+select set_config('request.jwt.claims', '{"sub":"deletion-a"}', true);
 select ok(not public.account_is_active(), 'old JWT is fenced');
 select is((select count(*)::int from public.tasks),0,'old JWT cannot read remaining data');
 select is((select count(*)::int from storage.objects),0,'old JWT cannot read remaining files');

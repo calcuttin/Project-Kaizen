@@ -1,4 +1,4 @@
-// Migration SHA-256: bec9aee5ae13a9222280185bd30e71f6c0018a60c8207333f368ce880c89fff9
+// Migration SHA-256: ed6b1a622cb3e187dab49b72e99dcbc5dd4e53eb1c08711d368be555d8e17a56
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
 type EntityRow = { owner_id: string; space_id: string | null; id: string; payload: Json; revision: number; source: string | null; source_ref: string | null; created_at: string; updated_at: string; deleted_at: string | null };

@@ -36,7 +36,8 @@ create function kaizen_private.guard_account_write() returns trigger
 language plpgsql security definer set search_path = '' as $$
 declare v_owner text := auth.jwt() ->> 'sub';
 begin
-  if auth.role() = 'authenticated' then
+  -- Third-party JWTs may omit a role claim; use PostgREST's effective SQL role.
+  if current_setting('role', true) = 'authenticated' then
     if v_owner is null then raise exception 'authentication required' using errcode = '42501'; end if;
     -- Shared locks allow ordinary writes; deletion takes the exclusive counterpart.
     perform pg_catalog.pg_advisory_xact_lock_shared(pg_catalog.hashtextextended(v_owner, 18861));

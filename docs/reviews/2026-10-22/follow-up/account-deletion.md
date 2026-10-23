@@ -10,7 +10,7 @@ Separately, eight simultaneous same-record sync writes produced one acceptance a
 
 ## Fix
 
-A private subject tombstone is written before file/database cleanup. Authenticated writes take a shared transaction lock for their subject; beginning deletion takes its exclusive counterpart, waiting for in-flight writes. After the fence commits, a trigger rejects late writes even when their outer statement started before the fence. Restrictive policies hide remaining records/files from that session. The service role retains cleanup access. Client roles cannot create a fence or inspect the private tombstone table.
+A private subject tombstone is written before file/database cleanup. Authenticated writes take a shared transaction lock for their subject; beginning deletion takes its exclusive counterpart, waiting for in-flight writes. After the fence commits, a trigger rejects late writes even when their outer statement started before the fence. Restrictive policies hide remaining records/files from that session. The service role retains cleanup access. The guard uses the effective database role, including third-party JWTs without a role claim. Client roles cannot create a fence or inspect the private tombstone table.
 
 The deletion endpoint stops if it cannot establish the fence, leaves the fence in place if cleanup needs retry, and treats an already-deleted Clerk identity as successful cleanup. Minimal subject + request-time tombstones remain privately to prevent old sessions from recreating data; no content, email, or token is retained there.
 
