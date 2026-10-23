@@ -11,7 +11,7 @@ jobs:
   container:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v4
         with: { node-version: 24 }
       - run: docker build --tag kaizen-release-check .
@@ -32,7 +32,7 @@ jobs:
       run:
         working-directory: supabase/functions/delete-account
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: denoland/setup-deno@v2
         with: { deno-version: v2.9.8 }
       - run: deno task check
