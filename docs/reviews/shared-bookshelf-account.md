@@ -2,6 +2,8 @@
 
 AI-assisted implementation review, 2026-11-08.
 
+Release follow-up: [both experiences on Vercel](2026-11-08/vercel-rollout.md). The observations below describe the initial implementation/private Sites review; the follow-up records subsequent audience, merge, hosting and verification changes.
+
 ## Behavior
 
 - One Clerk account and the existing Supabase workspace support both experiences.
