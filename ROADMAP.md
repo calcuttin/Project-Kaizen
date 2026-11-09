@@ -4,6 +4,10 @@ Kaizen's roadmap connects public reviews to actionable issues, implementation pu
 
 [Review archive](docs/reviews/README.md) · [Open roadmap issues](https://github.com/calcuttin/Project-Kaizen/issues?q=is%3Aissue%20is%3Aopen%20label%3Aroadmap) · [AI-assisted work](https://github.com/calcuttin/Project-Kaizen/issues?q=is%3Aissue%20label%3Aai-assisted)
 
+## Native iPhone Bookshelf — 2026-11-08
+
+[Tracker #49](https://github.com/calcuttin/Project-Kaizen/issues/49) covers the native shared-account connection and device-release follow-up. The SwiftUI app uses the existing Clerk/Supabase services, with protected account caches, durable offline edits, explicit conflicts and opt-in local-library import. A disposable-account test verified book/progress/notes synchronization across iPhone, Bookshelf and Full Kaizen, plus shared deletion and account cleanup. [Searchable review and evidence](docs/reviews/2026-11-08/ios-sync/README.md) · [Xcode setup](apps/ios/README.md). Apple signing/registration, physical-device and production-auth/distribution checks remain open. Hosted backup/recovery stays deferred.
+
 ## Shared accounts and Vercel hosting — 2026-11-08
 
 PR #39 and #41 merged in order after passing checks. [Full Kaizen](https://project-kaizen-gamma.vercel.app) and [Bookshelf](https://kaizen-bookshelf.vercel.app) are deployed as separate Vercel projects from the same application revision, Clerk identity system and Supabase database. Users can switch experiences without creating another account. A disposable-account test verified book creation and reading progress in both directions; account deletion completed and both apps signed out. [Release evidence and remaining checks](docs/reviews/2026-11-08/vercel-rollout.md); #18 retains the broader provider acceptance work. Hosted backup/recovery remains deferred.
