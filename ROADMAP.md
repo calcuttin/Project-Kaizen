@@ -8,6 +8,10 @@ Kaizen's roadmap connects public reviews to actionable issues, implementation pu
 
 PR #39 and #41 merged in order after passing checks. [Full Kaizen](https://project-kaizen-gamma.vercel.app) and [Bookshelf](https://kaizen-bookshelf.vercel.app) are deployed as separate Vercel projects from the same application revision, Clerk identity system and Supabase database. Users can switch experiences without creating another account. A disposable-account test verified book creation and reading progress in both directions; account deletion completed and both apps signed out. [Release evidence and remaining checks](docs/reviews/2026-11-08/vercel-rollout.md); #18 retains the broader provider acceptance work. Hosted backup/recovery remains deferred.
 
+## Dependency follow-up — 2026-11-08
+
+[Review and validation](docs/reviews/2026-11-08/dependency-follow-up.md) combine compatible updates from #42 and #44–46, and remove an unused mail-service port conflict from database CI. React 19 (#43) remains separate because it exceeds the unchanged JavaScript budget. #18 was reopened after the documentation merge closed it with unfinished criteria. #8 retains spoken screen-reader and physical-device/broader native zoom validation. Current publication and merge status is recorded in #18. Hosted backup/recovery remains deferred.
+
 ## Repository monitoring — 2026-10-23
 
 [Dependency follow-up](docs/reviews/2026-10-23/dependency-follow-up.md) evaluates PRs #20–27 together, updates compatible tooling/runtime packages and Actions, aligns Node typings and Supabase CLI, and fixes browser-test isolation/timing assumptions. React 19 remains separate because its measured initial bundle exceeded the existing budget. Current publication/merge status belongs in #18; the remaining manual/provider criteria stay open and backup recovery remains deferred.
