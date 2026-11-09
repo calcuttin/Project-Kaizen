@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { readPersistedValue } from './persistence';
 
 for (const width of [390, 1280]) {
   test(`first actions, chosen goals and backup reminders persist at ${width}px`, async ({ page }) => {
@@ -22,6 +23,7 @@ for (const width of [390, 1280]) {
     await expect(reminder).toBeVisible();
     await expect(reminder).toContainText('Sync is not a backup');
     await reminder.getByRole('button', { name: 'Remind me in a week' }).click();
+    await expect.poll(async () => JSON.parse(await readPersistedValue(page, 'ui') ?? '{}')).toMatchObject({ state: { backupReminderDismissedUntil: expect.any(String) } });
     await page.reload();
     await expect(reminder).toHaveCount(0);
     await expect(page.getByText('12 to go', { exact: false })).toBeVisible();

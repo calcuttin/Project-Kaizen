@@ -6,6 +6,8 @@ Kaizen's roadmap connects public reviews to actionable issues, implementation pu
 
 ## Repository monitoring — 2026-10-23
 
+[Dependency follow-up](docs/reviews/2026-10-23/dependency-follow-up.md) evaluates PRs #20–27 together, updates compatible tooling/runtime packages and Actions, aligns Node typings and Supabase CLI, and fixes browser-test isolation/timing assumptions. React 19 remains separate because its measured initial bundle exceeded the existing budget. Current publication/merge status belongs in #18; the remaining manual/provider criteria stay open and backup recovery remains deferred.
+
 Dependabot alerts/security updates, secret scanning, push protection and GitHub-managed CodeQL default setup are enabled. [Configuration and scan evidence](docs/reviews/2026-10-23/security-monitoring.md) records results and limits; [#18](https://github.com/calcuttin/Project-Kaizen/issues/18) remains the live security tracker. Hosted backup/recovery remains deferred.
 
 ## October 2026 security and product fixes

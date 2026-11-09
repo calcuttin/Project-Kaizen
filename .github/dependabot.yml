@@ -4,9 +4,16 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    ignore:
+      # Upgrade these with the Node runtime, not ahead of it.
+      - dependency-name: '@types/node'
+        update-types: ['version-update:semver-major']
     groups:
+      react-runtime:
+        patterns: ['react', 'react-dom', '@types/react', '@types/react-dom']
       development-tools:
         dependency-type: development
+        update-types: ['minor', 'patch']
   - package-ecosystem: github-actions
     directory: /
     schedule:
