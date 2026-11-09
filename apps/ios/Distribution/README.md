@@ -1,0 +1,63 @@
+# Internal TestFlight release
+
+This configuration prepares **Kaizen Books 0.1.0** (`org.projectkaizen.books`) for the owner's iPhone through internal TestFlight. It keeps the same Clerk development instance and Supabase library used by the two websites. A TestFlight upload is not a production-auth migration or a public App Store launch.
+
+## Apple setup
+
+1. Sign in to **Xcode → Settings → Apple Accounts** with an active Apple Developer Program membership. A free Personal Team cannot distribute through TestFlight. Accept any pending Apple agreements yourself.
+2. In **KaizenBooks → Signing & Capabilities**, select the paid team. Keep automatic signing. Register the existing bundle identifier and Associated Domains capability. If the identifier is unavailable, stop and update the bundle identifier, callback URL scheme and Clerk native registration together before rebuilding.
+3. Register the actual App ID prefix and bundle identifier in the current Clerk instance's native application settings. Verify the associated-domain association for `clean-marmot-1889.clerk.accounts.dev`. Never substitute a guessed team/prefix. Email-code sign-in worked on the signed simulator; physical-device redirects and passkeys remain unverified.
+4. In App Store Connect, create an **iOS** app record with primary language **English (U.S.)**, the registered bundle ID, and an unused SKU such as `kaizen-books-ios`. Use **Kaizen Books** as the working name if available. No App Store publication is required for internal testing.
+
+## Archive and upload
+
+Select **KaizenBooks**, **Any iOS Device**, then **Product → Archive**. In Organizer choose **Distribute App → TestFlight Internal Only**. Let Xcode manage signing and the build number, and include symbols. Do not disable signing for this archive.
+
+Equivalent commands from the repository root, after setting the real team:
+
+```sh
+export KAIZEN_APPLE_TEAM_ID='YOUR_ACTUAL_TEAM_ID'
+xcodebuild archive \
+  -project apps/ios/KaizenBooks.xcodeproj -scheme KaizenBooks \
+  -configuration Release -destination 'generic/platform=iOS' \
+  -archivePath /tmp/KaizenBooks-TestFlight.xcarchive \
+  -disableAutomaticPackageResolution -allowProvisioningUpdates \
+  DEVELOPMENT_TEAM="$KAIZEN_APPLE_TEAM_ID"
+
+# This command uploads the signed app to Apple.
+xcodebuild -exportArchive \
+  -archivePath /tmp/KaizenBooks-TestFlight.xcarchive \
+  -exportOptionsPlist apps/ios/Distribution/ExportOptions.plist \
+  -exportPath /tmp/KaizenBooks-TestFlight-export \
+  -allowProvisioningUpdates
+```
+
+The export settings infer the team from the signed archive, use automatic signing, include dSYMs, manage build numbers and restrict the build to **internal** TestFlight. Never commit certificates, provisioning profiles, API private keys, passwords or archives. Xcode stores signing credentials locally.
+
+An unsigned archive can validate compilation and bundled resources, but cannot be installed on an iPhone or uploaded to TestFlight. Apple processing/validation is a separate required check.
+
+## Privacy and encryption
+
+The app manifest declares account-linked library content, user ID and reading activity used for app functionality. Appearance preferences use UserDefaults within the app (`CA92.1`). The bundled Clerk/ClerkKitUI and PhoneNumberKit manifests describe their SDK usage separately; review the aggregate privacy report before broader distribution. The native app does not add advertising tracking.
+
+`ITSAppUsesNonExemptEncryption` is false: reviewed code uses HTTPS, Apple Keychain/data protection and CryptoKit hashing; no custom or non-exempt encryption implementation was found in the pinned dependencies. Reassess this declaration if cryptography or dependencies change. This is not an assertion that the app uses no encryption.
+
+The privacy manifest does not replace the App Store Connect privacy questionnaire or privacy policy. Complete those with the actual service configuration before a public release. Current development authentication and outstanding native acceptance checks remain tracked in [#49](https://github.com/calcuttin/Project-Kaizen/issues/49).
+
+## Install and test
+
+After Apple finishes processing the build, create an internal group (for example **Owner testing**) and add the account owner as a tester. Select the processed build for that group. Install Apple's TestFlight app on the iPhone, accept the invitation and install Kaizen Books. An internal tester needs App Store Connect access; do not invite unrelated testers or enable a public link as part of this setup.
+
+Suggested “What to Test” text:
+
+> Sign in with your existing Kaizen account using email verification. Check that your Bookshelf library appears. Add a clearly named test book, log progress on your iPhone, and verify it in both websites. Change progress on the web, then use Sync now on the phone. Try offline edits and reconnect, relaunch persistence, light/dark appearance and VoiceOver. Delete only your test book afterward. Web annotations are read-only; cabinet customization and background sync are not available in this build.
+
+Record the uploaded version/build, Apple processing result and the physical-device result in #49. Keep hosted backup/recovery deferred. Do not call the release complete until the build is available to the intended tester.
+
+## References
+
+- [Apple: distributing beta builds](https://developer.apple.com/documentation/xcode/distributing-your-app-for-beta-testing-and-releases)
+- [Apple: add internal testers](https://developer.apple.com/help/app-store-connect/test-a-beta-version/add-internal-testers)
+- [Apple: required-reason API declarations](https://developer.apple.com/documentation/technotes/tn3183-adding-required-reason-api-entries-to-your-privacy-manifest)
+- [Apple: encryption export compliance](https://developer.apple.com/documentation/security/complying-with-encryption-export-regulations)
+- [Clerk: native iOS setup](https://clerk.com/docs/ios/getting-started/quickstart)
