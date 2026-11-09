@@ -18,3 +18,11 @@
 .auth-spinner { animation: spin 1s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
+
+.experience-options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.experience-options button { display: flex; flex-direction: column; gap: 7px; text-align: left; padding: 16px; color: var(--text); background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); cursor: pointer; }
+.experience-options button[aria-pressed="true"] { border-color: var(--library); background: color-mix(in srgb, var(--library) 10%, var(--surface)); }
+.experience-options button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.experience-options strong { font-size: 14px; }
+.experience-options span { color: var(--text-2); font-size: 11px; line-height: 1.55; }
+@media (max-width: 420px) { .experience-options { grid-template-columns: 1fr; } }

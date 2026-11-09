@@ -1,3 +1,5 @@
+import { useAuth } from '@/core/auth/AuthProvider';
+import { areaVisible, experienceHome } from '@/core/experience';
 import { useState } from 'react';
 import { BackupReminder } from './BackupReminder';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
@@ -11,20 +13,23 @@ import { SyncBadge } from '@/core/sync/CloudSync';
 
 export function Shell() {
   const { lens, setLens, theme, toggleTheme } = useUI();
+  const { experience } = useAuth();
+  const bookshelf = experience === 'bookshelf';
+  const visibleModules = modules.filter(m => areaVisible(m.id, experience));
   const setPalette = usePalette((s) => s.setOpen);
   const nav = useNavigate();
   const [moreOpen, setMoreOpen] = useState(false);
   return (
     <div className="shell">
       <aside className="sidebar">
-        <div className="brand" onClick={() => nav('/')} style={{ cursor: 'pointer' }}>
+        <div className="brand" role="button" tabIndex={0} onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); nav(experienceHome(experience)); } }} onClick={() => nav(experienceHome(experience))} style={{ cursor: 'pointer' }}>
           <span className="brand-mark"><img src="/favicon.svg" alt="" width={22} height={22} /></span>
-          <div><div className="brand-name">Kaizen</div><div className="brand-sub">continuous improvement</div></div>
+          <div><div className="brand-name">{bookshelf ? 'Bookshelf' : 'Kaizen'}</div><div className="brand-sub">{bookshelf ? 'a Project Kaizen experience' : 'continuous improvement'}</div></div>
         </div>
         <nav className="stack" style={{ gap: 2 }} aria-label="Primary">
-          {modules.filter((m) => !m.hidden).map((m) => (
+          {visibleModules.filter((m) => !m.hidden).map((m) => (
             <NavLink key={m.id} to={m.path} end={m.path === '/'} className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-              <m.icon /><span>{m.name}</span>
+              <m.icon /><span>{bookshelf && m.id === 'library' ? 'Bookshelf' : m.name}</span>
             </NavLink>
           ))}
         </nav>
@@ -37,22 +42,22 @@ export function Shell() {
       </aside>
       <div className="main">
         <header className="topbar">
-          <LensSwitch value={lens} onChange={setLens} />
+          {bookshelf ? <span className="eyebrow">A world between the pages</span> : <LensSwitch value={lens} onChange={setLens} />}
           <div className="mobile-save-status"><SyncBadge /></div>
           <button className="btn ghost sm quick-add" aria-label="Quick add" onClick={() => setPalette(true)}><Search size={14} /><span className="quick-add-label">Quick add</span><span className="kbd">⌘K</span></button>
         </header>
         <BackupReminder />
         <Outlet />
         <nav className="tabbar" aria-label="Primary (mobile)">
-          {modules.filter((m) => ['today', 'tasks', 'library'].includes(m.id)).map((m) => (
+          {visibleModules.filter((m) => (bookshelf ? ['library', 'reading', 'reading-journal'] : ['today', 'tasks', 'library']).includes(m.id)).map((m) => (
             <NavLink key={m.id} to={m.path} end={m.path === '/'} className={({ isActive }) => `tab ${isActive ? 'active' : ''}`}>
-              <m.icon /><span>{m.name}</span>
+              <m.icon /><span>{bookshelf && m.id === 'library' ? 'Bookshelf' : m.name}</span>
             </NavLink>
           ))}
           <button type="button" className="tab" aria-expanded={moreOpen} onClick={() => setMoreOpen(true)}><Settings /><span>More</span></button>
         </nav>
       </div>
-      <Modal open={moreOpen} onClose={() => setMoreOpen(false)} title="More areas"><nav className="stack" aria-label="All areas">{modules.filter(m => !m.hidden).map(m => <NavLink key={m.id} to={m.path} className="nav-item" onClick={() => setMoreOpen(false)}><m.icon />{m.name}</NavLink>)}<NavLink to="/settings" className="nav-item" onClick={() => setMoreOpen(false)}>Settings</NavLink></nav></Modal>
+      <Modal open={moreOpen} onClose={() => setMoreOpen(false)} title="More areas"><nav className="stack" aria-label="All areas">{visibleModules.filter(m => !m.hidden).map(m => <NavLink key={m.id} to={m.path} className="nav-item" onClick={() => setMoreOpen(false)}><m.icon />{m.name}</NavLink>)}<NavLink to="/settings" className="nav-item" onClick={() => setMoreOpen(false)}>Settings</NavLink></nav></Modal>
       <CommandPalette />
       <Toaster />
     </div>

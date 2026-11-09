@@ -1,3 +1,4 @@
+import { readingModule, readingJournalModule } from '@/modules/library/readingModules';
 // Register all data stores even when their route has not been visited.
 import '@/modules/journal/store';
 import '@/core/imports/store';
@@ -14,4 +15,4 @@ import { feedModule } from '@/modules/feed';
 import { studioModule } from '@/modules/studio';
 import { settingsModule } from '@/modules/settings';
 
-export const modules: KaizenModule[] = [todayModule, tasksModule, studioModule, healthModule, libraryModule, feedModule, settingsModule];
+export const modules: KaizenModule[] = [todayModule, tasksModule, studioModule, healthModule, libraryModule, feedModule, settingsModule, readingModule, readingJournalModule];

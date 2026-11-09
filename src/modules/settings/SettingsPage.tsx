@@ -1,3 +1,5 @@
+import { PrototypeLibraryImport } from '@/modules/library/PrototypeLibraryImport';
+import { ExperienceSettings } from '@/components/ExperienceSettings';
 import { downloadJson, supportReport } from '@/core/diagnostics';
 import { saveStatus } from '@/core/sync/saveStatus';
 import { currentWorkspaceOwner, workspaceAvailable, flushWorkspaceWrites } from '@/core/storage';
@@ -7,7 +9,7 @@ import { Button, Card, Modal, PageHead } from '@/components/ui';
 import { useUI } from '@/app/uiStore';
 import { exportAll, importAll, inspectBackup, registeredStores, whenHydrated, resetAll } from '@/core/store';
 import { toast } from '@/components/Toast';
-import { seedSampleData } from './seed';
+import { seedSampleData, seedLibraryData } from './seed';
 import { useAuth } from '@/core/auth/AuthProvider';
 import { UserButton } from '@clerk/react';
 import { config } from '@/core/config';
@@ -23,6 +25,7 @@ export function SettingsPage() {
   const { theme, toggleTheme, externalBookCovers, setExternalBookCovers } = useUI();
   const lastBackupAt = useUI((state) => state.lastBackupAt);
   const auth = useAuth();
+  const bookshelf = auth.experience === 'bookshelf';
   const sync = useSyncStatus();
   const fileRef = useRef<HTMLInputElement>(null);
   const [backup, setBackup] = useState<{ payload: unknown; summary: ReturnType<typeof inspectBackup> } | null>(null);
@@ -63,7 +66,7 @@ export function SettingsPage() {
     } finally { setRestoring(false); }
   };
   const deleteAccount = async () => {
-    if (!confirm('Permanently delete your cloud account and synced data? Download a backup first if you want to keep it.')) return;
+    if (!confirm('Permanently delete your shared Kaizen account and all synced data, including tasks, habits, and books in both experiences? Download a backup first if you want to keep it.')) return;
     stopCloudSync();
     const { error } = await getSupabaseClient()!.functions.invoke('delete-account');
     if (error) { startCloudSync(); toast(`Account deletion failed: ${error.message}`); return; }
@@ -83,8 +86,10 @@ export function SettingsPage() {
 
   return (
     <div className="page">
-      <PageHead eyebrow="Settings" title="Your Kaizen" lead={config.mode === 'cloud' ? 'Your account has a separate workspace that synchronizes across your devices.' : "Everything lives on this device, in your browser's storage. Export regularly; import anywhere."} />
+      <PageHead eyebrow="Settings" title={bookshelf ? 'Your Bookshelf' : 'Your Kaizen'} lead={config.mode === 'cloud' ? 'Your account has a separate workspace that synchronizes across your devices.' : "Everything lives on this device, in your browser's storage. Export regularly; import anywhere."} />
       <div className="grid cols-2">
+        <ExperienceSettings />
+        <PrototypeLibraryImport />
         <Card title="Account & saving" icon={Cloud}>
           <div className="stack" style={{ gap: 11 }}>
             <div className="between"><span className="muted">Mode</span><span className="chip accent">{config.mode === 'cloud' ? 'Cloud workspace' : 'Device only'}</span></div>
@@ -109,7 +114,7 @@ export function SettingsPage() {
             <Button icon={theme === 'dark' ? Sun : Moon} onClick={toggleTheme}>{theme === 'dark' ? 'Switch to light' : 'Switch to dark'}</Button>
           </div>
         </Card>
-        <Card title="Getting started"><p className="muted">Reopen the first-steps checklist on Today whenever you need it.</p><Button onClick={() => { useUI.getState().setGettingStarted(true); toast('Checklist is ready on Today'); }}>Show checklist on Today</Button></Card>
+        {!bookshelf && <Card title="Getting started"><p className="muted">Reopen the first-steps checklist on Today whenever you need it.</p><Button onClick={() => { useUI.getState().setGettingStarted(true); toast('Checklist is ready on Today'); }}>Show checklist on Today</Button></Card>}
         <Card title="Data">
           <div className="stack" style={{ gap: 10 }}>
             <div className="between"><span className="muted">Export a JSON backup</span><Button icon={Download} onClick={doExport}>Export</Button></div>
@@ -119,7 +124,7 @@ export function SettingsPage() {
             <p className="muted">{lastBackupAt ? `Last backup download started: ${new Date(lastBackupAt).toLocaleString()}` : 'No backup downloaded in this browser yet.'} Keep a copy outside your browser.</p>
             {config.enableBundledImports && <div className="between"><span className="muted">Re-apply developer bundled imports</span><Button icon={RefreshCw} onClick={() => { void import('@/app/imports').then(({ reimportAll }) => { const r = reimportAll(); toast(`Added ${r.books} books, ${r.items} items`); }); }}>Re-import</Button></div>}
             <p className="muted" style={{ fontSize: 12.5, margin: 0 }}>Kaizen opens your saved workspace automatically. Sample data is optional and adds example records to your workspace.</p>
-            <div className="between"><span className="muted">Add sample data to explore</span><Button icon={Sparkles} onClick={() => { seedSampleData(); toast('Sample data loaded'); }}>Load samples</Button></div>
+            <div className="between"><span className="muted">Add sample data to explore</span><Button icon={Sparkles} onClick={() => { (bookshelf ? seedLibraryData : seedSampleData)(); toast('Sample data loaded'); }}>Load samples</Button></div>
 
           </div>
         </Card>

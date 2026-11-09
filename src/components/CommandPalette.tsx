@@ -1,3 +1,5 @@
+import { useAuth } from '@/core/auth/AuthProvider';
+import { areaVisible } from '@/core/experience';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CornerDownLeft, Search } from 'lucide-react';
@@ -18,6 +20,8 @@ interface Entry { id: string; group: string; label: string; hint?: string; icon:
 
 export function CommandPalette() {
   const { setLens, toggleTheme } = useUI();
+  const { experience } = useAuth();
+  const bookshelf = experience === 'bookshelf';
   const { open: paletteOpen, setOpen: setPalette, toggle } = usePalette();
   const nav = useNavigate();
   const tasks = useTasks((s) => s.tasks);
@@ -50,9 +54,9 @@ export function CommandPalette() {
       ...Object.values(books).map((b) => ({ id: b.id, title: b.title, detail: b.author, area: 'Library', path: '/library' })),
       ...Object.values(items).map((i) => ({ id: i.id, title: i.title, detail: i.takeaway, area: 'Feed', path: '/feed' })),
       ...Object.values(pieces).map((p) => ({ id: p.id, title: p.title, area: 'Studio', path: '/studio' })),
-    ]).map((record) => ({ id: `${record.path}:${record.id}`, group: `Saved · ${record.area}`, label: record.title, hint: record.area, icon: Search, run: () => { setLens('all'); go(`${record.path}?record=${encodeURIComponent(record.id)}`); } }));
+    ].filter(record => !bookshelf || record.area === 'Library')).map((record) => ({ id: `${record.path}:${record.id}`, group: `Saved · ${record.area}`, label: record.title, hint: record.area, icon: Search, run: () => { setLens('all'); go(`${record.path}?record=${encodeURIComponent(record.id)}`); } }));
     // Input-accepting actions: always offer them with the current text as payload.
-    for (const m of modules) for (const a of m.quickActions ?? []) {
+    for (const m of modules.filter(m => areaVisible(m.id, experience))) for (const a of m.quickActions ?? []) {
       if (a.acceptsInput && query) {
         const stripped = q.replace(new RegExp(`^${a.label}:?\\s*`, 'i'), '');
         list.push({ id: `${a.id}:input`, group: 'Create', label: `${a.label}: “${stripped}”`, hint: a.hint, icon: a.icon, preview: true, run: () => { a.run(stripped, go); close(); } });
@@ -60,16 +64,16 @@ export function CommandPalette() {
         list.push({ id: a.id, group: 'Actions', label: a.label, hint: a.hint, icon: a.icon, run: () => { a.run('', go); close(); } });
       }
     }
-    for (const m of modules) {
+    for (const m of modules.filter(m => areaVisible(m.id, experience))) {
       if (!query || m.name.toLowerCase().includes(query) || m.tagline.toLowerCase().includes(query)) {
         list.push({ id: `nav:${m.id}`, group: 'Go to', label: m.name, hint: m.tagline, icon: m.icon, run: () => go(m.path) });
       }
     }
     const lensOpts: { l: 'all' | 'personal' | 'business'; label: string }[] = [{ l: 'all', label: 'Lens: Everything' }, { l: 'personal', label: 'Lens: Personal' }, { l: 'business', label: 'Lens: Business' }];
-    for (const o of lensOpts) if (!query || o.label.toLowerCase().includes(query) || 'lens filter'.includes(query)) list.push({ id: `lens:${o.l}`, group: 'View', label: o.label, icon: Search, run: () => { setLens(o.l); close(); } });
+    for (const o of (bookshelf ? [] : lensOpts)) if (!query || o.label.toLowerCase().includes(query) || 'lens filter'.includes(query)) list.push({ id: `lens:${o.l}`, group: 'View', label: o.label, icon: Search, run: () => { setLens(o.l); close(); } });
     if (!query || 'toggle theme dark light'.includes(query)) list.push({ id: 'theme', group: 'View', label: 'Toggle theme', icon: Search, run: () => { toggleTheme(); close(); } });
     return list;
-  }, [q, tasks, books, items, pieces]);
+  }, [q, tasks, books, items, pieces, bookshelf, experience]);
 
   useEffect(() => setIdx(0), [q]);
   useEffect(() => { if (paletteOpen) document.getElementById(`palette-option-${idx}`)?.scrollIntoView({ block: 'nearest' }); }, [idx, paletteOpen]);
@@ -84,7 +88,7 @@ export function CommandPalette() {
       <div className="palette" style={{ width: '100%', border: 0, boxShadow: 'none' }}>
         <div className="palette-input">
           <Search size={18} style={{ color: 'var(--text-3)' }} />
-          <input ref={inputRef} value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search your records, or add a task…" role="combobox" aria-label="Search records and commands" aria-expanded={true} aria-controls="palette-results" aria-autocomplete="list" aria-activedescendant={active ? `palette-option-${idx}` : undefined}
+          <input ref={inputRef} value={q} onChange={(e) => setQ(e.target.value)} placeholder={bookshelf ? 'Search your books…' : 'Search your records, or add a task…'} role="combobox" aria-label="Search records and commands" aria-expanded={true} aria-controls="palette-results" aria-autocomplete="list" aria-activedescendant={active ? `palette-option-${idx}` : undefined}
             onKeyDown={(e) => {
               if (e.key === 'ArrowDown') { e.preventDefault(); setIdx((i) => Math.min(entries.length - 1, i + 1)); }
               if (e.key === 'ArrowUp') { e.preventDefault(); setIdx((i) => Math.max(0, i - 1)); }
@@ -93,7 +97,7 @@ export function CommandPalette() {
             }} />
           <span className="kbd">esc</span>
         </div>
-        <p className="muted" style={{ padding: 12 }}>Searches Everything in this workspace. Opening a result switches to Everything.</p>
+        <p className="muted" style={{ padding: 12 }}>{bookshelf ? 'Searches books in your account.' : 'Searches Everything in this workspace. Opening a result switches to Everything.'}</p>
         {q.trim() && !entries.some((entry) => entry.group.startsWith('Saved ·')) && <p role="status" style={{ padding: 12 }}>No saved records match. You can still capture something new.</p>}
         <div className="palette-list" id="palette-results" role="listbox" aria-label="Search results">
           {groups.map((g) => (
