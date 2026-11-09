@@ -1,5 +1,6 @@
+import { ExperienceRoute } from '@/components/ExperienceRoute';
 import { lazy, Suspense, useEffect } from 'react';
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { createBrowserRouter, createHashRouter, RouterProvider } from 'react-router-dom';
 import { modules } from './registry';
 import { useUI } from './uiStore';
 import { Shell } from '@/components/Shell';
@@ -11,12 +12,12 @@ import { ErrorBoundary, RecoveryScreen } from '@/components/ErrorBoundary';
 
 const CloudApplication = lazy(() => import('./CloudApplication'));
 
-const router = createBrowserRouter([
+const router = (config.hashRouting ? createHashRouter : createBrowserRouter)([
   {
     path: '/',
     element: <Shell />,
     errorElement: <RecoveryScreen />,
-    children: modules.map((m) => ({ path: m.path === '/' ? undefined : m.path.slice(1), index: m.path === '/', element: <Suspense fallback={<div className="page" role="status">Loading…</div>}><m.Page /></Suspense>, errorElement: <RecoveryScreen /> })),
+    children: modules.map((m) => ({ path: m.path === '/' ? undefined : m.path.slice(1), index: m.path === '/', element: <Suspense fallback={<div className="page" role="status">Loading…</div>}><ExperienceRoute area={m.id}><m.Page /></ExperienceRoute></Suspense>, errorElement: <RecoveryScreen /> })),
   },
 ]);
 

@@ -1,7 +1,10 @@
+import { resolveExperience, type Experience } from './experience';
 export type DeploymentMode = 'device' | 'cloud';
 
 type PublicConfig = {
   mode: DeploymentMode;
+  defaultExperience: Experience;
+  hashRouting: boolean;
   appUrl: string;
   clerkPublishableKey?: string;
   supabaseUrl?: string;
@@ -16,6 +19,8 @@ const supabasePublishableKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY?.tr
 
 export const config: PublicConfig = {
   mode: requestedMode === 'cloud' ? 'cloud' : 'device',
+  defaultExperience: resolveExperience(import.meta.env.VITE_KAIZEN_PRODUCT),
+  hashRouting: import.meta.env.VITE_KAIZEN_HASH_ROUTING === 'true',
   appUrl: import.meta.env.VITE_APP_URL?.trim() || window.location.origin,
   clerkPublishableKey: clerkPublishableKey || undefined,
   supabaseUrl: supabaseUrl || undefined,

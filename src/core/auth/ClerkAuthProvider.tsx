@@ -1,3 +1,4 @@
+import { EXPERIENCE_METADATA_KEY, resolveExperience } from '@/core/experience';
 import { useMemo, type ReactNode } from 'react';
 import { useAuth as useClerkAuth, useSession, useUser } from '@clerk/react';
 import { cloudConfigurationError, config } from '@/core/config';
@@ -20,14 +21,20 @@ export function ClerkAuthProvider({ children }: { children: ReactNode }) {
     imageUrl: clerkUser.imageUrl,
   } satisfies AuthUser : null, [authenticated, clerkUser]);
 
+  const experience = resolveExperience(clerkUser?.unsafeMetadata?.[EXPERIENCE_METADATA_KEY], config.defaultExperience);
   const value = useMemo<AuthContextValue>(() => ({
     mode: 'cloud',
+    experience,
+    async setExperience(next) {
+      if (!authenticated || !clerkUser) throw new Error('Sign in to change your experience.');
+      await clerkUser.update({ unsafeMetadata: { ...clerkUser.unsafeMetadata, [EXPERIENCE_METADATA_KEY]: next } });
+    },
     ready: isLoaded,
     user,
     localProfileId,
     error: configurationError,
     async signOut() { await signOut({ redirectUrl: config.appUrl }); },
-  }), [configurationError, isLoaded, localProfileId, signOut, user]);
+  }), [configurationError, isLoaded, localProfileId, signOut, user, authenticated, clerkUser, experience]);
 
   return <AuthContextProvider value={value}>{children}</AuthContextProvider>;
 }

@@ -41,8 +41,14 @@ export function seedSampleData() {
 
   useJournal.getState().upsert(shiftKey(t, -1), { intention: 'Say no to one meeting that could be an email.', mood: 4, wins: ['Shipped the pricing draft', 'Walked at lunch instead of scrolling'] });
 
+  seedLibraryData();
+  seedFeedIfEmpty();
+}
+
+export function seedLibraryData() {
+  const t = todayKey();
   const L = useLibrary.getState();
-  if (Object.keys(L.books).length) return seedFeedIfEmpty();
+  if (Object.keys(L.books).length) return;
   const office = L.addShelf('Office shelf');
   const kindle = L.addShelf('Kindle');
   const b1 = L.addBook({ title: 'Atomic Habits', author: 'James Clear', pages: 320, status: 'reading', currentPage: 140, shelfId: office.id, hue: 30 });
@@ -54,7 +60,7 @@ export function seedSampleData() {
   L.addBook({ title: 'High Output Management', author: 'Andrew Grove', pages: 272, status: 'paused', currentPage: 90, shelfId: kindle.id, hue: 180 });
   L.logProgress(b1.id, 152, shiftKey(t, -2)); L.logProgress(b1.id, 165, shiftKey(t, -1)); L.logProgress(b2.id, 78, t);
   L.setGoal({ books: 20, pagesPerDay: 20 });
-  seedFeedIfEmpty();
+
 }
 
 function seedFeedIfEmpty() {

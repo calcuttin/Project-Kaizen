@@ -1,4 +1,6 @@
-import type { ReactNode } from 'react';
+import { config } from '@/core/config';
+import { EXPERIENCE_METADATA_KEY, experienceHome, type Experience } from '@/core/experience';
+import { useState, type ReactNode } from 'react';
 import { SignInButton, SignUpButton } from '@clerk/react';
 import { Cloud, LoaderCircle } from 'lucide-react';
 import { Button } from '@/components/ui';
@@ -6,6 +8,7 @@ import { useAuth } from './AuthProvider';
 
 export function AuthGate({ children }: { children: ReactNode }) {
   const auth = useAuth();
+  const [experience, setExperience] = useState<Experience>(config.defaultExperience);
 
   if (!auth.ready) return <div className="auth-loading"><LoaderCircle className="auth-spinner" /><span>Opening Kaizen…</span></div>;
   if (auth.mode === 'device') return children;
@@ -15,12 +18,16 @@ export function AuthGate({ children }: { children: ReactNode }) {
   return <div className="auth-shell">
     <div className="auth-card">
       <div className="auth-mark">改善</div>
-      <span className="eyebrow">Your life, in steady motion</span>
+      <span className="eyebrow">One account. Your kind of progress.</span>
       <h1>Welcome to Kaizen</h1>
-      <p>Sign in to keep your private workspace in sync across your devices.</p>
-      <SignUpButton mode="modal"><Button variant="primary">Create your account</Button></SignUpButton>
+      <p>Start with the full workspace or a quiet home for your books. You can switch anytime with the same account.</p>
+      <div className="experience-options" role="group" aria-label="Choose your experience">
+        <button type="button" aria-pressed={experience === 'full'} onClick={() => setExperience('full')}><strong>Full Kaizen</strong><span>Tasks, habits, books, and your daily workspace</span></button>
+        <button type="button" aria-pressed={experience === 'bookshelf'} onClick={() => setExperience('bookshelf')}><strong>Bookshelf only</strong><span>Your books, reading progress, notes, and journal</span></button>
+      </div>
+      <SignUpButton mode="modal" unsafeMetadata={{ [EXPERIENCE_METADATA_KEY]: experience }} forceRedirectUrl={`${config.hashRouting ? '/#' : ''}${experienceHome(experience)}`}><Button variant="primary">Create your account</Button></SignUpButton>
       <SignInButton mode="modal"><Button className="auth-google">Sign in</Button></SignInButton>
-      <small>Each account has its own workspace. Changes sync automatically after sign-in.</small>
+      <small>Already use Kaizen? Sign in with your existing account. Your books stay with you in either experience.</small>
       <a className="btn ghost" href="/guides/using-kaizen.html">Help & guides</a>
     </div>
   </div>;

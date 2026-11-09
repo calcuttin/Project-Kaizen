@@ -1,6 +1,6 @@
 import { createPersistedStore, registerStore } from '@/core/store';
 import { newId, nowIso } from '@/core/ids';
-import { todayKey } from '@/core/dates';
+import { todayKey, toDateKey } from '@/core/dates';
 import type { BaseEntity, DateKey, ID } from '@/core/types';
 import type { ShelfImport } from '@/data/bookshelf';
 import type { ShelfTheme } from './themes';
@@ -146,7 +146,8 @@ export const useLibrary = createPersistedStore<LibraryState>('library', 2, (set,
   setStatus: (id, status) => {
     const b = get().books[id]; if (!b) return;
     const patch: Partial<Book> = { status };
-    if (status === 'reading' && !b.startedAt) patch.startedAt = todayKey();
+    if (status !== 'finished') patch.finishedAt = undefined;
+    if (status === 'reading' && (!b.startedAt || b.status === 'finished')) { patch.startedAt = todayKey(); if (b.status === 'finished') patch.currentPage = 0; }
     if (status === 'finished') { patch.finishedAt = todayKey(); patch.currentPage = b.pages; }
     if (status === 'want') { patch.currentPage = 0; patch.startedAt = undefined; patch.finishedAt = undefined; }
     get().updateBook(id, patch);
@@ -180,7 +181,7 @@ registerStore('library', useLibrary);
 export const coverGradient = (hue: number) => `linear-gradient(150deg, hsl(${hue} 45% 42%), hsl(${(hue + 40) % 360} 55% 22%))`;
 
 export function pagesInLastDays(sessions: ReadingSession[], days: number): number {
-  const keys = new Set(Array.from({ length: days }, (_, i) => { const d = new Date(); d.setDate(d.getDate() - i); return d.toISOString().slice(0, 10); }));
+  const keys = new Set(Array.from({ length: days }, (_, i) => { const d = new Date(); d.setDate(d.getDate() - i); return toDateKey(d); }));
   return sessions.filter((s) => keys.has(s.date)).reduce((a, s) => a + s.pages, 0);
 }
 

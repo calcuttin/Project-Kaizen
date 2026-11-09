@@ -1,3 +1,5 @@
+import { config } from '@/core/config';
+import type { Experience } from '@/core/experience';
 import { create } from 'zustand';
 import { createPersistedStore } from '@/core/store';
 import type { Lens } from '@/core/types';
@@ -7,6 +9,8 @@ export const TODAY_LABELS: Record<string, string> = { tasks: 'Tasks', intention:
 
 type Theme = 'dark' | 'light';
 interface UIState {
+  experience: Experience;
+  setExperience: (experience: Experience) => void;
   todayOrder: string[];
   todayHidden: string[];
   gettingStarted: boolean | null;
@@ -26,6 +30,8 @@ interface UIState {
 }
 
 export const useUI = createPersistedStore<UIState>('ui', 1, (set, get) => ({
+  experience: config.defaultExperience,
+  setExperience: (experience) => set({ experience }),
   todayOrder: TODAY_SECTIONS,
   todayHidden: [],
   gettingStarted: null,
