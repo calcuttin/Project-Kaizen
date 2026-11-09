@@ -6,7 +6,7 @@ Kaizen's roadmap connects public reviews to actionable issues, implementation pu
 
 ## Shared accounts and Vercel hosting — 2026-11-08
 
-PR #39 and #41 merged in order after passing checks. [Full Kaizen](https://project-kaizen-gamma.vercel.app) and [Bookshelf](https://kaizen-bookshelf.vercel.app) are deployed as separate Vercel projects from the same application revision, Clerk identity system and Supabase database. Users can switch experiences without creating another account. [Release evidence and remaining checks](docs/reviews/2026-11-08/vercel-rollout.md); #18 tracks live sync acceptance. Hosted backup/recovery remains deferred.
+PR #39 and #41 merged in order after passing checks. [Full Kaizen](https://project-kaizen-gamma.vercel.app) and [Bookshelf](https://kaizen-bookshelf.vercel.app) are deployed as separate Vercel projects from the same application revision, Clerk identity system and Supabase database. Users can switch experiences without creating another account. A disposable-account test verified book creation and reading progress in both directions; account deletion completed and both apps signed out. [Release evidence and remaining checks](docs/reviews/2026-11-08/vercel-rollout.md); #18 retains the broader provider acceptance work. Hosted backup/recovery remains deferred.
 
 ## Repository monitoring — 2026-10-23
 

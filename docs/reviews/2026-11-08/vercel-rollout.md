@@ -20,7 +20,21 @@ Vercel reports both production deployments Ready and assigns the domains above. 
 - Both `/library` and `/settings` return HTTP 200. The Bookshelf sign-in page renders with Bookshelf selected by default.
 - No database migration, new identity application, or separate library database was created.
 - The earlier Sites deployment is retained during the move. Its browser-only prototype data remains on its original origin; moving hosts does not transfer local storage automatically. Export that library there before retiring the old origin. Account-synced books use the shared database.
-- Live account sync verification is pending; deployment/configuration checks alone do not establish a successful authenticated round trip.
+- Live account sync passed using one explicitly authorized disposable development identity. The bounded test and cleanup are recorded below.
+
+## Authenticated two-way sync
+
+1. Created one disposable Clerk development account and signed into both Vercel origins through their email-code sign-in flows. No existing user directory was enumerated.
+2. Created the synthetic 200-page book **Disposable Vercel Sync Test — 2026-11-08** in Bookshelf with status Reading. It appeared in Full Kaizen under the same account.
+3. Logged page 42 in Full Kaizen. After saving and synchronizing, Bookshelf displayed **42 / 200 · 21%**.
+4. Logged page 84 in Bookshelf, waited for Saved, and reloaded Full Kaizen. It displayed **84 / 200 · 42%** with Saved status. This demonstrates book creation and reading-progress synchronization in both directions across separate origins.
+5. Called the deployed account-deletion endpoint using only this disposable account's session. It returned HTTP 200 with `deleted: true`. A lookup of that exact Clerk user returned 404; the account had zero active sessions. Both apps returned to their signed-out welcome screens after reload.
+
+![Full Kaizen displays page 84 received from Bookshelf](vercel-sync-proof.png)
+
+The app's deletion endpoint removes owned application rows and import files before deleting the Clerk identity; successful completion was observed. This test did not independently query privileged database row counts. The intentional deletion tombstone remains part of the deletion guard. No existing account or personal data was changed.
+
+This is synchronized saving, not an instantaneous push guarantee: the client polls every 60 seconds and also syncs on visibility changes or Save now. Reading the other origin before the save/pull completes can show the previous page. No application defect was established in this test. Notes, experience-preference propagation and additional browsers/devices were outside this bounded check; a proposed note write was rejected by automatic approval review before execution because the authorization covered books/progress.
 
 ## Limits
 
