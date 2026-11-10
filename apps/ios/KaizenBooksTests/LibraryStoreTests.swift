@@ -5,6 +5,24 @@ import XCTest
     private func temporaryFile() -> URL {
         FileManager.default.temporaryDirectory.appending(path: UUID().uuidString).appending(path: "library.json")
     }
+    func testOldCacheWithoutArtworkFieldsStillLoadsAndIdentityEditsInvalidateArtwork() throws {
+        let original = Book(title: "Original title", author: "Reader", pages: 100, coverURL: "https://covers.openlibrary.org/b/id/123-M.jpg")
+        let file = temporaryFile()
+        defer { try? FileManager.default.removeItem(at: file.deletingLastPathComponent()) }
+        let store = LibraryStore(fileURL: file, demo: false)
+        XCTAssertTrue(store.save(original))
+        var edited = original; edited.notes = "Keep cover"
+        XCTAssertTrue(store.save(edited))
+        XCTAssertEqual(store.book(original.id)?.coverURL, original.coverURL)
+        edited.title = "Different book"
+        XCTAssertTrue(store.save(edited))
+        XCTAssertNil(store.book(original.id)?.coverURL)
+        var json = try XCTUnwrap(JSONSerialization.jsonObject(with: JSONEncoder().encode(original)) as? [String: Any])
+        json.removeValue(forKey: "coverURL"); json.removeValue(forKey: "hue")
+        let legacy = try JSONDecoder().decode(Book.self, from: JSONSerialization.data(withJSONObject: json))
+        XCTAssertNil(legacy.coverURL)
+        XCTAssertEqual(legacy.title, original.title)
+    }
     func testProgressPersistsWithoutDoubleCountingAndFinishes() throws {
         let file = temporaryFile()
         defer { try? FileManager.default.removeItem(at: file.deletingLastPathComponent()) }

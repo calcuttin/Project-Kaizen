@@ -28,6 +28,8 @@ struct Book: Identifiable, Codable, Equatable {
     var notes = ""
     var cover = 0
     var finishedAt: Date?
+    var coverURL: String?
+    var hue: Int?
     var progress: Double { Double(currentPage) / Double(max(1, pages)) }
 }
 
@@ -46,6 +48,7 @@ struct LibrarySnapshot: Codable {
     var goalEnabled = false
     var isDemo = false
     var cloud: CloudState?
+    var shelfAppearances: [ShelfAppearance]?
 
     static func demo(now: Date = Date()) -> Self {
         let books = [
@@ -278,6 +281,10 @@ enum LibraryError: LocalizedError {
             clean.title = book.title.trimmingCharacters(in: .whitespacesAndNewlines)
             clean.author = book.author.trimmingCharacters(in: .whitespacesAndNewlines)
             clean.shelf = book.shelf.trimmingCharacters(in: .whitespacesAndNewlines)
+            if let old = snapshot.books.first(where: { $0.id == book.id }),
+               old.title != clean.title || old.author != clean.author || old.isbn != clean.isbn {
+                clean.coverURL = nil
+            }
             if let index = snapshot.books.firstIndex(where: { $0.id == book.id }) { snapshot.books[index] = clean }
             else { snapshot.books.append(clean) }
         }

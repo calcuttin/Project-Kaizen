@@ -4,6 +4,10 @@ Kaizen's roadmap connects public reviews to actionable issues, implementation pu
 
 [Review archive](docs/reviews/README.md) · [Open roadmap issues](https://github.com/calcuttin/Project-Kaizen/issues?q=is%3Aissue%20is%3Aopen%20label%3Aroadmap) · [AI-assisted work](https://github.com/calcuttin/Project-Kaizen/issues?q=is%3Aissue%20label%3Aai-assisted)
 
+## Native cover and shelf appearance follow-up — 2026-11-10
+
+Phone inspection confirmed that TestFlight build 2 omitted publisher artwork and substituted generic shelf styling. The native follow-up maps/render web cover URLs, adds opt-in Open Library lookup/retry, and uses saved themes and cabinet objects with the web artwork. Simulator model/UI regressions and a live sample-cover visual check passed. [Diagnosis, changes and validation limits](docs/reviews/2026-11-10/ios-cover-parity/README.md) · [Tracker #49](https://github.com/calcuttin/Project-Kaizen/issues/49). Build 3 is prepared in source; a new TestFlight upload and phone acceptance remain pending. Hosted backup/recovery stays deferred.
+
 ## Native iPhone TestFlight — 2026-11-10
 
 The Apple team/App ID, distribution certificate/profile, App Store Connect app and Clerk native login registration are configured. Signed **0.1.0 (2)** passed signature, entitlement and matching-symbol inspection and was uploaded for internal TestFlight. Apple made build 2 Ready to Test, and it is now Testing in the owner-only group with manual build selection. Physical installation/sign-in/sync and VoiceOver remain open in [#49](https://github.com/calcuttin/Project-Kaizen/issues/49). Build 1 remains unassigned because its export omitted Associated Domains. [Release runbook](apps/ios/Distribution/README.md) · [Validation and limits](docs/reviews/2026-11-10/ios-testflight/README.md). Existing shared development authentication is retained; production-auth acceptance remains open. Hosted backup/recovery stays deferred.

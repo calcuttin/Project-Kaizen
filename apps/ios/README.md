@@ -20,9 +20,9 @@ Changes save atomically on the phone before synchronization. While active, the a
 4. **Journal:** see reading sessions, pages from the last seven calendar days, and books finished in the current calendar year. The annual target is optional and editable.
 5. **Preferences:** start an empty library when finished exploring. This confirmation removes **all prototype data**, including books and notes added during demo mode. It never touches the web app.
 
-The app opens on Bookshelf, with Shelves/Grid views, status and shelf filters, and a mark-read mode. Dark appearance matches the web default; Preferences offers Light and System alternatives. Native navigation and tap targets remain adapted to iPhone. Cabinet objects are decorative in this prototype; web cabinet customization and atmosphere animation are not ported.
+The app opens on Bookshelf, with Shelves/Grid views, status and shelf filters, and a mark-read mode. Dark appearance matches the web default; Preferences offers Light and System alternatives. Native navigation and tap targets remain adapted to iPhone. Saved web shelf themes, object choices, arrangement and brightness are displayed on the phone. Cabinet editing and atmosphere animation remain on the website.
 
-The initial six books are a public-title sample collection with fictional reading activity. Shelves use the web app’s original wooden environment and cabinet assets. Book covers/spines use its generated palette; they are not publisher artwork. The sample banner stays visible until you start an empty library.
+The initial six books are a public-title sample collection with fictional reading activity. Shelves use the web app’s original wooden environment and cabinet assets. Online covers are optional and disabled by default on this device. Enable them above the shelves or in Preferences to display Open Library artwork; this sends book details and your IP address to Open Library. Synced cover URLs are used first, then ISBN/title lookup; missing or offline artwork keeps a readable generated cover. The sample banner stays visible until you start an empty library.
 
 ## Scope and data
 
@@ -32,7 +32,7 @@ The initial six books are a public-title sample collection with fictional readin
 - Sessions record forward progress. Marking a book Finished using the status menu does not invent a reading session. Goals count current-year completion dates and start fresh numerically each calendar year.
 - Account caches live at `Application Support/KaizenBooks/accounts/<SHA256-of-user-id>.json`. The cursor, raw web records, tombstones, durable mutation outbox and conflicts are saved together. Web-only fields are preserved, UUID prototype IDs remain readable, and account switches invalidate in-flight responses. Deleting the app removes local files and unsent changes. Hosted backup/recovery remains deferred.
 
-This is a local prototype, not an App Store release. Simulator checks do not establish full physical-device or spoken VoiceOver coverage.
+This is an internal beta, not a public App Store release. Simulator checks do not establish full physical-device or spoken VoiceOver coverage.
 
 ## Validation
 
@@ -90,3 +90,7 @@ All **6 model tests and 5 UI tests passed** on iPhone 17 Pro / iOS 26.5, followe
 The native app now connects to the existing web account and library. **20 model tests passed**, covering persistence, version conflicts, retries, account isolation, migration and stale editors. **Five UI flows passed again after the final editor/layout fixes**; evidence is recorded in the [searchable review](../../docs/reviews/2026-11-08/ios-sync/README.md). A signed simulator build verified native email-code sign-in, book/progress/notes/rating sync with both Vercel apps, relaunch persistence and shared deletion. The approved disposable account and its sessions were deleted and all three apps returned to sign-in.
 
 For live sign-in, use normal Xcode Run/build so Keychain access is locally signed. `CODE_SIGNING_ALLOWED=NO` is suitable only for isolated offline model/UI tests. [Release follow-up #49](https://github.com/calcuttin/Project-Kaizen/issues/49) retains physical-device, production-auth and distribution checks. Backup recovery remains deferred.
+
+### Cover and shelf parity follow-up — November 10, 2026
+
+The phone report exposed omitted artwork rendering and generic shelf styling in build 2. Build 3 source adds real cover rendering and saved web shelf appearance. **25 model tests and 5 UI tests passed**; a separate live simulator check confirmed real artwork with the sample library. [Diagnosis and evidence](../../docs/reviews/2026-11-10/ios-cover-parity/README.md). A new TestFlight upload and phone acceptance remain pending.

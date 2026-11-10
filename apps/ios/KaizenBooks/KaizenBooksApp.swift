@@ -138,7 +138,12 @@ struct BookshelfView: View {
             (term.isEmpty || "\(book.title) \(book.author) \(book.isbn)".localizedCaseInsensitiveContains(term))
         }
     }
-    private var shelfNames: [String] { Array(Set(books.map { $0.shelf.isEmpty ? "Unshelved" : $0.shelf })).sorted() }
+    private var shelfNames: [String] {
+        let names = Set(books.map { $0.shelf.isEmpty ? "Unshelved" : $0.shelf })
+        var seen = Set<String>()
+        let ordered = (store.library.shelfAppearances ?? []).map(\.name).filter { names.contains($0) && seen.insert($0).inserted }
+        return ordered + names.subtracting(seen).sorted()
+    }
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
@@ -204,6 +209,7 @@ struct BookshelfView: View {
                 }.padding(.horizontal, 12).frame(minHeight: 44).background(BooksTheme.raised, in: RoundedRectangle(cornerRadius: 8))
                     .overlay(RoundedRectangle(cornerRadius: 8).stroke(BooksTheme.border, lineWidth: 1))
                 if store.library.isDemo { Text("Sample library · saved on this device").font(.caption2).foregroundStyle(BooksTheme.secondary) }
+                if !store.library.books.isEmpty { OnlineCoverControls() }
                 if markMode { Text("Tap books to toggle Finished / Want to read.").font(.caption).foregroundStyle(BooksTheme.accent) }
                 if books.isEmpty {
                     ContentUnavailableView("No books here yet", systemImage: "books.vertical", description: Text("Add a book or try a different search or filter."))
@@ -223,9 +229,10 @@ struct BookshelfView: View {
                         }
                     }.padding(.vertical, 8)
                 } else {
-                    VStack(spacing: 8) {
+                    LazyVStack(spacing: 8) {
                         ForEach(shelfNames, id: \.self) { name in
-                            NativeShelf(name: name, books: books.filter { ($0.shelf.isEmpty ? "Unshelved" : $0.shelf) == name }, markMode: markMode, select: selectBook)
+                            NativeShelf(name: name, books: books.filter { ($0.shelf.isEmpty ? "Unshelved" : $0.shelf) == name }, markMode: markMode, select: selectBook,
+                                appearance: store.library.shelfAppearances?.first { $0.name == name })
                         }
                     }
                 }
