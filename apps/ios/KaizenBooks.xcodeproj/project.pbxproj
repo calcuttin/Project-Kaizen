@@ -30,6 +30,8 @@
 		AABBCCDD1122334455667742 /* Basic.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABBCCDD1122334455667741 /* Basic.swift */; };
 		AABBCCDD1122334455667752 /* RetroTerminal.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABBCCDD1122334455667751 /* RetroTerminal.swift */; };
 		AABBCCDD1122334455667762 /* ShelfManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABBCCDD1122334455667761 /* ShelfManager.swift */; };
+		AABBCCDD1122334455667772 /* LibraryImports.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABBCCDD1122334455667771 /* LibraryImports.swift */; };
+		AABBCCDD1122334455667782 /* ImportCenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABBCCDD1122334455667781 /* ImportCenter.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -74,6 +76,8 @@
 		AABBCCDD1122334455667741 /* Basic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Basic.swift; sourceTree = "<group>"; };
 		AABBCCDD1122334455667751 /* RetroTerminal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RetroTerminal.swift; sourceTree = "<group>"; };
 		AABBCCDD1122334455667761 /* ShelfManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShelfManager.swift; sourceTree = "<group>"; };
+		AABBCCDD1122334455667771 /* LibraryImports.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryImports.swift; sourceTree = "<group>"; };
+		AABBCCDD1122334455667781 /* ImportCenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportCenter.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -134,6 +138,8 @@
 				AABBCCDD1122334455667701 /* BookArtwork.swift */,
 				AABBCCDD1122334455667711 /* ShelfAppearance.swift */,
 				AABBCCDD1122334455667731 /* ISBNScanner.swift */,
+				AABBCCDD1122334455667781 /* ImportCenter.swift */,
+				AABBCCDD1122334455667771 /* LibraryImports.swift */,
 				AABBCCDD1122334455667761 /* ShelfManager.swift */,
 				AABBCCDD1122334455667751 /* RetroTerminal.swift */,
 				AABBCCDD1122334455667741 /* Basic.swift */,
@@ -313,6 +319,8 @@
 				AABBCCDD1122334455667702 /* BookArtwork.swift in Sources */,
 				AABBCCDD1122334455667712 /* ShelfAppearance.swift in Sources */,
 				AABBCCDD1122334455667732 /* ISBNScanner.swift in Sources */,
+				AABBCCDD1122334455667782 /* ImportCenter.swift in Sources */,
+				AABBCCDD1122334455667772 /* LibraryImports.swift in Sources */,
 				AABBCCDD1122334455667762 /* ShelfManager.swift in Sources */,
 				AABBCCDD1122334455667752 /* RetroTerminal.swift in Sources */,
 				AABBCCDD1122334455667742 /* Basic.swift in Sources */,

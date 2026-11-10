@@ -4,6 +4,10 @@ Kaizen's roadmap connects public reviews to actionable issues, implementation pu
 
 [Review archive](docs/reviews/README.md) · [Open roadmap issues](https://github.com/calcuttin/Project-Kaizen/issues?q=is%3Aissue%20is%3Aopen%20label%3Aroadmap) · [AI-assisted work](https://github.com/calcuttin/Project-Kaizen/issues?q=is%3Aissue%20label%3Aai-assisted)
 
+## Native import and undo follow-up — 2026-11-10
+
+CSV/Goodreads and Kindle file previews, duplicate handling, explicit book matching, local/shared annotations and guarded import undo are implemented for [#56](https://github.com/calcuttin/Project-Kaizen/issues/56). Book deletion also offers immediate undo with full cloud metadata and tombstone-aware restoration. [Review and validation](docs/reviews/2026-11-10/ios-capabilities/imports-undo.md). This follows reading PR #61 after #59 and #60. External file-provider and physical acceptance remain open. Hosted backup/recovery stays deferred.
+
 ## Native reading and account-tool follow-up — 2026-11-10
 
 The next [#56](https://github.com/calcuttin/Project-Kaizen/issues/56) implementation adds paused Reading, shared daily goals, all-time journal totals, journal-to-book navigation, annotation context and explicit web handoffs for account/data tools. [Review and validation](docs/reviews/2026-11-10/ios-capabilities/reading.md). It depends on shelf PR #60, after Apple II #59. Imports, deletion undo, shelf motion and physical acceptance remain tracked. Hosted backup/recovery stays deferred.

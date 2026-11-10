@@ -33,6 +33,16 @@ struct BooksRootView: View {
         }
         .preferredColorScheme(appearance == "system" ? nil : appearance == "light" ? .light : .dark)
         .disabled(store.readOnly)
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            if let deleted = store.deletedBook {
+                HStack {
+                    Text("Deleted \(deleted.book.title)").font(.caption).lineLimit(2)
+                    Spacer()
+                    Button("Undo") { _ = store.undoDelete() }.frame(minHeight: 44).accessibilityIdentifier("undo-book-delete")
+                    Button("Dismiss", systemImage: "xmark") { store.dismissDeleteUndo() }.labelStyle(.iconOnly).frame(minWidth: 44, minHeight: 44)
+                }.padding(.horizontal).background(BooksTheme.card)
+            }
+        }
         .safeAreaInset(edge: .top, spacing: 0) {
             if store.readOnly {
                 Text("Library unavailable · original data preserved").font(.caption).frame(maxWidth: .infinity).padding(8).background(.red.opacity(0.12))
@@ -130,6 +140,7 @@ struct BookshelfView: View {
     @State private var adding = false
     @State private var terminal = false
     @State private var managingShelves = false
+    @State private var importing = false
     @State private var settings = false
     @State private var grid = false
     @State private var markMode = false
@@ -218,7 +229,11 @@ struct BookshelfView: View {
                 if store.library.isDemo { Text("Sample library · saved on this device").font(.caption2).foregroundStyle(BooksTheme.secondary) }
                 if !store.library.books.isEmpty { OnlineCoverControls() }
                 if markMode { Text("Tap books to toggle Finished / Want to read.").font(.caption).foregroundStyle(BooksTheme.accent) }
-                Button("Manage shelves", systemImage: "slider.horizontal.3") { managingShelves = true }.frame(minHeight: 44)
+                HStack {
+                    Button("Manage shelves", systemImage: "slider.horizontal.3") { managingShelves = true }.frame(minHeight: 44)
+                    Spacer()
+                    Button("Import books", systemImage: "square.and.arrow.down") { importing = true }.frame(minHeight: 44)
+                }.font(.subheadline)
                 if books.isEmpty && (grid || !query.isEmpty || visibleShelves.isEmpty) {
                     ContentUnavailableView("No books here yet", systemImage: "books.vertical", description: Text("Add a book or try a different search or filter."))
                     if !query.isEmpty || status != nil || !shelf.isEmpty {
@@ -256,6 +271,7 @@ struct BookshelfView: View {
                 ToolbarItem(placement: .topBarTrailing) { Button("Preferences", systemImage: "gearshape") { settings = true } }
             }
             .onChange(of: store.shelves.map(\.id)) { _, ids in if !shelf.isEmpty && !ids.contains(shelf) { shelf = "" } }
+            .sheet(isPresented: $importing) { ImportCenter() }
             .sheet(isPresented: $managingShelves) { ShelfManager() }
             .sheet(isPresented: $terminal) { RetroTerminal() }
             .sheet(isPresented: $adding) { BookEditor() }

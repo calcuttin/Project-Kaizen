@@ -235,4 +235,38 @@ final class BooksFlowTests: XCTestCase {
         session.tap(); XCTAssertTrue(app.navigationBars["Book details"].waitForExistence(timeout: 5))
     }
 
+    func testImportPreviewDuplicateSkipAndUndo() {
+        let app = XCUIApplication()
+        app.launchArguments = ["--ui-testing", "--import-fixture", "-onlineBookCovers", "NO"]
+        app.launch()
+        let entry = app.buttons["Import books"]
+        for _ in 0..<4 { if entry.isHittable { break }; app.swipeUp() }
+        entry.tap(); app.buttons["Load import test file"].tap()
+        XCTAssertTrue(app.staticTexts["Import preview sample"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["Already exists — will skip"].exists)
+        let commit = app.buttons["commit-import"]
+        for _ in 0..<7 { if commit.isHittable { break }; app.swipeUp() }
+        let screenshot = XCTAttachment(screenshot: app.screenshot()); screenshot.name = "Import review"; screenshot.lifetime = .keepAlways; add(screenshot)
+        commit.tap()
+        XCTAssertTrue(app.staticTexts["1 records added · 1 skipped"].waitForExistence(timeout: 5))
+        app.buttons["Undo last import"].tap()
+        XCTAssertTrue(app.staticTexts["Import undone."].waitForExistence(timeout: 5))
+        app.buttons["Done"].tap()
+        let search = app.textFields["book-search"]; search.tap(); search.typeText("Import preview sample")
+        XCTAssertTrue(app.staticTexts["No books here yet"].waitForExistence(timeout: 5))
+    }
+    func testDeleteUndoReturnsBookAndProgress() {
+        let app = XCUIApplication()
+        app.launchArguments = ["--ui-testing", "-onlineBookCovers", "NO"]
+        app.launch(); app.tabBars.buttons["Reading"].tap(); app.buttons["reading-The Creative Act"].tap()
+        let delete = app.buttons["Delete book"]
+        for _ in 0..<7 { if delete.isHittable { break }; app.swipeUp() }
+        delete.tap(); app.sheets.buttons["Delete book"].tap()
+        XCTAssertTrue(app.buttons["undo-book-delete"].waitForExistence(timeout: 5)); app.buttons["undo-book-delete"].tap()
+        let book = app.buttons["reading-The Creative Act"]
+        for _ in 0..<7 { if book.isHittable { break }; app.swipeDown() }
+        XCTAssertTrue(book.isHittable); book.tap()
+        XCTAssertTrue(app.staticTexts["Page 146 of 432"].waitForExistence(timeout: 5))
+    }
+
 }

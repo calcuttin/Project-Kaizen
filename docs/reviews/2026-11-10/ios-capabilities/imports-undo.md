@@ -1,0 +1,19 @@
+# Native imports and safe undo
+
+Review ID: **REV-2026-11-10-IOS-IMPORTS-UNDO** · Related: [#56](https://github.com/calcuttin/Project-Kaizen/issues/56). Depends on reading follow-up [#61](https://github.com/calcuttin/Project-Kaizen/pull/61).
+
+Codex implemented file import and book deletion recovery at the maintainer’s request. Import books uses the system file picker and parses UTF-8 CSV/Goodreads or English Kindle My Clippings.txt locally, off the main actor. Security-scoped access is balanced and reads stop at 5 MB. The parser rejects oversized/unclosed fields and more than 1,000 records; CSV has at most 128 columns and 16 KiB fields. No source file is uploaded or retained by the importer.
+
+A preview shows books, statuses, page counts, annotations and warnings before any mutation. Missing/invalid page counts explicitly use 300. Imported finished status does not invent a finish date or reading session. CSV duplicates are skipped by normalized ISBN/title/author. Kindle permits automatic matching, explicit selection, create or skip; ambiguous matches are skipped unless chosen explicitly. Clipping fingerprints match the website’s UTF-16 FNV algorithm, so existing web imports are deduplicated. File loading, cancellation and account changes invalidate late previews.
+
+Local annotations now persist and participate in shared sync. Imports append records and preserve existing books. Undo last import is available for this session and removes only that run’s created records. It refuses if records were edited, gained reading/annotation activity, gained other books on a created shelf, or have sync conflicts. It never restores the entire pre-import library.
+
+Book deletion now offers an Undo banner. Undo restores the book, notes, sessions and annotations with the same IDs and full cloud metadata, including after the deletion tombstones have been acknowledged. Missing shelves remain removed and the book returns to Unshelved. A newer book or unresolved conflict is not overwritten. Undo state is memory-only, cleared on account disconnect, replaced by the next corresponding operation and lost when the app closes. This is an immediate recovery affordance, not a backup service.
+
+The restoration work also fixed native staging dropping an explicit cover URL on newly added books; restored/new covers now survive cloud staging. Full session payloads retain unknown fields during restore.
+
+Validation: **49 native model tests passed**, including CSV quotes/Goodreads fields/statuses, file/record limits, parser preview without writes, duplicate handling, explicit Kindle matching/context, local undo, refusal after new reading, shared tombstone restore and import undo. Two simulator flows passed: review a synthetic CSV, skip its existing book, import and undo; and delete/undo an existing sample book with progress retained. The import UI fixture is gated by both UI-test flags in Debug and exercises the actual file loader with a synthetic temporary CSV; it is excluded from Release. It does not claim verification of external iCloud/Files providers or physical VoiceOver. No personal cloud data was changed.
+
+The six import model tests passed again after bounded chunked reads and the exact website fingerprint fixture were added. Generic-iPhone Release compilation passed; the synthetic fixture strings are absent from the Release executable. [Synthetic import review screenshot](import-review.png) was inspected. Sample mode now explicitly warns that its mixed sample collection cannot be copied to a shared account; personal exports should start from an empty personal library.
+
+Apple references: [fileImporter and security-scoped URLs](https://developer.apple.com/documentation/swiftui/view/fileimporter(ispresented:allowedcontenttypes:oncompletion:)). **Hosted backup/recovery remains deferred.**

@@ -153,3 +153,78 @@ final class BasicTests: XCTestCase {
         c.execute(String(repeating: "A", count: 501), books: books); XCTAssertTrue(c.output.last!.contains("INPUT LIMIT"))
     }
 }
+
+@MainActor final class NativeImportTests: XCTestCase {
+    private func file() -> URL {
+        let dir = FileManager.default.temporaryDirectory.appending(path: UUID().uuidString)
+        addTeardownBlock { try? FileManager.default.removeItem(at: dir) }
+        return dir.appending(path: "library.json")
+    }
+    private let clipping = "A Book (A Reader)\n- Your Highlight on page 12 | Location 140-150 | Added on Sunday, November 1, 2026 12:00:00 PM\n\nA thought.\n==========\n"
+    func testCSVGoodreadsQuotesStatusAndBounds() throws {
+        let csv = "\u{FEFF}Title,Author,ISBN13,Number of Pages,Exclusive Shelf,My Rating\r\n\"A, \"\"quoted\"\" book\",A Reader,=\"9780140328721\",96,currently-reading,4\r\nPaused,Reader,,bad,paused,0\r\nDone,Reader,,20,read,5\r\n"
+        let result = try LibraryImports.parse(csv, kind: .csv)
+        XCTAssertEqual(result.books[0].title, "A, \"quoted\" book")
+        XCTAssertEqual(result.books[0].isbn, "9780140328721"); XCTAssertEqual(result.books[0].status, .reading)
+        XCTAssertEqual(result.books[1].status, .paused); XCTAssertEqual(result.books[1].pages, 300)
+        XCTAssertEqual(result.books[2].status, .finished); XCTAssertEqual(result.books[2].currentPage, 20); XCTAssertNil(result.books[2].finishedAt)
+        XCTAssertEqual(result.warnings.count, 1)
+        for bad in ["Title\n\"Unclosed", "Unknown\nBook", "Title\n" + String(repeating: "x", count: 16385), "Title\n" + String(repeating: "Book\n", count: 1001), String(repeating: "x", count: LibraryImports.maxBytes + 1)] {
+            XCTAssertThrowsError(try LibraryImports.parse(bad, kind: .csv))
+        }
+    }
+    func testCSVPreviewCommitDuplicatesAndUndoKeepsExistingBooks() throws {
+        let store = LibraryStore(fileURL: file(), demo: false)
+        XCTAssertTrue(store.save(Book(title: "Existing", author: "Reader", pages: 100)))
+        let preview = try LibraryImports.parse("Title,Author,Pages,Shelf\nExisting,Reader,150,Study\nNew,Reader,60,Study\nNew,Reader,60,Study", kind: .csv)
+        XCTAssertEqual(store.library.books.count, 1, "Parsing must not write")
+        XCTAssertTrue(store.importPreview(preview, choices: [:]))
+        XCTAssertEqual(store.library.books.count, 2); XCTAssertEqual(store.lastImport?.skipped, 2)
+        XCTAssertEqual(store.library.books.first { $0.title == "Existing" }?.pages, 100)
+        XCTAssertEqual(store.shelves.count, 1)
+        XCTAssertTrue(store.undoImport()); XCTAssertEqual(store.library.books.count, 1); XCTAssertTrue(store.shelves.isEmpty)
+        XCTAssertEqual(store.library.books[0].title, "Existing")
+    }
+    func testKindleContextMatchingDuplicatesAndUndo() throws {
+        let store = LibraryStore(fileURL: file(), demo: false)
+        let book = Book(title: "Different edition", author: "Reader", pages: 500)
+        XCTAssertTrue(store.save(book))
+        let preview = try LibraryImports.parse(clipping + clipping, kind: .kindle)
+        XCTAssertEqual(preview.books.count, 1); XCTAssertEqual(preview.annotations.count, 2)
+        let annotation = try XCTUnwrap(preview.annotations.first)
+        // Independent JavaScript evaluation of the website's UTF-16 FNV fingerprint.
+        XCTAssertEqual(annotation.payload?["sourceRef"], .string("kindle-f6b15c47"))
+        XCTAssertEqual(annotation.payload?["page"], .number(12)); XCTAssertEqual(annotation.payload?["location"], .string("140-150")); XCTAssertNotNil(annotation.payload?["annotatedAt"])
+        XCTAssertTrue(store.importPreview(preview, choices: [preview.books[0].id: "link:" + book.id]))
+        XCTAssertEqual(store.annotations.count, 1); XCTAssertEqual(store.annotations[0].payload?["bookId"], .string(book.id))
+        XCTAssertEqual(store.lastImport?.skipped, 1)
+        XCTAssertTrue(store.undoImport()); XCTAssertTrue(store.annotations.isEmpty); XCTAssertEqual(store.library.books, [book])
+    }
+    func testImportUndoRefusesLaterEditsOrReadingActivity() throws {
+        let store = LibraryStore(fileURL: file(), demo: false)
+        let preview = try LibraryImports.parse("Title,Author,Pages\nNew,Reader,100", kind: .csv)
+        XCTAssertTrue(store.importPreview(preview, choices: [:]))
+        let book = try XCTUnwrap(store.library.books.first)
+        XCTAssertTrue(store.log(book.id, page: 10)); XCTAssertFalse(store.undoImport())
+        XCTAssertEqual(store.book(book.id)?.currentPage, 10); XCTAssertEqual(store.library.sessions.count, 1)
+    }
+    func testLocalDeleteUndoRestoresNotesHistoryAndAnnotations() throws {
+        let url = file(), store = LibraryStore(fileURL: file(), demo: false)
+        let preview = try LibraryImports.parse(clipping, kind: .kindle)
+        XCTAssertTrue(store.importPreview(preview, choices: [:]))
+        var book = try XCTUnwrap(store.library.books.first); book.notes = "Keep me"; XCTAssertTrue(store.save(book))
+        XCTAssertTrue(store.log(book.id, page: 4)); XCTAssertTrue(store.delete(book.id))
+        XCTAssertTrue(store.annotations.isEmpty); XCTAssertTrue(store.undoDelete())
+        XCTAssertEqual(store.book(book.id)?.notes, "Keep me"); XCTAssertEqual(store.book(book.id)?.currentPage, 4)
+        XCTAssertEqual(store.annotations.count, 1); XCTAssertEqual(store.library.sessions.count, 1)
+        XCTAssertFalse(store.undoDelete())
+        let isolated = LibraryStore(fileURL: url, demo: false); XCTAssertNil(isolated.deletedBook)
+    }
+    func testFileLoaderRejectsOversizeAndInvalidEncoding() async throws {
+        let url = file(); try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try Data(repeating: 65, count: LibraryImports.maxBytes + 1).write(to: url)
+        do { _ = try await LibraryImportLoader().load(url, kind: .csv); XCTFail("Oversize accepted") } catch { }
+        try Data([0xff, 0xfe, 0xff]).write(to: url)
+        do { _ = try await LibraryImportLoader().load(url, kind: .csv); XCTFail("Invalid encoding accepted") } catch { }
+    }
+}

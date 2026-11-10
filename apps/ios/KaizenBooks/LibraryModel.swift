@@ -51,6 +51,7 @@ struct LibrarySnapshot: Codable {
     var isDemo = false
     var cloud: CloudState?
     var shelfAppearances: [ShelfAppearance]?
+    var importedAnnotations: [CloudRecord]?
 
     static func demo(now: Date = Date()) -> Self {
         let books = [
@@ -90,7 +91,9 @@ struct LibrarySnapshot: Codable {
             throw LibraryError.invalidData
         }
         let ids = Set(books.map(\.id))
-        guard sessions.allSatisfy({ ids.contains($0.bookID) }) else { throw LibraryError.invalidData }
+        let annotations = importedAnnotations ?? []
+        guard sessions.allSatisfy({ ids.contains($0.bookID) }), Set(annotations.map(\.entityId)).count == annotations.count,
+              annotations.allSatisfy({ $0.entityType == "reading_annotations" && !$0.entityId.isEmpty && ids.contains($0.payload?["bookId"]?.string ?? "") && ["note", "highlight", "bookmark"].contains($0.payload?["kind"]?.string ?? "") && $0.payload?["content"]?.string != nil }) else { throw LibraryError.invalidData }
         return self
     }
 }
@@ -112,6 +115,8 @@ enum LibraryError: LocalizedError {
     private(set) var library: LibrarySnapshot
     var errorMessage: String?
     private(set) var readOnly = false
+    private(set) var deletedBook: DeletedBook?
+    private(set) var lastImport: NativeImportRun?
     private let fileURL: URL
     private var transport: (any LibraryTransport)?
     private var generation = 0
@@ -172,7 +177,7 @@ enum LibraryError: LocalizedError {
     }
     func connect(_ transport: any LibraryTransport) { self.transport = transport }
     func disconnect() {
-        generation += 1; transport = nil; isSyncing = false
+        generation += 1; transport = nil; isSyncing = false; deletedBook = nil; lastImport = nil
         // A dismissed account view must not continue writing through a retained store reference.
         if owner != nil { readOnly = true }
     }
@@ -263,7 +268,7 @@ enum LibraryError: LocalizedError {
         if updateCloud({ try $0.resolve(key: key, keepLocal: keepLocal) }) { Task { await self.syncNow() } }
     }
     var annotations: [CloudRecord] {
-        (library.cloud?.visible.values.filter { $0.entityType == "reading_annotations" && $0.payload != nil } ?? []).sorted { $0.entityId < $1.entityId }
+        (library.importedAnnotations ?? []).sorted { $0.entityId < $1.entityId }
     }
     @discardableResult func importLocal(_ source: LibrarySnapshot) -> Bool {
         guard let state = library.cloud, !state.importedLocal, state.lastSyncedAt != nil, !source.isDemo else {
@@ -295,6 +300,13 @@ enum LibraryError: LocalizedError {
             for var session in source.sessions {
                 guard let book = imported[session.bookID] else { continue }
                 session.id = UUID().uuidString; session.bookID = book; next.sessions.append(session)
+            }
+            var refs = Set((next.importedAnnotations ?? []).compactMap { $0.payload?["sourceRef"]?.string })
+            for var annotation in source.importedAnnotations ?? [] {
+                guard let id = imported[annotation.payload?["bookId"]?.string ?? ""] else { continue }
+                if let ref = annotation.payload?["sourceRef"]?.string, !refs.insert(ref).inserted { continue }
+                annotation.entityId = UUID().uuidString; annotation.payload?["id"] = .string(annotation.entityId); annotation.payload?["bookId"] = .string(id)
+                next.importedAnnotations = (next.importedAnnotations ?? []) + [annotation]
             }
             next.cloud?.importedLocal = true
         }
@@ -399,7 +411,34 @@ enum LibraryError: LocalizedError {
         save(book)
     }
     @discardableResult func delete(_ id: String) -> Bool {
-        commit { $0.books.removeAll { $0.id == id }; $0.sessions.removeAll { $0.bookID == id } }
+        guard let book = book(id) else { return false }
+        let saved = DeletedBook(book: book, sessions: library.sessions.filter { $0.bookID == id }, annotations: annotations.filter { $0.payload?["bookId"]?.string == id }, records: library.cloud?.visible.values.filter { ($0.entityType == "books" && $0.entityId == id) || (["reading_sessions", "reading_annotations"].contains($0.entityType) && $0.payload?["bookId"]?.string == id) } ?? [])
+        let success = commit {
+            $0.books.removeAll { $0.id == id }; $0.sessions.removeAll { $0.bookID == id }
+            $0.importedAnnotations?.removeAll { $0.payload?["bookId"]?.string == id }
+        }
+        if success { deletedBook = saved }
+        return success
+    }
+    func dismissDeleteUndo() { deletedBook = nil }
+    @discardableResult func undoDelete() -> Bool {
+        guard let saved = deletedBook else { return false }
+        let success = commit { next in
+            guard !next.books.contains(where: { $0.id == saved.book.id }),
+                  !(next.cloud?.conflicts.contains { c in saved.records.contains { $0.key == c.key } } ?? false) else { throw LibraryImportError.invalid("The deleted records changed elsewhere. Resolve sync conflicts before restoring; no newer version was replaced.") }
+            var book = saved.book
+            if let id = book.shelfID, !(next.shelfAppearances ?? []).contains(where: { $0.id == id }) { book.shelfID = nil; book.shelf = "" }
+            next.books.append(book)
+            next.sessions.append(contentsOf: saved.sessions)
+            next.importedAnnotations = (next.importedAnnotations ?? []) + saved.annotations
+            // Restore complete payloads first; regular staging patches native fields and preserves metadata.
+            if var cloud = next.cloud {
+                for record in saved.records { cloud.enqueue(type: record.entityType, id: record.entityId, payload: record.payload) }
+                next.cloud = cloud
+            }
+        }
+        if success { deletedBook = nil }
+        return success
     }
     @discardableResult func setGoal(enabled: Bool, books: Int, pagesPerDay: Int? = nil, replacing expected: ReadingGoalSettings? = nil) -> Bool {
         guard expected == nil || expected == goalSettings else { errorMessage = LibraryError.staleGoal.localizedDescription; return false }
@@ -408,9 +447,79 @@ enum LibraryError: LocalizedError {
             if let pagesPerDay { $0.pagesPerDay = pagesPerDay }
         }
     }
+    @discardableResult func importPreview(_ preview: LibraryImportPreview, choices: [String: String]) -> Bool {
+        guard preview.count > 0, preview.count <= 1000 else { return false }
+        var createdBooks = Set<String>(), createdShelves = Set<String>(), createdAnnotations = Set<String>(), skipped = 0
+        let success = commit { next in
+            var mapping: [String: String] = [:]
+            let existingRefs = Set((next.importedAnnotations ?? []).compactMap { $0.payload?["sourceRef"]?.string })
+            for incoming in preview.books {
+                if preview.kind == .kindle {
+                    let clips = preview.annotations.filter { $0.payload?["bookId"]?.string == incoming.id }
+                    if !clips.isEmpty && clips.allSatisfy({ existingRefs.contains($0.payload?["sourceRef"]?.string ?? "") }) { skipped += clips.count; continue }
+                }
+                let matches = next.books.filter { LibraryImports.matches($0, incoming) }
+                let choice = choices[incoming.id] ?? (matches.count > 1 ? "skip" : "auto")
+                if choice == "skip" { skipped += preview.kind == .csv ? 1 : preview.annotations.filter { $0.payload?["bookId"]?.string == incoming.id }.count; continue }
+                if choice.hasPrefix("link:") {
+                    let id = String(choice.dropFirst(5))
+                    guard next.books.contains(where: { $0.id == id }) else { throw LibraryError.staleEdit }
+                    mapping[incoming.id] = id; continue
+                }
+                if choice != "create", let first = matches.first {
+                    guard matches.count == 1 else { throw LibraryImportError.invalid("More than one matching book now exists. Choose a book explicitly, then import again.") }
+                    mapping[incoming.id] = first.id; if preview.kind == .csv { skipped += 1 }; continue
+                }
+                var book = incoming; book.id = UUID().uuidString
+                if !book.shelf.isEmpty {
+                    let shelves = (next.shelfAppearances ?? []).filter { LibraryImports.normalized($0.name) == LibraryImports.normalized(book.shelf) }
+                    // Ambiguous shelf names never silently choose one of two existing IDs.
+                    if shelves.count == 1 { book.shelfID = shelves[0].id; book.shelf = shelves[0].name }
+                    else {
+                        let shelf = ShelfAppearance(id: UUID().uuidString, name: book.shelf, order: (next.shelfAppearances?.map(\.order).max() ?? -1) + 1)
+                        next.shelfAppearances = (next.shelfAppearances ?? []) + [shelf]; createdShelves.insert(shelf.id); book.shelfID = shelf.id
+                    }
+                }
+                next.books.append(book); createdBooks.insert(book.id); mapping[incoming.id] = book.id
+            }
+            var refs = Set((next.importedAnnotations ?? []).compactMap { $0.payload?["sourceRef"]?.string })
+            for var annotation in preview.annotations {
+                guard let oldBook = annotation.payload?["bookId"]?.string, let target = mapping[oldBook] else { continue }
+                if let ref = annotation.payload?["sourceRef"]?.string, !refs.insert(ref).inserted { skipped += 1; continue }
+                annotation.entityId = UUID().uuidString; annotation.payload?["id"] = .string(annotation.entityId); annotation.payload?["bookId"] = .string(target)
+                let stamp = ISO8601DateFormatter().string(from: Date())
+                annotation.payload?["createdAt"] = .string(stamp); annotation.payload?["updatedAt"] = .string(stamp)
+                next.importedAnnotations = (next.importedAnnotations ?? []) + [annotation]; createdAnnotations.insert(annotation.entityId)
+            }
+        }
+        if success {
+            let keys = Set(createdBooks.map { "books:\($0)" } + createdShelves.map { "shelves:\($0)" } + createdAnnotations.map { "reading_annotations:\($0)" })
+            lastImport = NativeImportRun(books: library.books.filter { createdBooks.contains($0.id) }, shelves: shelves.filter { createdShelves.contains($0.id) }, annotations: annotations.filter { createdAnnotations.contains($0.entityId) }, records: library.cloud?.visible.values.filter { keys.contains($0.key) } ?? [], skipped: skipped)
+        }
+        return success
+    }
+    @discardableResult func undoImport() -> Bool {
+        guard let run = lastImport else { return false }
+        let success = commit { next in
+            let ids = Set(run.books.map(\.id)), shelfIDs = Set(run.shelves.map(\.id)), annotationIDs = Set(run.annotations.map(\.entityId))
+            guard !next.sessions.contains(where: { ids.contains($0.bookID) }),
+                  !(next.importedAnnotations ?? []).contains(where: { ids.contains($0.payload?["bookId"]?.string ?? "") && !annotationIDs.contains($0.entityId) }),
+                  !next.books.contains(where: { !ids.contains($0.id) && shelfIDs.contains($0.shelfID ?? "") }) else { throw LibraryImportError.invalid("Imported items have new activity. Undo will not remove later work; remove the imported items individually if needed.") }
+            if let cloud = next.cloud {
+                guard run.records.allSatisfy({ cloud.visible[$0.key]?.payload == $0.payload }), !cloud.conflicts.contains(where: { c in run.records.contains { $0.key == c.key } }) else { throw LibraryImportError.invalid("Imported records changed after import. Undo will not replace later edits.") }
+            } else {
+                guard run.books.allSatisfy({ item in next.books.first { $0.id == item.id } == item }),
+                      run.shelves.allSatisfy({ item in next.shelfAppearances?.first { $0.id == item.id } == item }),
+                      run.annotations.allSatisfy({ item in next.importedAnnotations?.first { $0.entityId == item.entityId } == item }) else { throw LibraryImportError.invalid("Imported records changed after import. Undo will not replace later edits.") }
+            }
+            next.books.removeAll { ids.contains($0.id) }; next.shelfAppearances?.removeAll { shelfIDs.contains($0.id) }; next.importedAnnotations?.removeAll { annotationIDs.contains($0.entityId) }
+        }
+        if success { lastImport = nil }
+        return success
+    }
     @discardableResult func clearDemo() -> Bool {
         guard library.isDemo else { return false }
-        return commit { $0 = LibrarySnapshot() }
+        let success = commit { $0 = LibrarySnapshot() }; if success { deletedBook = nil; lastImport = nil }; return success
     }
 }
 
@@ -435,4 +544,19 @@ extension CloudRecord {
         if let source = p["source"]?.string { parts.append(source == "kindle-clippings" ? "Kindle clippings" : source) }
         return parts.joined(separator: " · ")
     }
+}
+
+struct DeletedBook {
+    let book: Book
+    let sessions: [ReadingSession]
+    let annotations: [CloudRecord]
+    let records: [CloudRecord]
+}
+struct NativeImportRun {
+    let books: [Book]
+    let shelves: [ShelfAppearance]
+    let annotations: [CloudRecord]
+    let records: [CloudRecord]
+    let skipped: Int
+    var createdCount: Int { books.count + annotations.count }
 }
