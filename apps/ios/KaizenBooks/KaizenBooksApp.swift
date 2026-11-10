@@ -81,7 +81,7 @@ struct ReadingHome: View {
                             }
                         }.buttonStyle(.plain).accessibilityIdentifier("reading-\(book.title)")
                         Button { logging = book } label: {
-                            Label("Log reading", systemImage: "plus").font(.subheadline.weight(.semibold)).frame(maxWidth: .infinity).padding(.vertical, 7)
+                            Label(book.status == .paused ? "Resume & log reading" : "Log reading", systemImage: "plus").font(.subheadline.weight(.semibold)).frame(maxWidth: .infinity).padding(.vertical, 7)
                         }.buttonStyle(.borderedProminent).foregroundStyle(BooksTheme.buttonInk).buttonBorderShape(.roundedRectangle(radius: 9)).accessibilityIdentifier("log-\(book.title)")
                     }.paperCard()
                 }
@@ -114,6 +114,7 @@ struct ReadingHome: View {
             Eyebrow(text: book.shelf.isEmpty ? "CURRENTLY READING" : book.shelf)
             Text(book.title).font(BooksTheme.display(22)).foregroundStyle(BooksTheme.ink).fixedSize(horizontal: false, vertical: true)
             Text(book.author).font(.subheadline).foregroundStyle(.secondary)
+            if book.status == .paused { Label("Paused", systemImage: "pause.circle").font(.caption).foregroundStyle(BooksTheme.accent) }
             ProgressView(value: book.progress).padding(.top, 6)
             Text("\(Int(book.progress * 100))% · \(book.pages - book.currentPage) pages left").font(.caption).foregroundStyle(.secondary)
         }

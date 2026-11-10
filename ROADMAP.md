@@ -4,6 +4,10 @@ Kaizen's roadmap connects public reviews to actionable issues, implementation pu
 
 [Review archive](docs/reviews/README.md) · [Open roadmap issues](https://github.com/calcuttin/Project-Kaizen/issues?q=is%3Aissue%20is%3Aopen%20label%3Aroadmap) · [AI-assisted work](https://github.com/calcuttin/Project-Kaizen/issues?q=is%3Aissue%20label%3Aai-assisted)
 
+## Native reading and account-tool follow-up — 2026-11-10
+
+The next [#56](https://github.com/calcuttin/Project-Kaizen/issues/56) implementation adds paused Reading, shared daily goals, all-time journal totals, journal-to-book navigation, annotation context and explicit web handoffs for account/data tools. [Review and validation](docs/reviews/2026-11-10/ios-capabilities/reading.md). It depends on shelf PR #60, after Apple II #59. Imports, deletion undo, shelf motion and physical acceptance remain tracked. Hosted backup/recovery stays deferred.
+
 ## Native Apple II and shelf follow-up — 2026-11-10
 
 Work is progressing through [#56](https://github.com/calcuttin/Project-Kaizen/issues/56). The native Apple II implementation adds a labeled shelf control and toolbar shortcut, a bounded BASIC interpreter, demo/help/catalog commands and command history. [Review and validation](docs/reviews/2026-11-10/ios-capabilities/apple-ii.md). Stable-ID shelf management now adds empty/same-name shelves, create/rename/remove/reorder and cabinet appearance controls. [Shelf review and validation](docs/reviews/2026-11-10/ios-capabilities/shelves.md). Apple II is [PR #59](https://github.com/calcuttin/Project-Kaizen/pull/59); the shelf PR depends on it. Implementation, merge/release and physical-device acceptance are tracked separately. Hosted backup/recovery stays deferred.

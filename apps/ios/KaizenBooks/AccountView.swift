@@ -130,3 +130,19 @@ struct AccountPreferences: View {
         }
     }
 }
+
+
+struct WebAccountTools: View {
+    @Environment(LibraryStore.self) private var store
+    private let settings = URL(string: "https://kaizen-bookshelf.vercel.app/settings")!
+    var body: some View {
+        Section {
+            Link("Manage account on the web", destination: settings)
+            Link("Switch Bookshelf / Full Kaizen experience", destination: settings)
+            Link("Export or import account JSON on the web", destination: settings)
+            Link("Account deletion options on the web", destination: settings)
+        } header: { Text("Account & data tools") } footer: {
+            Text(store.owner == nil ? "These links open web Settings. Sign in with your Kaizen account. A local-only iPhone library is not included in web exports; connect and import it first." : "These links open web Settings in your browser; sign in with the same account. Sync this phone’s changes before exporting. Account deletion affects both websites and this app. Nothing is deleted by opening these links.")
+        }
+    }
+}

@@ -47,6 +47,7 @@ struct LibrarySnapshot: Codable {
     var sessions: [ReadingSession] = []
     var yearlyGoal = 12
     var goalEnabled = false
+    var pagesPerDay: Int?
     var isDemo = false
     var cloud: CloudState?
     var shelfAppearances: [ShelfAppearance]?
@@ -82,7 +83,7 @@ struct LibrarySnapshot: Codable {
 
     func validated() throws -> Self {
         guard Set((shelfAppearances ?? []).map(\.id)).count == (shelfAppearances ?? []).count,
-              version == 1, (1...500).contains(yearlyGoal), Set(books.map(\.id)).count == books.count,
+              version == 1, (pagesPerDay == nil || (0...100_000).contains(pagesPerDay!)), (1...500).contains(yearlyGoal), Set(books.map(\.id)).count == books.count,
               books.allSatisfy({ !$0.title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && (1...100_000).contains($0.pages) && (0...$0.pages).contains($0.currentPage) && (0...5).contains($0.rating) && (0...5).contains($0.cover) }),
               sessions.allSatisfy({ $0.pages > 0 }),
               Set(sessions.map(\.id)).count == sessions.count else {
@@ -95,9 +96,10 @@ struct LibrarySnapshot: Codable {
 }
 
 enum LibraryError: LocalizedError {
-    case invalidData, invalidProgress, staleEdit, staleShelf
+    case invalidData, invalidProgress, staleEdit, staleShelf, staleGoal
     var errorDescription: String? {
         switch self {
+        case .staleGoal: "Your reading goal changed while Preferences was open. Reopen Preferences to use the latest goal."
         case .staleShelf: "This shelf changed or was removed while you were editing. Reopen it to use the latest version; your draft has not replaced it."
         case .invalidData: "The library contains invalid book details. Check the title and page count."
         case .invalidProgress: "Enter a page after your current page, up to the last page of the book."
@@ -298,7 +300,9 @@ enum LibraryError: LocalizedError {
         }
     }
 
-    var reading: [Book] { library.books.filter { $0.status == .reading } }
+    var reading: [Book] { library.books.filter { $0.status == .reading || $0.status == .paused } }
+    var allTimePages: Int { library.sessions.reduce(0) { $0 + $1.pages } }
+    var goalSettings: ReadingGoalSettings { ReadingGoalSettings(enabled: library.goalEnabled, books: library.yearlyGoal, pagesPerDay: library.pagesPerDay ?? 0, year: Calendar.current.component(.year, from: Date())) }
     var shelves: [ShelfAppearance] { (library.shelfAppearances ?? []).sorted { $0.order == $1.order ? $0.id < $1.id : $0.order < $1.order } }
     func shelfLabel(_ shelf: ShelfAppearance) -> String {
         let matches = shelves.filter { $0.name == shelf.name }
@@ -397,11 +401,38 @@ enum LibraryError: LocalizedError {
     @discardableResult func delete(_ id: String) -> Bool {
         commit { $0.books.removeAll { $0.id == id }; $0.sessions.removeAll { $0.bookID == id } }
     }
-    @discardableResult func setGoal(enabled: Bool, books: Int) -> Bool {
-        commit { $0.goalEnabled = enabled; $0.yearlyGoal = books }
+    @discardableResult func setGoal(enabled: Bool, books: Int, pagesPerDay: Int? = nil, replacing expected: ReadingGoalSettings? = nil) -> Bool {
+        guard expected == nil || expected == goalSettings else { errorMessage = LibraryError.staleGoal.localizedDescription; return false }
+        return commit {
+            $0.goalEnabled = enabled; $0.yearlyGoal = books
+            if let pagesPerDay { $0.pagesPerDay = pagesPerDay }
+        }
     }
     @discardableResult func clearDemo() -> Bool {
         guard library.isDemo else { return false }
         return commit { $0 = LibrarySnapshot() }
+    }
+}
+
+struct ReadingGoalSettings: Equatable {
+    var enabled: Bool
+    var books: Int
+    var pagesPerDay: Int
+    var year: Int
+}
+
+extension CloudRecord {
+    var annotationContext: String {
+        guard let p = payload else { return "" }
+        var parts: [String] = []
+        if let page = p["page"]?.int, page > 0 { parts.append("Page \(page)") }
+        if let location = p["location"]?.string, !location.isEmpty { parts.append("Location \(location)") }
+        if let raw = p["annotatedAt"]?.string {
+            let fractional = ISO8601DateFormatter(); fractional.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+            let date = fractional.date(from: raw) ?? ISO8601DateFormatter().date(from: raw)
+            parts.append(date?.formatted(date: .abbreviated, time: .omitted) ?? raw)
+        }
+        if let source = p["source"]?.string { parts.append(source == "kindle-clippings" ? "Kindle clippings" : source) }
+        return parts.joined(separator: " · ")
     }
 }
