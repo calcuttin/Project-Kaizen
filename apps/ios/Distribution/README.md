@@ -11,7 +11,7 @@ This configuration prepares **Kaizen Books 0.1.0** (`org.projectkaizen.books`) f
 
 ## Archive and upload
 
-Select **KaizenBooks**, **Any iOS Device**, then **Product → Archive**. In Organizer choose **Distribute App → TestFlight Internal Only**. Use the configured distribution certificate/profile and include symbols. Increment `CURRENT_PROJECT_VERSION` for each upload (next source build: **3**; TestFlight currently has **2**). Do not disable signing for this archive.
+Select **KaizenBooks**, **Any iOS Device**, then **Product → Archive**. In Organizer choose **Distribute App → TestFlight Internal Only**. Use the configured distribution certificate/profile and include symbols. Increment `CURRENT_PROJECT_VERSION` for each upload (current source/upload: **3**; use **4** or higher for the next upload). Do not disable signing for this archive.
 
 Equivalent commands from the repository root after installing the approved distribution certificate and profile:
 
@@ -46,9 +46,11 @@ The privacy manifest does not replace the App Store Connect privacy questionnair
 
 After Apple finishes processing the build, use the **Owner testing** internal group and add only the account owner as a tester. Keep automatic distribution disabled and explicitly select the verified processed build for that group. Install Apple's TestFlight app on the iPhone, accept the invitation and install Kaizen Books. An internal tester needs App Store Connect access; do not invite unrelated testers or enable a public link as part of this setup.
 
+Build 3 upload and availability: [release record](../../../docs/reviews/2026-11-10/ios-cover-parity/release.md).
+
 Suggested “What to Test” text:
 
-> Sign in with your existing Kaizen account using email verification. Check that your Bookshelf library appears. Add a clearly named test book, log progress on your iPhone, and verify it in both websites. Change progress on the web, then use Sync now on the phone. Try offline edits and reconnect, relaunch persistence, light/dark appearance and VoiceOver. Delete only your test book afterward. Web annotations are read-only; cabinet customization and background sync are not available in this build.
+> Update to build 3 and choose Enable online covers on Bookshelf or in Preferences; the disclosure explains the Open Library requests. Check artwork in shelves, Grid, Reading and book details, saved shelf appearance, and fallback/off/retry behavior. Sign in with your existing Kaizen account using email verification. Check that your Bookshelf library appears. Add a clearly named test book, log progress on your iPhone, and verify it in both websites. Change progress on the web, then use Sync now on the phone. Try offline edits and reconnect, relaunch persistence, light/dark appearance and VoiceOver. Delete only your test book afterward. Web annotations are read-only; cabinet customization and background sync are not available in this build.
 
 Record the uploaded version/build, Apple processing result and the physical-device result in #49. Keep hosted backup/recovery deferred. Do not call the release complete until the build is available to the intended tester.
 
