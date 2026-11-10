@@ -4,6 +4,10 @@ Kaizen's roadmap connects public reviews to actionable issues, implementation pu
 
 [Review archive](docs/reviews/README.md) · [Open roadmap issues](https://github.com/calcuttin/Project-Kaizen/issues?q=is%3Aissue%20is%3Aopen%20label%3Aroadmap) · [AI-assisted work](https://github.com/calcuttin/Project-Kaizen/issues?q=is%3Aissue%20label%3Aai-assisted)
 
+## Native Apple II and shelf follow-up — 2026-11-10
+
+Work is progressing through [#56](https://github.com/calcuttin/Project-Kaizen/issues/56). The native Apple II implementation adds a labeled shelf control and toolbar shortcut, a bounded BASIC interpreter, demo/help/catalog commands and command history. [Review and validation](docs/reviews/2026-11-10/ios-capabilities/apple-ii.md). Stable-ID shelf management is next. Implementation, merge/release and physical-device acceptance are tracked separately. Hosted backup/recovery stays deferred.
+
 ## Native capability review and ISBN quick add — 2026-11-10
 
 The maintainer confirmed build 3 covers work on their iPhone. [Tracker #56](https://github.com/calcuttin/Project-Kaizen/issues/56) and a [website/native capability audit](docs/reviews/2026-11-10/ios-capabilities/README.md) now distinguishes missing interactions from working artwork: Apple II, shelf management/empty and same-name shelves, imports, paused-reading visibility, daily goals, journal controls, annotation context and account/data-tool handoff remain tracked. Native barcode scanning and ISBN metadata lookup are implemented for build 4, with review-before-save and manual fallback. [PR #57](https://github.com/calcuttin/Project-Kaizen/pull/57) merged after all checks passed. Signed **0.1.0 (4)** was uploaded, processed by Apple and is **Testing** in the owner group. Physical camera acceptance remains open. [Release evidence and phone checklist](docs/reviews/2026-11-10/ios-capabilities/release.md). Hosted backup/recovery stays deferred.

@@ -156,4 +156,24 @@ final class BooksFlowTests: XCTestCase {
         XCTAssertTrue(app.buttons["grid-The Creative Act"].staticTexts["Finished"].waitForExistence(timeout: 5))
     }
 
+    func testAppleIICommandsAndKeyboard() {
+        let app = XCUIApplication()
+        app.launchArguments = ["--ui-testing", "-onlineBookCovers", "NO"]
+        app.launch()
+        app.buttons["Open Apple II"].tap()
+        XCTAssertTrue(app.staticTexts["APPLE II · KAIZEN EDITION"].waitForExistence(timeout: 5))
+        app.buttons["Run"].tap()
+        XCTAssertTrue(app.staticTexts["WELCOME TO KAIZEN"].waitForExistence(timeout: 5))
+        let input = app.textFields["basic-command"]
+        XCTAssertTrue(input.waitForExistence(timeout: 5))
+        input.tap(); input.typeText("PRINT 6 * 7")
+        app.buttons["basic-send"].tap()
+        XCTAssertTrue(app.staticTexts["42"].waitForExistence(timeout: 5))
+        app.buttons["Previous command"].tap()
+        XCTAssertEqual(input.value as? String, "PRINT 6 * 7")
+        let proof = XCTAttachment(screenshot: app.screenshot()); proof.name = "Apple II playground"; proof.lifetime = .keepAlways; add(proof)
+        app.buttons["Done"].tap()
+        XCTAssertTrue(app.textFields["book-search"].waitForExistence(timeout: 5))
+    }
+
 }

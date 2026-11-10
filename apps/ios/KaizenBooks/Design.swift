@@ -139,6 +139,7 @@ struct NativeShelf: View {
     let select: (Book) -> Void
     var appearance: ShelfAppearance?
     @Environment(\.dynamicTypeSize) private var textSize
+    @State private var terminal = false
     private var styling: ShelfAppearance { appearance ?? ShelfAppearance(id: name, name: name) }
     var body: some View {
         VStack(spacing: 0) {
@@ -177,16 +178,25 @@ struct NativeShelf: View {
                 HStack(alignment: .bottom, spacing: styling.cabinet?.object?["layout"]?.string == "balanced" ? 8 : -12) {
                     ForEach(Array(styling.displayObjects.enumerated()), id: \.offset) { index, object in
                         if object != "none" {
-                            Image("cabinet-object-\(object)").resizable().scaledToFit()
-                                .frame(maxWidth: index == 0 ? 170 : 135, maxHeight: index == 0 ? 190 : 155)
-                                .blendMode(object == "computer" ? .normal : .screen)
+                            if object == "computer" {
+                                Button { terminal = true } label: {
+                                    Image("cabinet-object-computer").resizable().scaledToFit()
+                                        .frame(maxWidth: index == 0 ? 170 : 135, maxHeight: index == 0 ? 190 : 155)
+                                }.buttonStyle(.plain).accessibilityLabel("Open Apple II")
+                                    .accessibilityHint("Open the BASIC playground").accessibilityIdentifier("apple-ii")
+                            } else {
+                                Image("cabinet-object-\(object)").resizable().scaledToFit()
+                                    .frame(maxWidth: index == 0 ? 170 : 135, maxHeight: index == 0 ? 190 : 155)
+                                    .blendMode(.screen).accessibilityHidden(true)
+                            }
                         }
                     }
-                }.opacity(0.35 + styling.brightness * 0.65).padding(.horizontal, 22).padding(.bottom, 26).accessibilityHidden(true)
+                }.opacity(0.35 + styling.brightness * 0.65).padding(.horizontal, 22).padding(.bottom, 26)
             }.frame(height: 260).clipped()
         }
         .overlay(Rectangle().stroke(Color(hex: 0x57412D), lineWidth: 2))
         .padding(4).background(Color(hex: 0x201710))
         .accessibilityElement(children: .contain).accessibilityLabel("\(name) bookshelf")
+        .sheet(isPresented: $terminal) { RetroTerminal() }
     }
 }

@@ -112,3 +112,44 @@ import XCTest
         XCTAssertEqual(store.finishedThisYear, 0)
     }
 }
+
+final class BasicTests: XCTestCase {
+    func testDemoArithmeticStringsAndVariables() throws {
+        XCTAssertEqual(Basic.run(Basic.demo).output, (1...5).map { "ONE SMALL STEP \($0)" } + ["WELCOME TO KAIZEN"])
+        XCTAssertEqual(try Basic.expression("2 + 3 * 4 ^ 2"), .number(50))
+        XCTAssertEqual(try Basic.expression("2 ^ 3 ^ 2"), .number(512))
+        XCTAssertEqual(try Basic.expression("\"A\"\"B\" + A$", vars: ["A$": .string("C")]), .string("A\"BC"))
+        let result = Basic.run([10: "LET A$ = \"Hi\"", 20: "PRINT A$; (2 + 1), 4"])
+        XCTAssertEqual(result.output, ["Hi3    4"])
+    }
+    func testLoopsConditionsAndLineEditing() {
+        XCTAssertEqual(Basic.run([10: "FOR I = 2 TO 1 STEP -1", 20: "FOR J = 1 TO 2", 30: "PRINT I; J", 40: "NEXT J", 50: "NEXT I"]).output, ["21", "22", "11", "12"])
+        XCTAssertEqual(Basic.run([10: "FOR I = 2 TO 1", 20: "FOR J = 1 TO 2", 30: "PRINT 0", 40: "NEXT J", 50: "NEXT I", 60: "PRINT 7"]).output, ["7"])
+        var c = BasicConsole(); c.execute("NEW", books: []); c.execute("20 PRINT 2", books: []); c.execute("10 IF 1 < 2 THEN 30", books: []); c.execute("30 PRINT 3", books: []); c.execute("20", books: []); c.execute("RUN", books: [])
+        XCTAssertEqual(c.program.count, 2); XCTAssertEqual(c.output.last, "3")
+        c.execute("LIST", books: []); XCTAssertEqual(c.output.last, "30 PRINT 3")
+        XCTAssertEqual(c.recall(-1), "LIST"); XCTAssertEqual(c.recall(1), "")
+    }
+    func testMalformedInputAndRunawayProgramsAreBounded() throws {
+        for (code, error) in [("PRINT 1/0", "DIVISION BY ZERO"), ("LET N = \"x\"", "TYPE MISMATCH"), ("GOTO 50", "UNDEFINED LINE"), ("NEXT I", "NEXT WITHOUT FOR"), ("PRINT 2^^3", "SYNTAX ERROR"), ("PRINT 10^999", "OVERFLOW")] {
+            XCTAssertEqual(Basic.run([10: code]).output.last, "?\(error) IN 10")
+        }
+        XCTAssertTrue(Basic.run([10: "GOTO 10"]).output.last!.contains("EXECUTION LIMIT"))
+        let growth = Basic.run([10: "A$ = \"x\"", 20: "A$ = A$ + A$", 30: "GOTO 20"])
+        XCTAssertTrue(growth.output.last!.contains("EXECUTION LIMIT"))
+        XCTAssertThrowsError(try Basic.expression(String(repeating: "(", count: 130) + "1" + String(repeating: ")", count: 130)))
+        XCTAssertTrue(Basic.run([10: "PRINT 1", 20: "GOTO 10"]).output.count <= 301)
+        XCTAssertTrue(Basic.run([10: "FOR I = 1 TO 2"]).output.last!.contains("FOR WITHOUT NEXT"))
+    }
+    func testCatalogAndConsoleLimitsDoNotModifyBooks() {
+        let books = LibrarySnapshot.demo().books
+        var c = BasicConsole(); c.execute("BOOKS", books: books)
+        XCTAssertTrue(c.output.contains("6 BOOKS")); XCTAssertTrue(c.output.contains("The Creative Act — Rick Rubin"))
+        c.execute("DELETE BOOKS", books: books); XCTAssertTrue(c.output.last!.contains("SYNTAX ERROR"))
+        XCTAssertEqual(books.count, 6)
+        for _ in 0..<410 { c.execute("PRINT 1", books: books) }
+        XCTAssertEqual(c.output.count, 400); XCTAssertEqual(c.history.count, 50)
+        c.execute("HOME", books: books); XCTAssertTrue(c.output.isEmpty)
+        c.execute(String(repeating: "A", count: 501), books: books); XCTAssertTrue(c.output.last!.contains("INPUT LIMIT"))
+    }
+}
