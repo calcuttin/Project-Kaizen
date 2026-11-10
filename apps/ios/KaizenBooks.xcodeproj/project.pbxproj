@@ -1,73 +1,527 @@
 // !$*UTF8*$!
-{ archiveVersion = 1; classes = {}; objectVersion = 56; objects = {
-E76A8DE7B012AB035F201511 = { isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
-E76A8DE7B012AB035F201512 = { isa = PBXBuildFile; fileRef = E76A8DE7B012AB035F201511; };
-A464ECC09BD26ACF18AA644A = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudSyncTests.swift; sourceTree = "<group>"; };
-50C2DC9D12A5B01CE760B134 = { isa = PBXBuildFile; fileRef = A464ECC09BD26ACF18AA644A; };
-1B87C1D11EFDAFB11988A121 = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudSync.swift; sourceTree = "<group>"; };
-E593F604DAA364657D92458A = { isa = PBXBuildFile; fileRef = 1B87C1D11EFDAFB11988A121; };
-E90F9D82E0B48BD8F51EBDE0 = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountView.swift; sourceTree = "<group>"; };
-1906F63E86E74545F80A5E94 = { isa = PBXBuildFile; fileRef = E90F9D82E0B48BD8F51EBDE0; };
-BB522B2A67174FCD50AE89F6 = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudConfiguration.swift; sourceTree = "<group>"; };
-A3646E5319B5FBCD0546A070 = { isa = PBXBuildFile; fileRef = BB522B2A67174FCD50AE89F6; };
-4B1C5B24B8D3BD41FD259A70 = { isa = XCRemoteSwiftPackageReference; repositoryURL = "https://github.com/clerk/clerk-ios"; requirement = { kind = exactVersion; version = 1.7.1; }; };
-85CB15ADD202344A0135911C = { isa = XCSwiftPackageProductDependency; package = 4B1C5B24B8D3BD41FD259A70; productName = ClerkKit; };
-D92E1B4682F74E4D69A26B21 = { isa = PBXBuildFile; productRef = 85CB15ADD202344A0135911C; };
-54069E8544BD9490CE645264 = { isa = XCSwiftPackageProductDependency; package = 4B1C5B24B8D3BD41FD259A70; productName = ClerkKitUI; };
-4D86FF267ED92742A41A70BC = { isa = PBXBuildFile; productRef = 54069E8544BD9490CE645264; };
-04D3B602CDC8D51E1A3BB4D0 = { isa = PBXFileReference; lastKnownFileType = folder; path = Fonts; sourceTree = "<group>"; };
-6A96D91E6A6B0FBB523839A3 = { isa = PBXBuildFile; fileRef = 04D3B602CDC8D51E1A3BB4D0; };
-3685E330EC5277A9DD5661C6 = { isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-04200CFFD12D083534B07BB1 = { isa = PBXBuildFile; fileRef = 3685E330EC5277A9DD5661C6; };
-F5FBF75D2A12BE94CB9DC6B7 = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BookDetailView.swift"; sourceTree = "<group>"; };
-3A6151ABADF49FA481376680 = { isa = PBXBuildFile; fileRef = F5FBF75D2A12BE94CB9DC6B7; };
-B45AD22BF28B885F699ECFD9 = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Design.swift"; sourceTree = "<group>"; };
-6361DE0AE4F92F32BFFA386C = { isa = PBXBuildFile; fileRef = B45AD22BF28B885F699ECFD9; };
-153F59142FF37183D91A1BCC = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "JournalView.swift"; sourceTree = "<group>"; };
-84FC4F6CA696A733ECBF5A52 = { isa = PBXBuildFile; fileRef = 153F59142FF37183D91A1BCC; };
-6B471860A0282749F16729EC = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "KaizenBooksApp.swift"; sourceTree = "<group>"; };
-6F757C209B067A3367E4BF25 = { isa = PBXBuildFile; fileRef = 6B471860A0282749F16729EC; };
-BCF48285ED2BFA84E5C17862 = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LibraryModel.swift"; sourceTree = "<group>"; };
-C1A669243900EF630103C7F1 = { isa = PBXBuildFile; fileRef = BCF48285ED2BFA84E5C17862; };
-A1DCB573B8F73BBD344A47C2 = { isa = PBXGroup; children = (E76A8DE7B012AB035F201511, 1B87C1D11EFDAFB11988A121, E90F9D82E0B48BD8F51EBDE0, BB522B2A67174FCD50AE89F6, 04D3B602CDC8D51E1A3BB4D0, 3685E330EC5277A9DD5661C6, F5FBF75D2A12BE94CB9DC6B7, B45AD22BF28B885F699ECFD9, 153F59142FF37183D91A1BCC, 6B471860A0282749F16729EC, BCF48285ED2BFA84E5C17862); path = KaizenBooks; sourceTree = "<group>"; };
-7DC022A42E41890D2D465E5F = { isa = PBXFileReference; explicitFileType = wrapper.application; path = KaizenBooks.app; sourceTree = BUILT_PRODUCTS_DIR; };
-DD34CC4102A181C0F0C0F611 = { isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (E593F604DAA364657D92458A, 1906F63E86E74545F80A5E94, A3646E5319B5FBCD0546A070, 3A6151ABADF49FA481376680, 6361DE0AE4F92F32BFFA386C, 84FC4F6CA696A733ECBF5A52, 6F757C209B067A3367E4BF25, C1A669243900EF630103C7F1); runOnlyForDeploymentPostprocessing = 0; };
-0DC3036D1135459F9B1257F5 = { isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (E76A8DE7B012AB035F201512, 6A96D91E6A6B0FBB523839A3, 04200CFFD12D083534B07BB1); runOnlyForDeploymentPostprocessing = 0; };
-54867DB83EE508E3AADF7F06 = { isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (D92E1B4682F74E4D69A26B21, 4D86FF267ED92742A41A70BC); runOnlyForDeploymentPostprocessing = 0; };
-C5DBFBF621E6702B2CB8272B = { isa = XCBuildConfiguration; buildSettings = { INFOPLIST_FILE = KaizenBooks/Info.plist; CODE_SIGN_ENTITLEMENTS = KaizenBooks/KaizenBooks.entitlements; PRODUCT_BUNDLE_IDENTIFIER = org.projectkaizen.books; PRODUCT_NAME = "$(TARGET_NAME)"; SWIFT_VERSION = 5.0; IPHONEOS_DEPLOYMENT_TARGET = 17.0; TARGETED_DEVICE_FAMILY = 1; GENERATE_INFOPLIST_FILE = YES; CODE_SIGN_STYLE = Automatic; MARKETING_VERSION = 0.1.0; CURRENT_PROJECT_VERSION = 1; SWIFT_EMIT_LOC_STRINGS = YES; ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon; INFOPLIST_KEY_CFBundleDisplayName = "Kaizen Books"; INFOPLIST_KEY_UILaunchScreen_Generation = YES; INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES; INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight"; }; name = Debug; };
-66B7EE3E08CA544BAB50397F = { isa = XCBuildConfiguration; buildSettings = { INFOPLIST_FILE = KaizenBooks/Info.plist; CODE_SIGN_ENTITLEMENTS = KaizenBooks/KaizenBooks.entitlements; PRODUCT_BUNDLE_IDENTIFIER = org.projectkaizen.books; PRODUCT_NAME = "$(TARGET_NAME)"; SWIFT_VERSION = 5.0; IPHONEOS_DEPLOYMENT_TARGET = 17.0; TARGETED_DEVICE_FAMILY = 1; GENERATE_INFOPLIST_FILE = YES; CODE_SIGN_STYLE = Automatic; MARKETING_VERSION = 0.1.0; CURRENT_PROJECT_VERSION = 1; SWIFT_EMIT_LOC_STRINGS = YES; ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon; INFOPLIST_KEY_CFBundleDisplayName = "Kaizen Books"; INFOPLIST_KEY_UILaunchScreen_Generation = YES; INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES; INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight"; }; name = Release; };
-FB05E4C3CC3AFDCDC4A532B0 = { isa = XCConfigurationList; buildConfigurations = (C5DBFBF621E6702B2CB8272B, 66B7EE3E08CA544BAB50397F); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
-8EA730E605B7247EC835DFBC = { isa = PBXNativeTarget; buildConfigurationList = FB05E4C3CC3AFDCDC4A532B0; buildPhases = (DD34CC4102A181C0F0C0F611, 54867DB83EE508E3AADF7F06, 0DC3036D1135459F9B1257F5); buildRules = (); dependencies = (); packageProductDependencies = (85CB15ADD202344A0135911C, 54069E8544BD9490CE645264); name = KaizenBooks; productName = KaizenBooks; productReference = 7DC022A42E41890D2D465E5F; productType = "com.apple.product-type.application"; };
-DB33DAC8BB66A89DFF8F34A8 = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LibraryStoreTests.swift"; sourceTree = "<group>"; };
-C8D808B57491D548490DFE77 = { isa = PBXBuildFile; fileRef = DB33DAC8BB66A89DFF8F34A8; };
-C587D02D7723EB5EB75A68D9 = { isa = PBXGroup; children = (A464ECC09BD26ACF18AA644A, DB33DAC8BB66A89DFF8F34A8); path = KaizenBooksTests; sourceTree = "<group>"; };
-363DE48A87CCFDB7671EA0DF = { isa = PBXFileReference; explicitFileType = wrapper.cfbundle; path = KaizenBooksTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-74D3A6338D32B389F8A3C26B = { isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (50C2DC9D12A5B01CE760B134, C8D808B57491D548490DFE77); runOnlyForDeploymentPostprocessing = 0; };
-A0BA819058C6C112F3A6379F = { isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
-8129D8778DBB8D33CD2E00AE = { isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
-10FC2E9E97FC22A0FDCCA1FE = { isa = PBXContainerItemProxy; containerPortal = 98F54143AB4E86B28C3AFEE0; proxyType = 1; remoteGlobalIDString = 8EA730E605B7247EC835DFBC; remoteInfo = KaizenBooks; };
-9DB0E5F56E34E9FC76DA1CCD = { isa = PBXTargetDependency; target = 8EA730E605B7247EC835DFBC; targetProxy = 10FC2E9E97FC22A0FDCCA1FE; };
-DE3386FC78F7D84CE9CF292C = { isa = XCBuildConfiguration; buildSettings = { PRODUCT_BUNDLE_IDENTIFIER = org.projectkaizen.books.KaizenBooksTests; PRODUCT_NAME = "$(TARGET_NAME)"; SWIFT_VERSION = 5.0; IPHONEOS_DEPLOYMENT_TARGET = 17.0; TARGETED_DEVICE_FAMILY = 1; GENERATE_INFOPLIST_FILE = YES; CODE_SIGN_STYLE = Automatic; MARKETING_VERSION = 0.1.0; CURRENT_PROJECT_VERSION = 1; SWIFT_EMIT_LOC_STRINGS = YES; BUNDLE_LOADER = "$(TEST_HOST)"; TEST_HOST = "$(BUILT_PRODUCTS_DIR)/KaizenBooks.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/KaizenBooks"; }; name = Debug; };
-96B6D059456F523FA31C5CCF = { isa = XCBuildConfiguration; buildSettings = { PRODUCT_BUNDLE_IDENTIFIER = org.projectkaizen.books.KaizenBooksTests; PRODUCT_NAME = "$(TARGET_NAME)"; SWIFT_VERSION = 5.0; IPHONEOS_DEPLOYMENT_TARGET = 17.0; TARGETED_DEVICE_FAMILY = 1; GENERATE_INFOPLIST_FILE = YES; CODE_SIGN_STYLE = Automatic; MARKETING_VERSION = 0.1.0; CURRENT_PROJECT_VERSION = 1; SWIFT_EMIT_LOC_STRINGS = YES; BUNDLE_LOADER = "$(TEST_HOST)"; TEST_HOST = "$(BUILT_PRODUCTS_DIR)/KaizenBooks.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/KaizenBooks"; }; name = Release; };
-FD08E721C2D9205A05257F88 = { isa = XCConfigurationList; buildConfigurations = (DE3386FC78F7D84CE9CF292C, 96B6D059456F523FA31C5CCF); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
-468C1A7E93DF35996060C38D = { isa = PBXNativeTarget; buildConfigurationList = FD08E721C2D9205A05257F88; buildPhases = (74D3A6338D32B389F8A3C26B, 8129D8778DBB8D33CD2E00AE, A0BA819058C6C112F3A6379F); buildRules = (); dependencies = (9DB0E5F56E34E9FC76DA1CCD); name = KaizenBooksTests; productName = KaizenBooksTests; productReference = 363DE48A87CCFDB7671EA0DF; productType = "com.apple.product-type.bundle.unit-test"; };
-E2AFC190113ACACD87417D7F = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BooksFlowTests.swift"; sourceTree = "<group>"; };
-4AB859555A91E105C73E9E72 = { isa = PBXBuildFile; fileRef = E2AFC190113ACACD87417D7F; };
-409511F5204AFB7287D37AC2 = { isa = PBXGroup; children = (E2AFC190113ACACD87417D7F); path = KaizenBooksUITests; sourceTree = "<group>"; };
-07E597FA3FD7E1F82D05D12F = { isa = PBXFileReference; explicitFileType = wrapper.cfbundle; path = KaizenBooksUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-110F4375F71F1750F17B3767 = { isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (4AB859555A91E105C73E9E72); runOnlyForDeploymentPostprocessing = 0; };
-D96F7ABCED3B4F85F01DAD76 = { isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
-EAC4DF047DDBAB4A4631FDB3 = { isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
-8D39AA8DBDB3431B9AF8BA76 = { isa = PBXContainerItemProxy; containerPortal = 98F54143AB4E86B28C3AFEE0; proxyType = 1; remoteGlobalIDString = 8EA730E605B7247EC835DFBC; remoteInfo = KaizenBooks; };
-C2A429B5FA59E385F5F2F0CA = { isa = PBXTargetDependency; target = 8EA730E605B7247EC835DFBC; targetProxy = 8D39AA8DBDB3431B9AF8BA76; };
-838FEC1CA5164189959EA41F = { isa = XCBuildConfiguration; buildSettings = { PRODUCT_BUNDLE_IDENTIFIER = org.projectkaizen.books.KaizenBooksUITests; PRODUCT_NAME = "$(TARGET_NAME)"; SWIFT_VERSION = 5.0; IPHONEOS_DEPLOYMENT_TARGET = 17.0; TARGETED_DEVICE_FAMILY = 1; GENERATE_INFOPLIST_FILE = YES; CODE_SIGN_STYLE = Automatic; MARKETING_VERSION = 0.1.0; CURRENT_PROJECT_VERSION = 1; SWIFT_EMIT_LOC_STRINGS = YES; TEST_TARGET_NAME = KaizenBooks; }; name = Debug; };
-1BE6AD545D0E54194E2D26E1 = { isa = XCBuildConfiguration; buildSettings = { PRODUCT_BUNDLE_IDENTIFIER = org.projectkaizen.books.KaizenBooksUITests; PRODUCT_NAME = "$(TARGET_NAME)"; SWIFT_VERSION = 5.0; IPHONEOS_DEPLOYMENT_TARGET = 17.0; TARGETED_DEVICE_FAMILY = 1; GENERATE_INFOPLIST_FILE = YES; CODE_SIGN_STYLE = Automatic; MARKETING_VERSION = 0.1.0; CURRENT_PROJECT_VERSION = 1; SWIFT_EMIT_LOC_STRINGS = YES; TEST_TARGET_NAME = KaizenBooks; }; name = Release; };
-8B3AC33FD8B9966A0E1CF316 = { isa = XCConfigurationList; buildConfigurations = (838FEC1CA5164189959EA41F, 1BE6AD545D0E54194E2D26E1); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
-FF6FBA73E9D64D3901BCB6D5 = { isa = PBXNativeTarget; buildConfigurationList = 8B3AC33FD8B9966A0E1CF316; buildPhases = (110F4375F71F1750F17B3767, EAC4DF047DDBAB4A4631FDB3, D96F7ABCED3B4F85F01DAD76); buildRules = (); dependencies = (C2A429B5FA59E385F5F2F0CA); name = KaizenBooksUITests; productName = KaizenBooksUITests; productReference = 07E597FA3FD7E1F82D05D12F; productType = "com.apple.product-type.bundle.ui-testing"; };
-BFE00B156DCFC34C4751A6E5 = { isa = PBXGroup; children = (7DC022A42E41890D2D465E5F, 363DE48A87CCFDB7671EA0DF, 07E597FA3FD7E1F82D05D12F); name = Products; sourceTree = "<group>"; };
-325F10A6957A34D66CB8C0E4 = { isa = PBXGroup; children = (A1DCB573B8F73BBD344A47C2, C587D02D7723EB5EB75A68D9, 409511F5204AFB7287D37AC2, BFE00B156DCFC34C4751A6E5); sourceTree = "<group>"; };
-89E1FD6268CC0F221A2BE178 = { isa = XCBuildConfiguration; buildSettings = { SDKROOT = iphoneos; CLANG_ENABLE_MODULES = YES; SWIFT_OPTIMIZATION_LEVEL = "-Onone"; DEBUG_INFORMATION_FORMAT = dwarf; ENABLE_TESTABILITY = YES; SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG"; ONLY_ACTIVE_ARCH = YES; }; name = Debug; };
-E6DE6C99132752C914FEF632 = { isa = XCBuildConfiguration; buildSettings = { SDKROOT = iphoneos; CLANG_ENABLE_MODULES = YES; SWIFT_OPTIMIZATION_LEVEL = "-O"; DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym"; ENABLE_TESTABILITY = NO; SWIFT_ACTIVE_COMPILATION_CONDITIONS = ""; }; name = Release; };
-F8C70E4123C9AE82C42562CC = { isa = XCConfigurationList; buildConfigurations = (89E1FD6268CC0F221A2BE178, E6DE6C99132752C914FEF632); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
-98F54143AB4E86B28C3AFEE0 = { isa = PBXProject; attributes = { BuildIndependentTargetsInParallel = YES; LastUpgradeCheck = 1600; }; buildConfigurationList = F8C70E4123C9AE82C42562CC; compatibilityVersion = "Xcode 14.0"; developmentRegion = en; hasScannedForEncodings = 0; knownRegions = (en, Base); mainGroup = 325F10A6957A34D66CB8C0E4; productRefGroup = BFE00B156DCFC34C4751A6E5; projectDirPath = ""; projectRoot = ""; packageReferences = (4B1C5B24B8D3BD41FD259A70); targets = (8EA730E605B7247EC835DFBC, 468C1A7E93DF35996060C38D, FF6FBA73E9D64D3901BCB6D5); };
-}; rootObject = 98F54143AB4E86B28C3AFEE0; }
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		04200CFFD12D083534B07BB1 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3685E330EC5277A9DD5661C6 /* Assets.xcassets */; };
+		1906F63E86E74545F80A5E94 /* AccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E90F9D82E0B48BD8F51EBDE0 /* AccountView.swift */; };
+		3A6151ABADF49FA481376680 /* BookDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5FBF75D2A12BE94CB9DC6B7 /* BookDetailView.swift */; };
+		4AB859555A91E105C73E9E72 /* BooksFlowTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2AFC190113ACACD87417D7F /* BooksFlowTests.swift */; };
+		4D86FF267ED92742A41A70BC /* ClerkKitUI in Frameworks */ = {isa = PBXBuildFile; productRef = 54069E8544BD9490CE645264 /* ClerkKitUI */; };
+		50C2DC9D12A5B01CE760B134 /* CloudSyncTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A464ECC09BD26ACF18AA644A /* CloudSyncTests.swift */; };
+		6361DE0AE4F92F32BFFA386C /* Design.swift in Sources */ = {isa = PBXBuildFile; fileRef = B45AD22BF28B885F699ECFD9 /* Design.swift */; };
+		6A96D91E6A6B0FBB523839A3 /* Fonts in Resources */ = {isa = PBXBuildFile; fileRef = 04D3B602CDC8D51E1A3BB4D0 /* Fonts */; };
+		6F757C209B067A3367E4BF25 /* KaizenBooksApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B471860A0282749F16729EC /* KaizenBooksApp.swift */; };
+		84FC4F6CA696A733ECBF5A52 /* JournalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 153F59142FF37183D91A1BCC /* JournalView.swift */; };
+		A3646E5319B5FBCD0546A070 /* CloudConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB522B2A67174FCD50AE89F6 /* CloudConfiguration.swift */; };
+		C1A669243900EF630103C7F1 /* LibraryModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCF48285ED2BFA84E5C17862 /* LibraryModel.swift */; };
+		C8D808B57491D548490DFE77 /* LibraryStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB33DAC8BB66A89DFF8F34A8 /* LibraryStoreTests.swift */; };
+		D92E1B4682F74E4D69A26B21 /* ClerkKit in Frameworks */ = {isa = PBXBuildFile; productRef = 85CB15ADD202344A0135911C /* ClerkKit */; };
+		E593F604DAA364657D92458A /* CloudSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B87C1D11EFDAFB11988A121 /* CloudSync.swift */; };
+		E76A8DE7B012AB035F201512 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = E76A8DE7B012AB035F201511 /* PrivacyInfo.xcprivacy */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		10FC2E9E97FC22A0FDCCA1FE /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 98F54143AB4E86B28C3AFEE0 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 8EA730E605B7247EC835DFBC;
+			remoteInfo = KaizenBooks;
+		};
+		8D39AA8DBDB3431B9AF8BA76 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 98F54143AB4E86B28C3AFEE0 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 8EA730E605B7247EC835DFBC;
+			remoteInfo = KaizenBooks;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		04D3B602CDC8D51E1A3BB4D0 /* Fonts */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Fonts; sourceTree = "<group>"; };
+		07E597FA3FD7E1F82D05D12F /* KaizenBooksUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; path = KaizenBooksUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		153F59142FF37183D91A1BCC /* JournalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JournalView.swift; sourceTree = "<group>"; };
+		1B87C1D11EFDAFB11988A121 /* CloudSync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudSync.swift; sourceTree = "<group>"; };
+		363DE48A87CCFDB7671EA0DF /* KaizenBooksTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; path = KaizenBooksTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		3685E330EC5277A9DD5661C6 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		6B471860A0282749F16729EC /* KaizenBooksApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KaizenBooksApp.swift; sourceTree = "<group>"; };
+		7DC022A42E41890D2D465E5F /* KaizenBooks.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; path = KaizenBooks.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A464ECC09BD26ACF18AA644A /* CloudSyncTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudSyncTests.swift; sourceTree = "<group>"; };
+		B45AD22BF28B885F699ECFD9 /* Design.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Design.swift; sourceTree = "<group>"; };
+		BB522B2A67174FCD50AE89F6 /* CloudConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudConfiguration.swift; sourceTree = "<group>"; };
+		BCF48285ED2BFA84E5C17862 /* LibraryModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryModel.swift; sourceTree = "<group>"; };
+		DB33DAC8BB66A89DFF8F34A8 /* LibraryStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryStoreTests.swift; sourceTree = "<group>"; };
+		E2AFC190113ACACD87417D7F /* BooksFlowTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BooksFlowTests.swift; sourceTree = "<group>"; };
+		E76A8DE7B012AB035F201511 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		E90F9D82E0B48BD8F51EBDE0 /* AccountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountView.swift; sourceTree = "<group>"; };
+		F5FBF75D2A12BE94CB9DC6B7 /* BookDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookDetailView.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		54867DB83EE508E3AADF7F06 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D92E1B4682F74E4D69A26B21 /* ClerkKit in Frameworks */,
+				4D86FF267ED92742A41A70BC /* ClerkKitUI in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8129D8778DBB8D33CD2E00AE /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EAC4DF047DDBAB4A4631FDB3 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		325F10A6957A34D66CB8C0E4 = {
+			isa = PBXGroup;
+			children = (
+				A1DCB573B8F73BBD344A47C2 /* KaizenBooks */,
+				C587D02D7723EB5EB75A68D9 /* KaizenBooksTests */,
+				409511F5204AFB7287D37AC2 /* KaizenBooksUITests */,
+				BFE00B156DCFC34C4751A6E5 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		409511F5204AFB7287D37AC2 /* KaizenBooksUITests */ = {
+			isa = PBXGroup;
+			children = (
+				E2AFC190113ACACD87417D7F /* BooksFlowTests.swift */,
+			);
+			path = KaizenBooksUITests;
+			sourceTree = "<group>";
+		};
+		A1DCB573B8F73BBD344A47C2 /* KaizenBooks */ = {
+			isa = PBXGroup;
+			children = (
+				E76A8DE7B012AB035F201511 /* PrivacyInfo.xcprivacy */,
+				1B87C1D11EFDAFB11988A121 /* CloudSync.swift */,
+				E90F9D82E0B48BD8F51EBDE0 /* AccountView.swift */,
+				BB522B2A67174FCD50AE89F6 /* CloudConfiguration.swift */,
+				04D3B602CDC8D51E1A3BB4D0 /* Fonts */,
+				3685E330EC5277A9DD5661C6 /* Assets.xcassets */,
+				F5FBF75D2A12BE94CB9DC6B7 /* BookDetailView.swift */,
+				B45AD22BF28B885F699ECFD9 /* Design.swift */,
+				153F59142FF37183D91A1BCC /* JournalView.swift */,
+				6B471860A0282749F16729EC /* KaizenBooksApp.swift */,
+				BCF48285ED2BFA84E5C17862 /* LibraryModel.swift */,
+			);
+			path = KaizenBooks;
+			sourceTree = "<group>";
+		};
+		BFE00B156DCFC34C4751A6E5 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				7DC022A42E41890D2D465E5F /* KaizenBooks.app */,
+				363DE48A87CCFDB7671EA0DF /* KaizenBooksTests.xctest */,
+				07E597FA3FD7E1F82D05D12F /* KaizenBooksUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		C587D02D7723EB5EB75A68D9 /* KaizenBooksTests */ = {
+			isa = PBXGroup;
+			children = (
+				A464ECC09BD26ACF18AA644A /* CloudSyncTests.swift */,
+				DB33DAC8BB66A89DFF8F34A8 /* LibraryStoreTests.swift */,
+			);
+			path = KaizenBooksTests;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		468C1A7E93DF35996060C38D /* KaizenBooksTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = FD08E721C2D9205A05257F88 /* Build configuration list for PBXNativeTarget "KaizenBooksTests" */;
+			buildPhases = (
+				74D3A6338D32B389F8A3C26B /* Sources */,
+				8129D8778DBB8D33CD2E00AE /* Frameworks */,
+				A0BA819058C6C112F3A6379F /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				9DB0E5F56E34E9FC76DA1CCD /* PBXTargetDependency */,
+			);
+			name = KaizenBooksTests;
+			productName = KaizenBooksTests;
+			productReference = 363DE48A87CCFDB7671EA0DF /* KaizenBooksTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		8EA730E605B7247EC835DFBC /* KaizenBooks */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = FB05E4C3CC3AFDCDC4A532B0 /* Build configuration list for PBXNativeTarget "KaizenBooks" */;
+			buildPhases = (
+				DD34CC4102A181C0F0C0F611 /* Sources */,
+				54867DB83EE508E3AADF7F06 /* Frameworks */,
+				0DC3036D1135459F9B1257F5 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = KaizenBooks;
+			packageProductDependencies = (
+				85CB15ADD202344A0135911C /* ClerkKit */,
+				54069E8544BD9490CE645264 /* ClerkKitUI */,
+			);
+			productName = KaizenBooks;
+			productReference = 7DC022A42E41890D2D465E5F /* KaizenBooks.app */;
+			productType = "com.apple.product-type.application";
+		};
+		FF6FBA73E9D64D3901BCB6D5 /* KaizenBooksUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 8B3AC33FD8B9966A0E1CF316 /* Build configuration list for PBXNativeTarget "KaizenBooksUITests" */;
+			buildPhases = (
+				110F4375F71F1750F17B3767 /* Sources */,
+				EAC4DF047DDBAB4A4631FDB3 /* Frameworks */,
+				D96F7ABCED3B4F85F01DAD76 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				C2A429B5FA59E385F5F2F0CA /* PBXTargetDependency */,
+			);
+			name = KaizenBooksUITests;
+			productName = KaizenBooksUITests;
+			productReference = 07E597FA3FD7E1F82D05D12F /* KaizenBooksUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		98F54143AB4E86B28C3AFEE0 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1600;
+			};
+			buildConfigurationList = F8C70E4123C9AE82C42562CC /* Build configuration list for PBXProject "KaizenBooks" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 325F10A6957A34D66CB8C0E4;
+			packageReferences = (
+				4B1C5B24B8D3BD41FD259A70 /* XCRemoteSwiftPackageReference "clerk-ios" */,
+			);
+			productRefGroup = BFE00B156DCFC34C4751A6E5 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				8EA730E605B7247EC835DFBC /* KaizenBooks */,
+				468C1A7E93DF35996060C38D /* KaizenBooksTests */,
+				FF6FBA73E9D64D3901BCB6D5 /* KaizenBooksUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		0DC3036D1135459F9B1257F5 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E76A8DE7B012AB035F201512 /* PrivacyInfo.xcprivacy in Resources */,
+				6A96D91E6A6B0FBB523839A3 /* Fonts in Resources */,
+				04200CFFD12D083534B07BB1 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A0BA819058C6C112F3A6379F /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D96F7ABCED3B4F85F01DAD76 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		110F4375F71F1750F17B3767 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4AB859555A91E105C73E9E72 /* BooksFlowTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		74D3A6338D32B389F8A3C26B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				50C2DC9D12A5B01CE760B134 /* CloudSyncTests.swift in Sources */,
+				C8D808B57491D548490DFE77 /* LibraryStoreTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		DD34CC4102A181C0F0C0F611 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E593F604DAA364657D92458A /* CloudSync.swift in Sources */,
+				1906F63E86E74545F80A5E94 /* AccountView.swift in Sources */,
+				A3646E5319B5FBCD0546A070 /* CloudConfiguration.swift in Sources */,
+				3A6151ABADF49FA481376680 /* BookDetailView.swift in Sources */,
+				6361DE0AE4F92F32BFFA386C /* Design.swift in Sources */,
+				84FC4F6CA696A733ECBF5A52 /* JournalView.swift in Sources */,
+				6F757C209B067A3367E4BF25 /* KaizenBooksApp.swift in Sources */,
+				C1A669243900EF630103C7F1 /* LibraryModel.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		9DB0E5F56E34E9FC76DA1CCD /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 8EA730E605B7247EC835DFBC /* KaizenBooks */;
+			targetProxy = 10FC2E9E97FC22A0FDCCA1FE /* PBXContainerItemProxy */;
+		};
+		C2A429B5FA59E385F5F2F0CA /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 8EA730E605B7247EC835DFBC /* KaizenBooks */;
+			targetProxy = 8D39AA8DBDB3431B9AF8BA76 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		1BE6AD545D0E54194E2D26E1 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 2;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = org.projectkaizen.books.KaizenBooksUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_TARGET_NAME = KaizenBooks;
+			};
+			name = Release;
+		};
+		66B7EE3E08CA544BAB50397F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = KaizenBooks/KaizenBooks.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				"CODE_SIGN_STYLE[sdk=iphoneos*]" = Manual;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Distribution";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "Kaizen Books TestFlight";
+				CURRENT_PROJECT_VERSION = 2;
+				DEVELOPMENT_TEAM = GZLCX6QZ8L;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = KaizenBooks/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Kaizen Books";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = org.projectkaizen.books;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		838FEC1CA5164189959EA41F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 2;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = org.projectkaizen.books.KaizenBooksUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_TARGET_NAME = KaizenBooks;
+			};
+			name = Debug;
+		};
+		89E1FD6268CC0F221A2BE178 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_TESTABILITY = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		96B6D059456F523FA31C5CCF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 2;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = org.projectkaizen.books.KaizenBooksTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/KaizenBooks.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/KaizenBooks";
+			};
+			name = Release;
+		};
+		C5DBFBF621E6702B2CB8272B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = KaizenBooks/KaizenBooks.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 2;
+				DEVELOPMENT_TEAM = GZLCX6QZ8L;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = KaizenBooks/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Kaizen Books";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = org.projectkaizen.books;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		DE3386FC78F7D84CE9CF292C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 2;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = org.projectkaizen.books.KaizenBooksTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/KaizenBooks.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/KaizenBooks";
+			};
+			name = Debug;
+		};
+		E6DE6C99132752C914FEF632 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_TESTABILITY = NO;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "";
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		8B3AC33FD8B9966A0E1CF316 /* Build configuration list for PBXNativeTarget "KaizenBooksUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				838FEC1CA5164189959EA41F /* Debug */,
+				1BE6AD545D0E54194E2D26E1 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F8C70E4123C9AE82C42562CC /* Build configuration list for PBXProject "KaizenBooks" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				89E1FD6268CC0F221A2BE178 /* Debug */,
+				E6DE6C99132752C914FEF632 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		FB05E4C3CC3AFDCDC4A532B0 /* Build configuration list for PBXNativeTarget "KaizenBooks" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C5DBFBF621E6702B2CB8272B /* Debug */,
+				66B7EE3E08CA544BAB50397F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		FD08E721C2D9205A05257F88 /* Build configuration list for PBXNativeTarget "KaizenBooksTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DE3386FC78F7D84CE9CF292C /* Debug */,
+				96B6D059456F523FA31C5CCF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		4B1C5B24B8D3BD41FD259A70 /* XCRemoteSwiftPackageReference "clerk-ios" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/clerk/clerk-ios";
+			requirement = {
+				kind = exactVersion;
+				version = 1.7.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		54069E8544BD9490CE645264 /* ClerkKitUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4B1C5B24B8D3BD41FD259A70 /* XCRemoteSwiftPackageReference "clerk-ios" */;
+			productName = ClerkKitUI;
+		};
+		85CB15ADD202344A0135911C /* ClerkKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4B1C5B24B8D3BD41FD259A70 /* XCRemoteSwiftPackageReference "clerk-ios" */;
+			productName = ClerkKit;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 98F54143AB4E86B28C3AFEE0 /* Project object */;
+}

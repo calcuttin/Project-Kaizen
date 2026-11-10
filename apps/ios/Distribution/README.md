@@ -5,24 +5,22 @@ This configuration prepares **Kaizen Books 0.1.0** (`org.projectkaizen.books`) f
 ## Apple setup
 
 1. Sign in to **Xcode → Settings → Apple Accounts** with an active Apple Developer Program membership. A free Personal Team cannot distribute through TestFlight. Accept any pending Apple agreements yourself.
-2. In **KaizenBooks → Signing & Capabilities**, select the paid team. Keep automatic signing. Register the existing bundle identifier and Associated Domains capability. If the identifier is unavailable, stop and update the bundle identifier, callback URL scheme and Clerk native registration together before rebuilding.
+2. In **KaizenBooks → Signing & Capabilities**, select the paid team. Debug uses automatic signing. Release builds for iphoneos use the **Apple Distribution** identity and the **Kaizen Books TestFlight** App Store Connect profile for team `GZLCX6QZ8L`. Register the existing bundle identifier and Associated Domains capability. Install that profile through Xcode’s **Download Manual Profiles** action; no registered device is required for this distribution profile. If the identifier is unavailable, stop and update the bundle identifier, callback URL scheme and Clerk native registration together before rebuilding.
 3. Register the actual App ID prefix and bundle identifier in the current Clerk instance's native application settings. Verify the associated-domain association for `clean-marmot-1889.clerk.accounts.dev`. Never substitute a guessed team/prefix. Email-code sign-in worked on the signed simulator; physical-device redirects and passkeys remain unverified.
 4. In App Store Connect, create an **iOS** app record with primary language **English (U.S.)**, the registered bundle ID, and an unused SKU such as `kaizen-books-ios`. Use **Kaizen Books** as the working name if available. No App Store publication is required for internal testing.
 
 ## Archive and upload
 
-Select **KaizenBooks**, **Any iOS Device**, then **Product → Archive**. In Organizer choose **Distribute App → TestFlight Internal Only**. Let Xcode manage signing and the build number, and include symbols. Do not disable signing for this archive.
+Select **KaizenBooks**, **Any iOS Device**, then **Product → Archive**. In Organizer choose **Distribute App → TestFlight Internal Only**. Use the configured distribution certificate/profile and include symbols. Increment `CURRENT_PROJECT_VERSION` for each upload (current build: **2**). Do not disable signing for this archive.
 
-Equivalent commands from the repository root, after setting the real team:
+Equivalent commands from the repository root after installing the approved distribution certificate and profile:
 
 ```sh
-export KAIZEN_APPLE_TEAM_ID='YOUR_ACTUAL_TEAM_ID'
 xcodebuild archive \
   -project apps/ios/KaizenBooks.xcodeproj -scheme KaizenBooks \
   -configuration Release -destination 'generic/platform=iOS' \
   -archivePath /tmp/KaizenBooks-TestFlight.xcarchive \
-  -disableAutomaticPackageResolution -allowProvisioningUpdates \
-  DEVELOPMENT_TEAM="$KAIZEN_APPLE_TEAM_ID"
+  -disableAutomaticPackageResolution
 
 # This command uploads the signed app to Apple.
 xcodebuild -exportArchive \
@@ -32,9 +30,9 @@ xcodebuild -exportArchive \
   -allowProvisioningUpdates
 ```
 
-The export settings infer the team from the signed archive, use automatic signing, include dSYMs, manage build numbers and restrict the build to **internal** TestFlight. Never commit certificates, provisioning profiles, API private keys, passwords or archives. Xcode stores signing credentials locally.
+The export settings select the same team and manual distribution profile, include dSYMs, preserve the source build number and restrict the build to **internal** TestFlight. Before upload, verify the signed app with `codesign --verify --deep --strict` and `codesign -d --entitlements -`. Its entitlements must include `application-identifier = GZLCX6QZ8L.org.projectkaizen.books`, `webcredentials:clean-marmot-1889.clerk.accounts.dev`, and `get-task-allow = false`. Confirm that the executable and dSYM UUIDs match. Never commit certificates, provisioning profiles, API private keys, passwords or archives. Xcode stores signing credentials locally.
 
-An unsigned archive can validate compilation and bundled resources, but cannot be installed on an iPhone or uploaded to TestFlight. Apple processing/validation is a separate required check.
+An unsigned archive only validates compilation and bundled resources. Do not use it as the distribution source: export can sign the app while omitting the required Associated Domains entitlement. The initial build 1 upload exposed this issue and must remain unassigned; build 2 is the corrected signed archive. Apple processing/validation is a separate required check.
 
 ## Privacy and encryption
 
@@ -46,7 +44,7 @@ The privacy manifest does not replace the App Store Connect privacy questionnair
 
 ## Install and test
 
-After Apple finishes processing the build, create an internal group (for example **Owner testing**) and add the account owner as a tester. Select the processed build for that group. Install Apple's TestFlight app on the iPhone, accept the invitation and install Kaizen Books. An internal tester needs App Store Connect access; do not invite unrelated testers or enable a public link as part of this setup.
+After Apple finishes processing the build, use the **Owner testing** internal group and add only the account owner as a tester. Keep automatic distribution disabled and explicitly select the verified processed build for that group. Install Apple's TestFlight app on the iPhone, accept the invitation and install Kaizen Books. An internal tester needs App Store Connect access; do not invite unrelated testers or enable a public link as part of this setup.
 
 Suggested “What to Test” text:
 
