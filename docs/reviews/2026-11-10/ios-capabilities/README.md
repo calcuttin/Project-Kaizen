@@ -3,7 +3,7 @@
 - **Review ID:** `REV-2026-11-10-IOS-CAPABILITIES`
 - **Scope:** Bookshelf/library, Reading, Journal and shared-account controls. Full Kaizen task/habit tracking is deliberately outside this books-only iPhone app.
 - **Roadmap:** [#56 — capability gaps](https://github.com/calcuttin/Project-Kaizen/issues/56), [#49 — native release/device acceptance](https://github.com/calcuttin/Project-Kaizen/issues/49).
-- **Baseline:** released iPhone 0.1.0 (3), main `b602d66`; scanner follow-up prepares build 4.
+- **Baseline:** released iPhone 0.1.0 (3), main `b602d66`; scanner follow-up is released as build 4 (see the [release record](release.md)).
 - **Attribution:** AI-assisted source comparison and implementation by Codex at the maintainer's request. The maintainer confirmed that covers work on their physical iPhone; that does not establish scanner, full sync or VoiceOver acceptance.
 
 ## Capability matrix
@@ -14,7 +14,7 @@ The findings compare reachable website controls with reachable native controls. 
 | --- | --- | --- | --- |
 | Apple II computer | Opens BASIC playground, demo, command help and library listing | Static artwork with no action. Add an accessible button and native terminal; test commands, cancellation and bounded execution. | High |
 | Shelf management | Create empty shelves, rename/remove, choose themes/objects, lighting/brightness/layout and restore defaults | Books can be assigned by shelf name and saved artwork is displayed. No standalone shelf editor; empty shelves disappear. Native grouping/selection uses names, so same-name web shelves cannot be distinguished. Use stable shelf IDs before adding full management. | High |
-| Camera / ISBN quick add | Scan barcode or enter ISBN and look up metadata | Implemented in this follow-up: scan or type → lookup → review details → save. Build 4 upload and physical camera acceptance remain pending. | Implemented, acceptance open |
+| Camera / ISBN quick add | Scan barcode or enter ISBN and look up metadata | Implemented in this follow-up: scan or type → lookup → review details → save. Signed build 4 is **Testing** in the owner group; [physical camera acceptance](release.md) remains open. | Implemented, acceptance open |
 | Bulk import | CSV/Goodreads and Kindle clippings, preview/matching, duplicate handling and undo of imported records | Only the separate one-time local-iPhone-library import exists. Add file picker, review/matching and bounded import/undo. Web import remains available. | Medium |
 | Paused books on Reading | Includes reading and paused books | Reading tab filters only `reading`; paused books remain reachable through Bookshelf. Include paused books with clear status and resume behavior. | Medium |
 | Reading goal | Annual books and pages/day | Annual goal/enable control only. Existing cloud pages/day is preserved but not editable/displayed. | Medium |
@@ -37,7 +37,7 @@ The findings compare reachable website controls with reachable native controls. 
 
 Scanning fills the ISBN only. **Look up ISBN** explicitly sends the ISBN/IP to Open Library using a separate unauthenticated ephemeral session. Metadata is reviewed before applying it to the form; nothing is saved automatically. Missing author/page counts remain editable. A normalized ISBN match warns about an existing copy. Missing books, malformed data, outages and rate limits show manual-entry guidance. ISBN edits, cancellation and editor dismissal invalidate late responses. Online artwork remains a separate local opt-in. The old Add Book text incorrectly claiming no online cover requests was corrected.
 
-The change prepares **0.1.0 (4)**; build 3 on TestFlight is unchanged. No new backend schema or account permissions are needed. This scanner change does not implement the other matrix gaps.
+The change is merged in #57 and signed **0.1.0 (4)** is **Testing** in the owner group. [Release evidence and availability](release.md). No new backend schema or account permissions are needed. This scanner change does not implement the other matrix gaps.
 
 ## Validation and release boundaries
 
