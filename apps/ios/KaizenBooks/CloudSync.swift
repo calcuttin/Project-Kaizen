@@ -228,6 +228,7 @@ enum LibraryCloudMapping {
         let year = Calendar.current.component(.year, from: Date())
         let goal = records.first { $0.entityType == "reading_goals" && $0.payload?["year"]?.int == year }?.payload
         snapshot.yearlyGoal = goal?["books"]?.int ?? 12
+        snapshot.pagesPerDay = goal?["pagesPerDay"]?.int ?? 0
         snapshot.goalEnabled = goal?["enabled"]?.bool ?? (goal != nil)
         snapshot.isDemo = false
         _ = try snapshot.validated()
@@ -288,11 +289,14 @@ enum LibraryCloudMapping {
         for s in after.sessions where !oldSessions.contains(s.id) {
             cloud.enqueue(type: "reading_sessions", id: s.id, payload: ["id": .string(s.id), "bookId": .string(s.bookID), "date": .string(day(s.date)), "pages": .number(Double(s.pages))])
         }
-        if before.yearlyGoal != after.yearlyGoal || before.goalEnabled != after.goalEnabled {
+        if before.yearlyGoal != after.yearlyGoal || before.goalEnabled != after.goalEnabled || before.pagesPerDay != after.pagesPerDay {
             let year = Calendar.current.component(.year, from: Date())
             let id = String(year)
             var p = cloud.visible["reading_goals:\(id)"]?.payload ?? ["id": .string(id), "year": .number(Double(year)), "pagesPerDay": .number(0)]
-            p["books"] = .number(Double(after.yearlyGoal)); p["enabled"] = .bool(after.goalEnabled)
+            if before.yearlyGoal != after.yearlyGoal { p["books"] = .number(Double(after.yearlyGoal)) }
+            else if p["books"] == nil { p["books"] = .number(Double(after.yearlyGoal)) }
+            if before.goalEnabled != after.goalEnabled || p["enabled"] == nil { p["enabled"] = .bool(after.goalEnabled) }
+            if before.pagesPerDay != after.pagesPerDay { p["pagesPerDay"] = .number(Double(after.pagesPerDay ?? 0)) }
             cloud.enqueue(type: "reading_goals", id: id, payload: p)
         }
     }

@@ -219,4 +219,20 @@ final class BooksFlowTests: XCTestCase {
         XCTAssertTrue(app.textFields["book-search"].waitForExistence(timeout: 5))
     }
 
+    func testDailyGoalAndJournalNavigation() {
+        let app = XCUIApplication()
+        app.launchArguments = ["--ui-testing", "-onlineBookCovers", "NO"]
+        app.launch(); app.tabBars.buttons["Journal"].tap(); app.buttons["Edit"].tap()
+        let goal = app.textFields["daily-goal"]
+        for _ in 0..<5 { if goal.exists && goal.isHittable { break }; app.swipeUp() }
+        XCTAssertTrue(goal.isHittable); goal.coordinate(withNormalizedOffset: CGVector(dx: 0.98, dy: 0.5)).tap(); goal.typeText(XCUIKeyboardKey.delete.rawValue + "25")
+        XCTAssertEqual(goal.value as? String, "25")
+        app.navigationBars["Make it your own"].buttons["Save"].tap()
+        XCTAssertTrue(app.staticTexts["25 pages a day to aim for"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["42 pages"].firstMatch.exists)
+        let session = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'journal-'")).firstMatch
+        for _ in 0..<4 { if session.isHittable { break }; app.swipeUp() }
+        session.tap(); XCTAssertTrue(app.navigationBars["Book details"].waitForExistence(timeout: 5))
+    }
+
 }

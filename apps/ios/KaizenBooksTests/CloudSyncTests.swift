@@ -161,6 +161,38 @@ private final class CoverProtocol: URLProtocol, @unchecked Sendable {
         XCTAssertEqual(Set(source.books.map(\.id)), Set(restored.library.books.map(\.id)))
         XCTAssertTrue(account.shelves.isEmpty)
     }
+    func testDailyGoalPreservesWebFieldsAndRejectsStalePreferenceDraft() throws {
+        let year = Calendar.current.component(.year, from: Date()), id = String(year)
+        var cloud = CloudState(owner: "goals")
+        let payload: Payload = ["id": .string(id), "year": .number(Double(year)), "books": .number(24), "pagesPerDay": .number(35), "enabled": .bool(true), "future": .string("keep")]
+        try cloud.apply([change("reading_goals", id, payload)])
+        var before = LibrarySnapshot(); try LibraryCloudMapping.project(cloud, onto: &before)
+        XCTAssertEqual(before.pagesPerDay, 35)
+        var after = before; after.yearlyGoal = 30
+        LibraryCloudMapping.stage(before: before, after: after, cloud: &cloud)
+        XCTAssertEqual(cloud.visible["reading_goals:\(id)"]?.payload?["pagesPerDay"], .number(35))
+        before = after; after.pagesPerDay = 50
+        LibraryCloudMapping.stage(before: before, after: after, cloud: &cloud)
+        XCTAssertEqual(cloud.visible["reading_goals:\(id)"]?.payload?["books"], .number(30))
+        XCTAssertEqual(cloud.visible["reading_goals:\(id)"]?.payload?["future"], .string("keep"))
+        let local = LibraryStore(fileURL: base().appending(path: "goals.json"), demo: false)
+        let baseline = local.goalSettings
+        XCTAssertTrue(local.setGoal(enabled: true, books: 20, pagesPerDay: 40))
+        XCTAssertFalse(local.setGoal(enabled: false, books: 12, pagesPerDay: 0, replacing: baseline))
+        XCTAssertEqual(local.library.pagesPerDay, 40)
+        XCTAssertTrue(local.setGoal(enabled: false, books: 21))
+        XCTAssertEqual(local.library.pagesPerDay, 40, "Annual-only saves must preserve the daily goal")
+    }
+    func testPausedReadingAndAnnotationContext() throws {
+        let store = LibraryStore(fileURL: base().appending(path: "reading.json"), demo: false)
+        let book = Book(title: "Paused book", author: "Reader", pages: 100, status: .paused)
+        XCTAssertTrue(store.save(book)); XCTAssertEqual(store.reading.map(\.id), [book.id])
+        XCTAssertTrue(store.log(book.id, page: 5)); XCTAssertEqual(store.book(book.id)?.status, .reading)
+        XCTAssertEqual(store.allTimePages, 5)
+        let record = CloudRecord(entityType: "reading_annotations", entityId: "a", payload: ["page": .number(12), "location": .string("140-150"), "source": .string("kindle-clippings"), "annotatedAt": .string("2026-11-01T12:00:00.000Z")], revision: 1)
+        XCTAssertTrue(record.annotationContext.contains("Page 12")); XCTAssertTrue(record.annotationContext.contains("Location 140-150")); XCTAssertTrue(record.annotationContext.contains("Kindle clippings"))
+        XCTAssertFalse(record.annotationContext.contains("T12:00"))
+    }
     func testWebPayloadAndShelfMetadataSurviveNativeEdit() throws {
         var cloud = CloudState(owner: "user_test")
         let shelf: Payload = ["name": .string("Study"), "cabinet": .object(["style": .string("walnut")])]

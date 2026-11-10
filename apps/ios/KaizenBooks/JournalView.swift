@@ -20,6 +20,7 @@ struct JournalView: View {
                             Text("of \(store.library.yearlyGoal) books").foregroundStyle(.secondary)
                         }
                         ProgressView(value: min(Double(store.finishedThisYear) / Double(store.library.yearlyGoal), 1))
+                        if let daily = store.library.pagesPerDay, daily > 0 { Text("\(daily) pages a day to aim for").font(.subheadline).foregroundStyle(.secondary).accessibilityIdentifier("daily-goal-summary") }
                         Text(store.finishedThisYear >= store.library.yearlyGoal ? "A year of new perspectives. Goal reached." : "At your own pace. Every book counts.").font(.subheadline).foregroundStyle(.secondary)
                     } else {
                         Text("Read at your own pace.").font(.system(.title2, design: .serif))
@@ -31,11 +32,13 @@ struct JournalView: View {
                     Spacer()
                     Text("\(store.weeklyPages) pages").bold().monospacedDigit()
                 }.font(.subheadline).paperCard()
+                HStack { Label("All time", systemImage: "books.vertical"); Spacer(); Text("\(store.allTimePages) pages").bold().monospacedDigit() }.font(.subheadline).paperCard()
                 Text("Your reading journal").font(.system(.title2, design: .serif).weight(.semibold))
                 if store.library.sessions.isEmpty {
                     ContentUnavailableView("A fresh page", systemImage: "text.book.closed", description: Text("Log your reading to see your sessions here."))
                 } else {
                     ForEach(store.library.sessions.sorted { $0.date > $1.date }) { session in
+                        NavigationLink { BookDetailView(id: session.bookID) } label: {
                         HStack(alignment: .top, spacing: 14) {
                             Image(systemName: "bookmark.fill").foregroundStyle(BooksTheme.accent).padding(12).background(BooksTheme.accent.opacity(0.08), in: Circle())
                             VStack(alignment: .leading, spacing: 6) {
@@ -45,6 +48,7 @@ struct JournalView: View {
                             }
                             Spacer(minLength: 0)
                         }.frame(maxWidth: .infinity, alignment: .leading)
+                        }.buttonStyle(.plain).accessibilityIdentifier("journal-\(session.bookID)")
                         Divider()
                     }
                 }
@@ -60,6 +64,9 @@ struct PreferencesView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var enabled = false
     @State private var goal = 12
+    @State private var daily = "0"
+    @State private var baseline: ReadingGoalSettings?
+    private var validDaily: Bool { Int(daily).map { (0...100_000).contains($0) } ?? false }
     @State private var clearing = false
     var body: some View {
         NavigationStack {
@@ -74,8 +81,13 @@ struct PreferencesView: View {
                 }
                 Section("Your reading year") {
                     Toggle("Set a reading goal", isOn: $enabled)
-                    if enabled { Stepper("\(goal) books this year", value: $goal, in: 1...500) }
+                    if enabled {
+                        Stepper("\(goal) books this year", value: $goal, in: 1...500)
+                        HStack { Text("Pages per day"); Spacer(); TextField("Pages per day", text: $daily).keyboardType(.numberPad).multilineTextAlignment(.trailing).frame(width: 100).accessibilityLabel("Pages per day").accessibilityIdentifier("daily-goal") }
+                        Text("Daily page goal · 0 means no daily target. Up to 100,000 pages.").font(.caption).foregroundStyle(.secondary)
+                    }
                 }
+                WebAccountTools()
                 Section("About this prototype") {
                     LabeledContent("Project Kaizen", value: "Books for iPhone")
                     Text(store.owner == nil ? "You are using a local library. Connect your Kaizen account to synchronize, then explicitly import your personal local books." : "Books, shelves, notes, reading history and goals share your Kaizen account. Changes save on this phone first, then synchronize.").font(.footnote).foregroundStyle(.secondary)
@@ -90,9 +102,9 @@ struct PreferencesView: View {
             }.navigationTitle("Make it your own").navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
-                    ToolbarItem(placement: .confirmationAction) { Button("Save") { if store.setGoal(enabled: enabled, books: goal) { dismiss() } } }
+                    ToolbarItem(placement: .confirmationAction) { Button("Save") { if let count = Int(daily), store.setGoal(enabled: enabled, books: goal, pagesPerDay: count, replacing: baseline) { dismiss() } }.disabled(!validDaily) }
                 }
-                .onAppear { enabled = store.library.goalEnabled; goal = store.library.yearlyGoal }
+                .onAppear { guard baseline == nil else { return }; baseline = store.goalSettings; enabled = store.library.goalEnabled; goal = store.library.yearlyGoal; daily = String(store.library.pagesPerDay ?? 0) }
                 .confirmationDialog("Remove every book and start fresh?", isPresented: $clearing, titleVisibility: .visible) {
                     Button("Remove all prototype data", role: .destructive) { if store.clearDemo() { dismiss() } }
                 } message: { Text("All prototype books, notes, sessions, and goals will be removed. Your web library is unaffected.") }

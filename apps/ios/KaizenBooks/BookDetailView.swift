@@ -47,6 +47,7 @@ struct BookDetailView: View {
                             VStack(alignment: .leading, spacing: 8) {
                                 Text(annotation.payload?["kind"]?.string?.capitalized ?? "Annotation").font(.headline)
                                 Text(annotation.payload?["content"]?.string ?? "")
+                                if !annotation.annotationContext.isEmpty { Text(annotation.annotationContext).font(.caption).foregroundStyle(.secondary) }
                             }.paperCard()
                         }
                         Text(store.syncLabel).font(.caption).foregroundStyle(.secondary)
