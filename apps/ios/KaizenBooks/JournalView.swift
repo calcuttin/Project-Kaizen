@@ -78,7 +78,8 @@ struct PreferencesView: View {
                 }
                 Section("About this prototype") {
                     LabeledContent("Project Kaizen", value: "Books for iPhone")
-                    Text(store.owner == nil ? "You are using a local library. Connect your Kaizen account to synchronize, then explicitly import your personal local books." : "Books, shelves, notes, reading history and goals share your Kaizen account. Changes save on this phone first, then synchronize. Camera scanning is not included.").font(.footnote).foregroundStyle(.secondary)
+                    Text(store.owner == nil ? "You are using a local library. Connect your Kaizen account to synchronize, then explicitly import your personal local books." : "Books, shelves, notes, reading history and goals share your Kaizen account. Changes save on this phone first, then synchronize.").font(.footnote).foregroundStyle(.secondary)
+                    Text("Add books by scanning an ISBN barcode on a supported iPhone or typing an ISBN. Lookup sends only the ISBN and your IP address to Open Library; camera images stay on the device.").font(.footnote).foregroundStyle(.secondary)
                     Text("Sample book titles are real; reading activity is fictional. Shelf themes and cabinet artwork match the Kaizen web app. Optional online covers come from Open Library; unavailable images keep a readable title cover. Cabinet editing and animations remain available on the website.").font(.footnote).foregroundStyle(.secondary)
                 }
                 if store.library.isDemo {

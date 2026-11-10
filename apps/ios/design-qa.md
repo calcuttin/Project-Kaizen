@@ -1,3 +1,5 @@
+> Historical prototype visual review. For current connected-app capabilities, build 3 covers and build 4 ISBN/scanning follow-up, see the [capability audit](../../docs/reviews/2026-11-10/ios-capabilities/README.md).
+
 # Books prototype visual QA
 
 Reviewed November 8, 2026 against the running local web app’s Library page and its source assets/tokens.

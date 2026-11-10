@@ -317,3 +317,89 @@ private final class CoverProtocol: URLProtocol, @unchecked Sendable {
         XCTAssertNil(store.book(original.id))
     }
 }
+
+private actor DelayedISBNLookup: ISBNLookingUp {
+    let started: XCTestExpectation
+    private var continuation: CheckedContinuation<ISBNBook, Error>?
+    init(started: XCTestExpectation) { self.started = started }
+    func book(isbn: String) async throws -> ISBNBook {
+        try await withCheckedThrowingContinuation { continuation in
+            self.continuation = continuation
+            started.fulfill()
+        }
+    }
+    func finish() {
+        continuation?.resume(returning: ISBNBook(isbn: "9780140328721", title: "Late result", author: "", pages: 100, coverURL: nil))
+        continuation = nil
+    }
+}
+
+@MainActor final class ISBNLookupTests: XCTestCase {
+    private func service(_ status: Int, _ json: String, mime: String = "application/json") -> ISBNLookupService {
+        CoverProtocol.requests = []; CoverProtocol.responses = [(status, mime, Data(json.utf8))]
+        let config = URLSessionConfiguration.ephemeral; config.protocolClasses = [CoverProtocol.self]
+        return ISBNLookupService(session: URLSession(configuration: config))
+    }
+    func testISBNChecksumsAndCanonicalDuplicateIdentity() {
+        XCTAssertEqual(ISBN.normalized("0-14-032872-6"), "9780140328721")
+        XCTAssertEqual(ISBN.normalized(" 978 0 14 032872 1 "), "9780140328721")
+        XCTAssertEqual(ISBN.normalized("080442957x"), "9780804429573")
+        XCTAssertEqual(ISBN.normalized("9791090636071"), "9791090636071")
+        for invalid in ["", "9780140328722", "0140328727", "12345", "4006381333931", "978014032872X", "X804429575", "ISBN:9780140328721", "９７８０１４０３２８７２１", "9780140328721?token=x"] {
+            XCTAssertNil(ISBN.normalized(invalid), invalid)
+        }
+    }
+    func testLookupUsesOnlyCanonicalISBNAndPublicTransport() async throws {
+        let loader = service(200, #"{"ISBN:9780140328721":{"title":"Matilda","authors":[{"name":"Roald Dahl"}],"number_of_pages":240,"cover":{"medium":"https://covers.openlibrary.org/b/id/123-M.jpg"}}}"#)
+        let book = try await loader.book(isbn: "0140328726")
+        XCTAssertEqual(book.title, "Matilda"); XCTAssertEqual(book.author, "Roald Dahl"); XCTAssertEqual(book.pages, 240)
+        XCTAssertEqual(book.coverURL, "https://covers.openlibrary.org/b/id/123-M.jpg")
+        XCTAssertEqual(CoverProtocol.requests.count, 1)
+        let request = try XCTUnwrap(CoverProtocol.requests.first)
+        let url = try XCTUnwrap(URLComponents(url: request.url!, resolvingAgainstBaseURL: false))
+        XCTAssertEqual(url.host, "openlibrary.org"); XCTAssertEqual(url.scheme, "https")
+        XCTAssertEqual(Set(url.queryItems!.map(\.name)), ["bibkeys", "format", "jscmd"])
+        XCTAssertEqual(url.queryItems?.first { $0.name == "bibkeys" }?.value, "ISBN:9780140328721")
+        XCTAssertNil(request.value(forHTTPHeaderField: "Authorization")); XCTAssertNil(request.value(forHTTPHeaderField: "Cookie")); XCTAssertNil(request.httpBody)
+    }
+    func testIncompleteMetadataAndUntrustedArtworkStayEditable() throws {
+        let book = try ISBNLookupService.decode(Data(#"{"ISBN:9780140328721":{"title":"Matilda","number_of_pages":0,"cover":{"medium":"https://example.com/track"}}}"#.utf8), isbn: "9780140328721")
+        XCTAssertNil(book.pages); XCTAssertEqual(book.author, ""); XCTAssertNil(book.coverURL)
+        XCTAssertThrowsError(try ISBNLookupService.decode(Data("{}".utf8), isbn: "9780140328721"))
+        XCTAssertThrowsError(try ISBNLookupService.decode(Data(#"{"ISBN:9780140328721":{"title":"  "}}"#.utf8), isbn: "9780140328721"))
+        XCTAssertThrowsError(try ISBNLookupService.decode(Data("not json".utf8), isbn: "9780140328721"))
+    }
+    func testInvalidISBNDoesNotRequestNetwork() async {
+        let loader = service(200, "{}")
+        do { _ = try await loader.book(isbn: "9780140328722"); XCTFail("Invalid check digit accepted") } catch {}
+        XCTAssertTrue(CoverProtocol.requests.isEmpty)
+    }
+    func testRateLimitStopsImmediateRetries() async {
+        let loader = service(429, "{}")
+        for _ in 0..<2 {
+            do { _ = try await loader.book(isbn: "9780140328721"); XCTFail("Rate limit ignored") }
+            catch { XCTAssertEqual(error.localizedDescription, ISBNLookupError.rateLimited.localizedDescription) }
+        }
+        XCTAssertEqual(CoverProtocol.requests.count, 1)
+    }
+    func testFailureResponsesKeepManualFallback() async {
+        for (status, mime, json) in [(404, "application/json", "{}"), (503, "text/plain", "Unavailable"), (200, "text/html", "<html>error</html>"), (200, "application/json", String(repeating: " ", count: 500_001))] {
+            let loader = service(status, json, mime: mime)
+            do { _ = try await loader.book(isbn: "9780140328721"); XCTFail("Bad response accepted") } catch {}
+        }
+    }
+    func testCancelOrISBNChangeDiscardsLateLookupResponse() async {
+        let started = expectation(description: "Lookup started")
+        let delayed = DelayedISBNLookup(started: started)
+        let model = BookLookupModel(service: delayed)
+        model.lookup("9780140328721")
+        await fulfillment(of: [started], timeout: 2)
+        model.cancel()
+        // The server completes even though the editor changed ISBN or was dismissed.
+        await delayed.finish()
+        for _ in 0..<20 { await Task.yield() }
+        XCTAssertNil(model.result); XCTAssertNil(model.message); XCTAssertFalse(model.busy)
+        model.lookup("invalid")
+        XCTAssertEqual(model.message, ISBNLookupError.invalid.localizedDescription)
+    }
+}
