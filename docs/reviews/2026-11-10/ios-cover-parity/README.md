@@ -17,7 +17,7 @@ The earlier simulator tests checked book operations and sync without asserting p
 - Render Open Library artwork in details, reading cards, grid covers and shelf spines. Use a readable fallback when disabled, missing or offline. Look up missing artwork by ISBN and then exact title, following the website's matching strategy.
 - Add the website's explicit online-cover disclosure, enable/disable control and retry action. This is a local device preference, disabled by default. Requests use a separate unauthenticated ephemeral session, accept stored artwork only from HTTPS Open Library cover URLs, throttle metadata searches, and use bounded account-scoped memory caching. They never mutate cloud books.
 - Project saved shelf themes, cabinet objects, arrangement and brightness without overwriting source metadata. Reuse the website's theme labels, palettes, environment images and object artwork; preserve saved shelf ordering and match spine proportions more closely.
-- Prepare build number **3**. This code is not yet uploaded to TestFlight; installed build 2 remains unchanged.
+- Release build number **3**. #53 and #54 merged in order after passing checks, and the signed archive was uploaded. [Release evidence and current availability](release.md).
 
 ## Validation
 
@@ -28,7 +28,7 @@ The earlier simulator tests checked book operations and sync without asserting p
 
 ## Remaining boundaries
 
-A new signed TestFlight upload and phone acceptance are still needed. This is closer visual parity, not a claim of complete web feature parity: cabinet editing/animations, ISBN camera scanning and background sync remain web-only or unimplemented in the native app. Exact cabinet lighting effects are not reproduced. Online covers require enabling on this device and depend on Open Library availability; unavailable artwork retains the fallback.
+Signed build **0.1.0 (3)** is now **Testing** in the owner group. Physical phone acceptance remains open; see the [release record and phone checklist](release.md). This is closer visual parity, not a claim of complete web feature parity: cabinet editing/animations, ISBN camera scanning and background sync remain web-only or unimplemented in the native app. Exact cabinet lighting effects are not reproduced. Online covers require enabling on this device and depend on Open Library availability; unavailable artwork retains the fallback.
 
 **Hosted backup/recovery remains deferred.**
 
