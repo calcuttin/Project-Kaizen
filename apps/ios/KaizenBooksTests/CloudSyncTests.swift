@@ -98,6 +98,69 @@ private final class CoverProtocol: URLProtocol, @unchecked Sendable {
     private func change(_ type: String, _ id: String, _ payload: Payload?, seq: Int = 1, revision: Int = 1) -> CloudChange {
         CloudChange(seq: seq, entity_type: type, entity_id: id, operation: payload == nil ? "delete" : "put", payload: payload, revision: revision)
     }
+    func testSameNameAndEmptyShelvesKeepIdentityAndMetadata() throws {
+        let account = LibraryStore.account(owner: "shelf-test", base: base())
+        let transport = FakeTransport()
+        let one: Payload = ["name": .string("Study"), "order": .number(0), "futureShelf": .bool(true), "cabinet": .object(["style": .string("walnut"), "brightness": .number(70)])]
+        transport.changes = [change("shelves", "web-shelf", one), change("shelves", "second", ["name": .string("Study"), "order": .number(1)], seq: 2), change("books", "web_nanoid-123", book(), seq: 3)]
+        account.connect(transport)
+        // This test uses projection directly so each pending mutation can be inspected before transport sends it.
+        var cloud = CloudState(owner: "shelf-test"); try cloud.apply(transport.changes)
+        var before = LibrarySnapshot(); try LibraryCloudMapping.project(cloud, onto: &before)
+        XCTAssertEqual(before.shelfAppearances?.count, 2)
+        XCTAssertEqual(before.books[0].shelfID, "web-shelf")
+        var after = before
+        after.shelfAppearances![0].name = "Renamed"
+        var cabinet = after.shelfAppearances![0].cabinet!.object!; cabinet["brightness"] = .number(90)
+        after.shelfAppearances![0].cabinet = .object(cabinet)
+        after.books[0].shelf = "Renamed"
+        LibraryCloudMapping.stage(before: before, after: after, cloud: &cloud)
+        XCTAssertEqual(cloud.outbox.count, 1, "Rename must not rewrite book records")
+        XCTAssertEqual(cloud.visible["shelves:web-shelf"]?.payload?["futureShelf"], .bool(true))
+        XCTAssertEqual(cloud.visible["shelves:web-shelf"]?.payload?["cabinet"]?.object?["style"], .string("walnut"))
+        before = after; after.books[0].shelfID = "second"; after.books[0].shelf = "Study"
+        LibraryCloudMapping.stage(before: before, after: after, cloud: &cloud)
+        XCTAssertEqual(cloud.visible["books:web_nanoid-123"]?.payload?["shelfId"], .string("second"))
+        XCTAssertEqual(cloud.visible["books:web_nanoid-123"]?.payload?["futureField"], book()["futureField"])
+        var projected = LibrarySnapshot(); try LibraryCloudMapping.project(cloud, onto: &projected)
+        XCTAssertEqual(projected.books[0].shelfID, "second")
+        XCTAssertEqual(projected.shelfAppearances?.count, 2, "Empty shelf must survive projection")
+    }
+    func testShelfRemovalQueuesBookDetachAndTombstoneAndRejectsStaleEdits() throws {
+        let account = LibraryStore.account(owner: "shelf-remove", base: base())
+        let first = ShelfAppearance(id: "first", name: "Same"), second = ShelfAppearance(id: "second", name: "Same")
+        XCTAssertTrue(account.saveShelf(first)); XCTAssertTrue(account.saveShelf(second))
+        XCTAssertEqual(account.shelfLabel(first), "Same · 1"); XCTAssertEqual(account.shelfLabel(second), "Same · 2")
+        var b = Book(title: "Kept", author: "", pages: 100); b.shelfID = "first"
+        XCTAssertTrue(account.save(b)); XCTAssertTrue(account.log(b.id, page: 10))
+        let baseline = try XCTUnwrap(account.shelves.first { $0.id == "first" })
+        var updated = baseline; updated.name = "Changed"
+        XCTAssertTrue(account.saveShelf(updated, replacing: baseline))
+        XCTAssertFalse(account.removeShelf(baseline))
+        XCTAssertFalse(account.saveShelf(baseline, replacing: baseline))
+        XCTAssertTrue(account.removeShelf(updated))
+        XCTAssertNil(account.book(b.id)?.shelfID); XCTAssertEqual(account.book(b.id)?.currentPage, 10)
+        XCTAssertEqual(account.library.sessions.count, 1)
+        XCTAssertNil(account.library.cloud?.visible["shelves:first"]?.payload)
+        XCTAssertNil(account.library.cloud?.visible["books:\(b.id)"]?.payload?["shelfId"])
+        XCTAssertEqual(account.shelves.map(\.id), ["second"])
+        XCTAssertFalse(account.save(b), "A stale book cannot recreate a removed shelf")
+    }
+    func testLegacyShelfMigrationPersistsOnEditAndEmptyShelfReorders() throws {
+        let file = base().appending(path: "library.json")
+        let store = LibraryStore(fileURL: file)
+        let ids = store.shelves.map(\.id)
+        XCTAssertTrue(store.saveShelf(ShelfAppearance(id: "empty", name: "Empty", theme: "tech")))
+        XCTAssertTrue(store.moveShelves(from: IndexSet(integer: 3), to: 0))
+        let restored = LibraryStore(fileURL: file)
+        XCTAssertEqual(restored.shelves.map(\.id), ["empty"] + ids)
+        XCTAssertEqual(restored.library.books, store.library.books)
+        let account = LibraryStore.account(owner: "local-import", base: base())
+        var source = store.library; source.isDemo = false
+        // Import setup is covered by the existing transport test; migration above must not change any book IDs.
+        XCTAssertEqual(Set(source.books.map(\.id)), Set(restored.library.books.map(\.id)))
+        XCTAssertTrue(account.shelves.isEmpty)
+    }
     func testWebPayloadAndShelfMetadataSurviveNativeEdit() throws {
         var cloud = CloudState(owner: "user_test")
         let shelf: Payload = ["name": .string("Study"), "cabinet": .object(["style": .string("walnut")])]
@@ -244,18 +307,23 @@ private final class CoverProtocol: URLProtocol, @unchecked Sendable {
         let directory = base()
         let localURL = directory.appending(path: "local.json")
         let local = LibraryStore(fileURL: localURL, demo: false)
-        let original = Book(title: "Personal", author: "Reader", pages: 100)
+        let shelf = ShelfAppearance(id: "local-private", name: "Study", theme: "tech", objects: ["computer", "wafer"])
+        XCTAssertTrue(local.saveShelf(shelf))
+        var original = Book(title: "Personal", author: "Reader", pages: 100); original.shelfID = shelf.id
         local.save(original); local.log(original.id, page: 20)
         local.save(Book(title: " shared BOOK ", author: "READER", pages: 200))
         let bytes = try Data(contentsOf: localURL)
         let store = LibraryStore.account(owner: "user_import", base: directory)
-        let transport = FakeTransport(); transport.changes = [change("books", "web_nanoid-123", book())]
+        let transport = FakeTransport(); transport.changes = [change("shelves", "web-shelf", ["name": .string("Study")]), change("books", "web_nanoid-123", book(), seq: 2)]
         store.connect(transport); await store.syncNow()
         XCTAssertFalse(store.importLocal(.demo()))
         XCTAssertTrue(store.importLocal(local.library))
         XCTAssertEqual(store.library.books.count, 2)
         let imported = try XCTUnwrap(store.library.books.first { $0.title == "Personal" })
         XCTAssertNotEqual(imported.id, original.id)
+        XCTAssertNotEqual(imported.shelfID, "web-shelf"); XCTAssertNotEqual(imported.shelfID, shelf.id)
+        XCTAssertEqual(store.shelves.first { $0.id == imported.shelfID }?.objects, shelf.objects)
+        XCTAssertEqual(store.shelves.filter { $0.name == "Study" }.count, 2)
         XCTAssertEqual(store.library.sessions.first?.bookID, imported.id)
         XCTAssertNotEqual(store.library.sessions.first?.id, local.library.sessions.first?.id)
         XCTAssertFalse(store.importLocal(local.library))
@@ -297,7 +365,9 @@ private final class CoverProtocol: URLProtocol, @unchecked Sendable {
         try legacy.write(to: file)
         let loaded = LibraryStore(fileURL: file)
         XCTAssertFalse(loaded.readOnly)
-        XCTAssertEqual(loaded.library.books, original.books)
+        XCTAssertEqual(loaded.library.books.map { book in var copy = book; copy.shelfID = nil; return copy }, original.books)
+        XCTAssertEqual(loaded.shelves.count, 3)
+        XCTAssertEqual(LibraryStore(fileURL: file).library.books, loaded.library.books)
         XCTAssertNil(loaded.owner)
         XCTAssertEqual(try Data(contentsOf: file), legacy)
     }

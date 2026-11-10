@@ -192,6 +192,8 @@ struct NativeShelf: View {
                         }
                     }
                 }.opacity(0.35 + styling.brightness * 0.65).padding(.horizontal, 22).padding(.bottom, 26)
+                LinearGradient(colors: [styling.lightColor.opacity(0.16 * styling.brightness), .clear, .black.opacity(0.12)], startPoint: .top, endPoint: .bottom)
+                    .allowsHitTesting(false).accessibilityHidden(true)
             }.frame(height: 260).clipped()
         }
         .overlay(Rectangle().stroke(Color(hex: 0x57412D), lineWidth: 2))

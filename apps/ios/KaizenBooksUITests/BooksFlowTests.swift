@@ -176,4 +176,47 @@ final class BooksFlowTests: XCTestCase {
         XCTAssertTrue(app.textFields["book-search"].waitForExistence(timeout: 5))
     }
 
+    func testCreateStyleRenameAndRemoveEmptyShelf() {
+        let app = XCUIApplication()
+        app.launchArguments = ["--ui-testing", "-onlineBookCovers", "NO"]
+        app.launch()
+        let manage = app.buttons["Manage shelves"]
+        for _ in 0..<4 { if manage.isHittable { break }; app.swipeUp() }
+        manage.tap(); app.buttons["Create shelf"].tap()
+        let name = app.textFields["shelf-name"]
+        XCTAssertTrue(name.waitForExistence(timeout: 5)); name.tap(); name.typeText("Tech room")
+        app.buttons["Theme, Automatic from name"].tap(); app.buttons["Tech & founders"].tap()
+        app.buttons["Layout, Layered"].tap(); app.buttons["Balanced"].tap()
+        app.buttons["Lighting, Gallery"].tap(); app.buttons["Moonlight"].tap()
+        app.buttons["save-shelf"].tap()
+        let row = app.buttons.containing(.staticText, identifier: "Tech room").firstMatch
+        XCTAssertTrue(row.waitForExistence(timeout: 5)); row.tap()
+        let computer = app.buttons["apple-ii"]
+        for _ in 0..<7 { if computer.exists && computer.isHittable { break }; app.swipeUp() }
+        XCTAssertTrue(computer.isHittable)
+        let proof = XCTAttachment(screenshot: app.screenshot()); proof.name = "Shelf cabinet controls"; proof.lifetime = .keepAlways; add(proof)
+        computer.tap()
+        XCTAssertTrue(app.staticTexts["APPLE II · KAIZEN EDITION"].waitForExistence(timeout: 5))
+        app.navigationBars["Apple II"].buttons["Done"].tap()
+        for _ in 0..<7 { if name.isHittable { break }; app.swipeDown() }
+        name.tap(); name.typeText(" renamed")
+        app.buttons["save-shelf"].tap()
+        let renamed = app.buttons.containing(.staticText, identifier: "Tech room renamed").firstMatch
+        XCTAssertTrue(renamed.waitForExistence(timeout: 5))
+        app.navigationBars["Manage shelves"].buttons["Done"].tap()
+        // Empty shelf remains in the shelf filter, even with no books assigned.
+        for _ in 0..<7 { if app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'All shelves'")).firstMatch.isHittable { break }; app.swipeDown() }
+        app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'All shelves'")).firstMatch.tap()
+        app.buttons["Tech room renamed"].tap()
+        XCTAssertTrue(app.staticTexts["0 books · 0 read"].waitForExistence(timeout: 5))
+        for _ in 0..<5 { if manage.isHittable { break }; app.swipeDown() }
+        manage.tap(); renamed.tap()
+        let remove = app.buttons["Remove shelf"]
+        for _ in 0..<8 { if remove.exists && remove.isHittable { break }; app.swipeUp() }
+        remove.tap(); app.buttons["Remove shelf, keep books"].tap()
+        XCTAssertFalse(renamed.exists)
+        app.navigationBars["Manage shelves"].buttons["Done"].tap()
+        XCTAssertTrue(app.textFields["book-search"].waitForExistence(timeout: 5))
+    }
+
 }

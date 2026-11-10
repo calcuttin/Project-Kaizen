@@ -128,6 +128,7 @@ struct BookshelfView: View {
     @State private var shelf = ""
     @State private var adding = false
     @State private var terminal = false
+    @State private var managingShelves = false
     @State private var settings = false
     @State private var grid = false
     @State private var markMode = false
@@ -135,15 +136,19 @@ struct BookshelfView: View {
     private var books: [Book] {
         let term = query.trimmingCharacters(in: .whitespacesAndNewlines)
         return store.library.books.filter { book in
-            (status == nil || book.status == status) && (shelf.isEmpty || book.shelf == shelf) &&
+            (status == nil || book.status == status) && (shelf.isEmpty || book.shelfID == shelf) &&
             (term.isEmpty || "\(book.title) \(book.author) \(book.isbn)".localizedCaseInsensitiveContains(term))
         }
     }
-    private var shelfNames: [String] {
-        let names = Set(books.map { $0.shelf.isEmpty ? "Unshelved" : $0.shelf })
-        var seen = Set<String>()
-        let ordered = (store.library.shelfAppearances ?? []).map(\.name).filter { names.contains($0) && seen.insert($0).inserted }
-        return ordered + names.subtracting(seen).sorted()
+    private var visibleShelves: [ShelfAppearance] {
+        let regular = store.shelves.filter { item in (shelf.isEmpty || item.id == shelf) && (status == nil || books.contains(where: { $0.shelfID == item.id })) }
+        let ids = Set(store.shelves.map(\.id))
+        let unshelved = books.filter { $0.shelfID == nil || !ids.contains($0.shelfID!) }
+        return regular + (shelf.isEmpty && !unshelved.isEmpty ? [ShelfAppearance(id: "", name: "Unshelved")] : [])
+    }
+    private func booksOnShelf(_ id: String) -> [Book] {
+        let ids = Set(store.shelves.map(\.id))
+        return books.filter { id.isEmpty ? $0.shelfID == nil || !ids.contains($0.shelfID!) : $0.shelfID == id }
     }
     var body: some View {
         ScrollView {
@@ -196,9 +201,9 @@ struct BookshelfView: View {
                 HStack {
                     Menu {
                         Button("All shelves") { shelf = "" }
-                        ForEach(store.shelves, id: \.self) { name in Button(name) { shelf = name } }
+                        ForEach(store.shelves) { item in Button(store.shelfLabel(item)) { shelf = item.id } }
                     } label: {
-                        HStack { Text(shelf.isEmpty ? "All shelves · \(store.shelves.count)" : shelf); Spacer(); Image(systemName: "chevron.down") }.font(.subheadline).frame(minHeight: 44)
+                        HStack { Text(shelf.isEmpty ? "All shelves · \(store.shelves.count)" : store.shelves.first { $0.id == shelf }.map(store.shelfLabel) ?? "Shelf removed"); Spacer(); Image(systemName: "chevron.down") }.font(.subheadline).frame(minHeight: 44)
                     }.foregroundStyle(BooksTheme.ink)
                     Text("\(books.count) of \(store.library.books.count) books").font(.caption).foregroundStyle(BooksTheme.secondary)
                 }
@@ -212,7 +217,8 @@ struct BookshelfView: View {
                 if store.library.isDemo { Text("Sample library · saved on this device").font(.caption2).foregroundStyle(BooksTheme.secondary) }
                 if !store.library.books.isEmpty { OnlineCoverControls() }
                 if markMode { Text("Tap books to toggle Finished / Want to read.").font(.caption).foregroundStyle(BooksTheme.accent) }
-                if books.isEmpty {
+                Button("Manage shelves", systemImage: "slider.horizontal.3") { managingShelves = true }.frame(minHeight: 44)
+                if books.isEmpty && (grid || !query.isEmpty || visibleShelves.isEmpty) {
                     ContentUnavailableView("No books here yet", systemImage: "books.vertical", description: Text("Add a book or try a different search or filter."))
                     if !query.isEmpty || status != nil || !shelf.isEmpty {
                         Button("Clear filters") { query = ""; status = nil; shelf = "" }.frame(maxWidth: .infinity)
@@ -231,9 +237,8 @@ struct BookshelfView: View {
                     }.padding(.vertical, 8)
                 } else {
                     LazyVStack(spacing: 8) {
-                        ForEach(shelfNames, id: \.self) { name in
-                            NativeShelf(name: name, books: books.filter { ($0.shelf.isEmpty ? "Unshelved" : $0.shelf) == name }, markMode: markMode, select: selectBook,
-                                appearance: store.library.shelfAppearances?.first { $0.name == name })
+                        ForEach(visibleShelves) { item in
+                            NativeShelf(name: item.id.isEmpty ? item.name : store.shelfLabel(item), books: booksOnShelf(item.id), markMode: markMode, select: selectBook, appearance: item)
                         }
                     }
                 }
@@ -249,6 +254,8 @@ struct BookshelfView: View {
                 ToolbarItem(placement: .topBarLeading) { Button("Open Apple II", systemImage: "desktopcomputer") { terminal = true } }
                 ToolbarItem(placement: .topBarTrailing) { Button("Preferences", systemImage: "gearshape") { settings = true } }
             }
+            .onChange(of: store.shelves.map(\.id)) { _, ids in if !shelf.isEmpty && !ids.contains(shelf) { shelf = "" } }
+            .sheet(isPresented: $managingShelves) { ShelfManager() }
             .sheet(isPresented: $terminal) { RetroTerminal() }
             .sheet(isPresented: $adding) { BookEditor() }
             .sheet(isPresented: $settings) { PreferencesView() }
