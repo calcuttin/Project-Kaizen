@@ -140,6 +140,13 @@ struct NativeShelf: View {
     var appearance: ShelfAppearance?
     @Environment(\.dynamicTypeSize) private var textSize
     @State private var terminal = false
+    @AppStorage("shelfMotion") private var atmosphere = true
+    @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
+    private var reduceMotion: Bool { ShelfMotionPolicy.reduced(systemReduceMotion) }
+    @Environment(\.scenePhase) private var scenePhase
+    @State private var visible = false
+    @State private var orreryPlaying = true
+    private var moving: Bool { ShelfMotionPolicy.allowsMotion(enabled: atmosphere, reduced: reduceMotion, active: scenePhase == .active, visible: visible) }
     private var styling: ShelfAppearance { appearance ?? ShelfAppearance(id: name, name: name) }
     var body: some View {
         VStack(spacing: 0) {
@@ -184,6 +191,14 @@ struct NativeShelf: View {
                                         .frame(maxWidth: index == 0 ? 170 : 135, maxHeight: index == 0 ? 190 : 155)
                                 }.buttonStyle(.plain).accessibilityLabel("Open Apple II")
                                     .accessibilityHint("Open the BASIC playground").accessibilityIdentifier("apple-ii")
+                            } else if object == "orrery" {
+                                Button { orreryPlaying.toggle() } label: {
+                                    NativeOrrery(moving: moving && orreryPlaying)
+                                        .frame(maxWidth: index == 0 ? 170 : 135, maxHeight: index == 0 ? 190 : 155)
+                                }.buttonStyle(.plain).disabled(reduceMotion || !atmosphere)
+                                    .accessibilityLabel(reduceMotion ? "Solar system · Reduce Motion is on" : !atmosphere ? "Solar system · shelf motion is off" : orreryPlaying ? "Pause solar system" : "Play solar system")
+                                    .accessibilityValue(moving && orreryPlaying ? "Moving" : "Still")
+                                    .accessibilityIdentifier("orrery-control")
                             } else {
                                 Image("cabinet-object-\(object)").resizable().scaledToFit()
                                     .frame(maxWidth: index == 0 ? 170 : 135, maxHeight: index == 0 ? 190 : 155)
@@ -192,13 +207,13 @@ struct NativeShelf: View {
                         }
                     }
                 }.opacity(0.35 + styling.brightness * 0.65).padding(.horizontal, 22).padding(.bottom, 26)
-                LinearGradient(colors: [styling.lightColor.opacity(0.16 * styling.brightness), .clear, .black.opacity(0.12)], startPoint: .top, endPoint: .bottom)
-                    .allowsHitTesting(false).accessibilityHidden(true)
+                CabinetLight(appearance: styling, moving: moving)
             }.frame(height: 260).clipped()
         }
         .overlay(Rectangle().stroke(Color(hex: 0x57412D), lineWidth: 2))
         .padding(4).background(Color(hex: 0x201710))
         .accessibilityElement(children: .contain).accessibilityLabel("\(name) bookshelf")
         .sheet(isPresented: $terminal) { RetroTerminal() }
+        .onAppear { visible = true }.onDisappear { visible = false }
     }
 }

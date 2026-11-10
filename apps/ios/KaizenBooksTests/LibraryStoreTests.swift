@@ -228,3 +228,23 @@ final class BasicTests: XCTestCase {
         do { _ = try await LibraryImportLoader().load(url, kind: .csv); XCTFail("Invalid encoding accepted") } catch { }
     }
 }
+
+final class ShelfMotionTests: XCTestCase {
+    func testMotionRequiresPreferenceVisibilityForegroundAndNoReducedMotion() {
+        XCTAssertTrue(ShelfMotionPolicy.allowsMotion(enabled: true, reduced: false, active: true, visible: true))
+        XCTAssertFalse(ShelfMotionPolicy.allowsMotion(enabled: false, reduced: false, active: true, visible: true))
+        XCTAssertFalse(ShelfMotionPolicy.allowsMotion(enabled: true, reduced: true, active: true, visible: true))
+        XCTAssertFalse(ShelfMotionPolicy.allowsMotion(enabled: true, reduced: false, active: false, visible: true))
+        XCTAssertFalse(ShelfMotionPolicy.allowsMotion(enabled: true, reduced: false, active: true, visible: false))
+    }
+    func testPauseAndBackgroundFreezePhaseWithoutJumpOnResume() {
+        let start = Date(timeIntervalSince1970: 1000)
+        var clock = ShelfMotionClock()
+        clock.setRunning(true, at: start)
+        XCTAssertEqual(clock.angle(at: start.addingTimeInterval(10)), 90, accuracy: 0.001)
+        clock.setRunning(false, at: start.addingTimeInterval(10))
+        XCTAssertEqual(clock.angle(at: start.addingTimeInterval(100)), 90, accuracy: 0.001)
+        clock.setRunning(true, at: start.addingTimeInterval(100))
+        XCTAssertEqual(clock.angle(at: start.addingTimeInterval(110)), 180, accuracy: 0.001)
+    }
+}
