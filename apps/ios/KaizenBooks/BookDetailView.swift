@@ -121,6 +121,14 @@ struct BookEditor: View {
     @State private var cover = 0
     @State private var baseline: Book?
     @State private var initialized = false
+    @State private var scanning = false
+    @State private var lookup = BookLookupModel()
+    @State private var appliedLookup: ISBNBook?
+    @FocusState private var isbnFocused: Bool
+    private var duplicate: Book? {
+        guard let normalized = ISBN.normalized(isbn) else { return nil }
+        return store.library.books.first { $0.id != existing?.id && ISBN.normalized($0.isbn) == normalized }
+    }
     private var valid: Bool {
         guard let count = Int(pages), (1...100_000).contains(count), count >= (existing?.currentPage ?? 0) else { return false }
         return !title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
@@ -128,11 +136,46 @@ struct BookEditor: View {
     var body: some View {
         NavigationStack {
             Form {
+                Section {
+                    TextField("ISBN-10 or ISBN-13", text: $isbn)
+                        .keyboardType(.numbersAndPunctuation).textInputAutocapitalization(.characters).autocorrectionDisabled()
+                        .focused($isbnFocused)
+                        .accessibilityIdentifier("book-isbn")
+                    Button { isbnFocused = false; lookup.cancel(); scanning = true } label: { Label("Scan barcode", systemImage: "barcode.viewfinder") }
+                        .accessibilityIdentifier("scan-isbn")
+                    Button(lookup.busy ? "Looking up…" : "Look up ISBN") { isbnFocused = false; lookup.lookup(isbn) }
+                        .disabled(lookup.busy || isbn.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                        .accessibilityIdentifier("lookup-isbn")
+                    if lookup.busy { Button("Cancel lookup") { lookup.cancel() } }
+                    if let message = lookup.message {
+                        Text(message).font(.footnote).foregroundStyle(.secondary).accessibilityIdentifier("isbn-message")
+                    }
+                    if let duplicate {
+                        Text("Already in your library: \(duplicate.title). \(existing == nil ? "Saving will add another copy." : "Check that this is the edition you intend to edit.")")
+                            .font(.footnote).foregroundStyle(.secondary)
+                    }
+                } header: { Text("Find by ISBN") } footer: {
+                    Text("Look up ISBN sends the ISBN and your IP address to Open Library. Camera images stay on your device. Review the details before saving, or enter them manually.")
+                }
+                if let found = lookup.result {
+                    Section("Review book details") {
+                        Text(found.title).font(.headline)
+                        Text(found.author.isEmpty ? "Author unavailable" : found.author)
+                        Text(found.pages.map { "\($0) pages" } ?? "Page count unavailable — enter it below.")
+                        Button("Use these details") {
+                            title = found.title
+                            if !found.author.isEmpty { author = found.author }
+                            if let count = found.pages, count >= (existing?.currentPage ?? 0) { pages = String(count) }
+                            appliedLookup = found
+                            lookup.cancel()
+                        }.accessibilityIdentifier("apply-isbn-details")
+                        Text("This replaces the title and any available author/page count in the form. Check the edition and page count before saving.").font(.footnote).foregroundStyle(.secondary)
+                    }
+                }
                 Section("The book") {
                     TextField("Title", text: $title).accessibilityIdentifier("book-title")
                     TextField("Author", text: $author).accessibilityIdentifier("book-author")
                     TextField("Total pages", text: $pages).keyboardType(.numberPad).accessibilityIdentifier("book-pages")
-                    TextField("ISBN (optional)", text: $isbn).keyboardType(.numbersAndPunctuation)
                 }
                 Section {
                     TextField("Shelf name (optional)", text: $shelf)
@@ -145,25 +188,31 @@ struct BookEditor: View {
                     Picker("Cover color", selection: $cover) {
                         ForEach(Array(["Sand", "Forest", "Terracotta", "Ocean", "Ochre", "Twilight"].enumerated()), id: \.offset) { i, name in Text(name).tag(i) }
                     }
-                } header: { Text("Make it yours") } footer: { Text("Covers are original typographic designs. When connected, book details synchronize with your Kaizen account. This app does not request online cover images.") }
+                } header: { Text("Make it yours") } footer: { Text("Cover color is used when artwork is unavailable. Online covers are optional in Preferences. When connected, book details synchronize with your Kaizen account.") }
                 if !pages.isEmpty && !valid {
                     Text("A title and a whole page count (1–100,000) are required. Pages cannot be fewer than your recorded progress.").font(.footnote).foregroundStyle(.secondary)
                 }
             }.navigationTitle(existing == nil ? "Add a book" : "Edit book").navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
-                    ToolbarItem(placement: .confirmationAction) { Button("Save book") { save() }.disabled(!valid).accessibilityIdentifier("save-book") }
+                    ToolbarItem(placement: .confirmationAction) { Button("Save book") { save() }.disabled(!valid || lookup.busy).accessibilityIdentifier("save-book") }
                 }
                 .onAppear {
                     guard !initialized else { return }; initialized = true; baseline = existing
                     if let existing { title = existing.title; author = existing.author; pages = String(existing.pages); isbn = existing.isbn; shelf = existing.shelf; cover = existing.cover }
                 }
+                .onChange(of: isbn) { _, _ in lookup.cancel(); appliedLookup = nil }
+                .onDisappear { lookup.cancel() }
+                .sheet(isPresented: $scanning) { ISBNScannerSheet { scanned in isbn = scanned } }
         }
     }
     private func save() {
         guard valid, let count = Int(pages) else { return }
         var book = baseline ?? Book(title: title, author: author, pages: count)
-        book.title = title; book.author = author; book.pages = count; book.isbn = isbn; book.shelf = shelf; book.cover = cover
+        book.title = title; book.author = author; book.pages = count; book.isbn = ISBN.normalized(isbn) ?? isbn.trimmingCharacters(in: .whitespacesAndNewlines); book.shelf = shelf; book.cover = cover
+        if baseline == nil, let found = appliedLookup, found.isbn == book.isbn, found.title == title, found.author == author {
+            book.coverURL = found.coverURL
+        }
         if book.status == .finished { book.currentPage = count }
         if store.save(book, replacing: baseline) { dismiss() }
     }

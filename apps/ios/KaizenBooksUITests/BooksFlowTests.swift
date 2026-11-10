@@ -22,11 +22,63 @@ final class BooksFlowTests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Page 170 of 432"].waitForExistence(timeout: 5))
         let image = XCTAttachment(screenshot: app.screenshot()); image.name = "Book detail"; image.lifetime = .keepAlways; add(image)
     }
+    func testISBNLookupReviewsBeforeSaving() {
+        let app = XCUIApplication()
+        app.launchArguments = ["--ui-testing", "--isbn-fixture", "-onlineBookCovers", "NO"]
+        app.launch()
+        app.buttons["add-book"].tap()
+        let isbn = app.textFields["book-isbn"]
+        XCTAssertTrue(isbn.waitForExistence(timeout: 5))
+        isbn.tap(); isbn.typeText("0140328726")
+        app.buttons["lookup-isbn"].tap()
+        let use = app.buttons["apply-isbn-details"]
+        XCTAssertTrue(use.waitForExistence(timeout: 5))
+        XCTAssertFalse(app.buttons["save-book"].isEnabled, "Lookup must not fill/save without review")
+        for _ in 0..<4 { if use.isHittable { break }; app.collectionViews.firstMatch.swipeUp() }
+        let preview = XCTAttachment(screenshot: app.screenshot()); preview.name = "ISBN metadata review"; preview.lifetime = .keepAlways; add(preview)
+        use.tap()
+        let title = app.textFields["book-title"]
+        XCTAssertTrue(title.waitForExistence(timeout: 5))
+        XCTAssertEqual(title.value as? String, "ISBN preview sample")
+        XCTAssertEqual(app.textFields["book-author"].value as? String, "Test author")
+        XCTAssertEqual(app.textFields["book-pages"].value as? String, "96")
+        app.buttons["save-book"].tap()
+        let search = app.textFields["book-search"]
+        XCTAssertTrue(search.waitForExistence(timeout: 5)); search.tap(); search.typeText("9780140328721")
+        let book = app.buttons.containing(.staticText, identifier: "ISBN preview sample").firstMatch
+        XCTAssertTrue(book.waitForExistence(timeout: 5)); book.tap()
+        XCTAssertTrue(app.staticTexts["ISBN preview sample"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["Test author"].exists)
+        XCTAssertTrue(app.staticTexts["Page 0 of 96"].exists)
+    }
+    func testScannerFallbackAndInvalidISBNKeepManualEntry() {
+        let app = XCUIApplication()
+        app.launchArguments = ["--ui-testing", "-onlineBookCovers", "NO"]
+        app.launch()
+        app.buttons["add-book"].tap()
+        let isbn = app.textFields["book-isbn"]
+        XCTAssertTrue(isbn.waitForExistence(timeout: 5))
+        isbn.tap(); isbn.typeText("9780140328722")
+        app.buttons["lookup-isbn"].tap()
+        XCTAssertTrue(app.staticTexts["isbn-message"].waitForExistence(timeout: 5))
+        XCTAssertFalse(app.buttons["save-book"].isEnabled)
+        app.buttons["scan-isbn"].tap()
+        XCTAssertTrue(app.buttons["Enter ISBN manually"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.otherElements["scanner-unavailable"].exists || app.staticTexts["Scanner unavailable"].exists)
+        let proof = XCTAttachment(screenshot: app.screenshot()); proof.name = "Scanner manual fallback"; proof.lifetime = .keepAlways; add(proof)
+        app.buttons["Enter ISBN manually"].tap()
+        XCTAssertTrue(isbn.waitForExistence(timeout: 5))
+        XCTAssertEqual(isbn.value as? String, "9780140328722")
+        app.buttons["Cancel"].tap()
+        XCTAssertTrue(app.textFields["book-search"].waitForExistence(timeout: 5))
+    }
     func testAddSearchAndDeleteBook() {
         let app = XCUIApplication()
         app.launchArguments = ["--ui-testing", "-onlineBookCovers", "NO"]
         app.launch()
         app.buttons["add-book"].tap()
+        let isbn = app.textFields["book-isbn"]
+        XCTAssertTrue(isbn.waitForExistence(timeout: 5)); isbn.tap(); isbn.typeText("0-14-032872-6")
         let title = app.textFields["book-title"]
         XCTAssertTrue(title.waitForExistence(timeout: 5)); title.tap(); title.typeText("Prototype book")
         app.textFields["book-author"].tap(); app.textFields["book-author"].typeText("A reader")
@@ -34,7 +86,7 @@ final class BooksFlowTests: XCTestCase {
         app.buttons["save-book"].tap()
         app.tabBars.buttons["Bookshelf"].tap()
         let search = app.textFields["book-search"]
-        XCTAssertTrue(search.waitForExistence(timeout: 5)); search.tap(); search.typeText("Prototype book")
+        XCTAssertTrue(search.waitForExistence(timeout: 5)); search.tap(); search.typeText("9780140328721")
         let book = app.buttons.containing(.staticText, identifier: "Prototype book").firstMatch
         XCTAssertTrue(book.waitForExistence(timeout: 5)); book.tap()
         XCTAssertTrue(app.navigationBars["Book details"].waitForExistence(timeout: 5))
