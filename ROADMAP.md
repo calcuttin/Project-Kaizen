@@ -6,7 +6,7 @@ Kaizen's roadmap connects public reviews to actionable issues, implementation pu
 
 ## Kaizen Books icon / build 7 — 2026-11-10
 
-The maintainer selected the open-book mark inside Kaizen’s amber ring. The opaque 1024×1024 icon and its generator are ready; signed build **0.1.0 (7)** is being prepared for the existing Owner testing and External groups. [Release evidence and current status](docs/reviews/2026-11-10/ios-capabilities/release-build7.md). Apple processing, internal availability and external approval are tracked separately. Hosted backup/recovery remains deferred.
+The maintainer selected the open-book mark inside Kaizen’s amber ring. [PR #66](https://github.com/calcuttin/Project-Kaizen/pull/66) contains the icon and generator. Signed build **0.1.0 (7)** passed archive verification and Apple accepted the upload at **6:30 p.m. Eastern** for the existing Owner testing and External groups. [Release evidence and current status](docs/reviews/2026-11-10/ios-capabilities/release-build7.md). Apple processing, internal availability and external approval are tracked separately. Hosted backup/recovery remains deferred.
 
 ## External TestFlight build 6 — 2026-11-10
 
