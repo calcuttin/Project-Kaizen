@@ -12,6 +12,8 @@
 
 [PR CI](https://github.com/calcuttin/Project-Kaizen/actions/runs/42859202650) · [Branch CI](https://github.com/calcuttin/Project-Kaizen/actions/runs/42859181041) · [CodeQL](https://github.com/calcuttin/Project-Kaizen/actions/runs/42859183505).
 
+Post-merge main checks also passed: web, database, container, edge and both CodeQL analyses. Both Vercel deployment statuses succeeded. These do not replace native/device acceptance.
+
 ## Signed artifact
 
 - Version **0.1.0 (3)**, bundle `org.projectkaizen.books`, internal TestFlight only.
@@ -19,7 +21,7 @@
 - Distribution signature passed `codesign --verify --deep --strict`.
 - Entitlements include App ID `GZLCX6QZ8L.org.projectkaizen.books`, `webcredentials:clean-marmot-1889.clerk.accounts.dev`, `beta-reports-active = true`, and `get-task-allow = false`.
 - Executable and dSYM share arm64 UUID `C2835B26-2C6F-3A5F-91AA-0654A4A38377`.
-- Apple accepted the upload at **16:58 UTC on 2026-11-10**. App Store Connect shows build 3 processing; owner-group assignment remains pending. Export inspection confirmed that the login Associated Domains entitlement was retained.
+- Apple accepted the upload at **16:58 UTC on 2026-11-10**. Apple processing completed, and App Store Connect now shows build 3 **Testing** in the existing **Owner testing** internal group with **1** tester/invite. The cover-specific What to Test checklist was saved. Automatic distribution remains disabled; build 1 remains unassigned. Export inspection confirmed that the login Associated Domains entitlement was retained.
 
 Certificates, profiles, archives and signing logs remain local. No credentials or personal library contents are published.
 

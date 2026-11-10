@@ -28,7 +28,7 @@ The earlier simulator tests checked book operations and sync without asserting p
 
 ## Remaining boundaries
 
-The signed TestFlight upload is complete; Apple processing and physical phone acceptance are tracked in the [release record](release.md). This is closer visual parity, not a claim of complete web feature parity: cabinet editing/animations, ISBN camera scanning and background sync remain web-only or unimplemented in the native app. Exact cabinet lighting effects are not reproduced. Online covers require enabling on this device and depend on Open Library availability; unavailable artwork retains the fallback.
+Signed build **0.1.0 (3)** is now **Testing** in the owner group. Physical phone acceptance remains open; see the [release record and phone checklist](release.md). This is closer visual parity, not a claim of complete web feature parity: cabinet editing/animations, ISBN camera scanning and background sync remain web-only or unimplemented in the native app. Exact cabinet lighting effects are not reproduced. Online covers require enabling on this device and depend on Open Library availability; unavailable artwork retains the fallback.
 
 **Hosted backup/recovery remains deferred.**
 
