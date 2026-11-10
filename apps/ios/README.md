@@ -2,7 +2,7 @@
 
 A native SwiftUI Bookshelf app using the same Clerk account and Supabase library as Project Kaizen and the standalone Bookshelf website. Open **[KaizenBooks.xcodeproj](KaizenBooks.xcodeproj)** in Xcode, select the **KaizenBooks** scheme and an iPhone simulator, then Run (⌘R). Xcode resolves the pinned ClerkKit/ClerkKitUI 1.7.1 packages automatically. Use Xcode 26 or later with Swift 6.2 support. Public frontend configuration is included; no secret key or signing team is needed for the simulator. Deployment target: iOS 17 or later.
 
-For a physical iPhone, choose your own development team in the app target’s Signing & Capabilities settings and select your connected phone. This repository does not contain signing credentials or an App Store distribution configuration.
+For a physical iPhone, choose your development team in the app target’s Signing & Capabilities settings and select your connected phone. For installation through TestFlight, follow the [internal distribution setup](Distribution/README.md). The repository includes internal TestFlight export settings, but never signing credentials. A paid Apple Developer membership and a signed archive are required for TestFlight.
 
 ## Connect your library
 

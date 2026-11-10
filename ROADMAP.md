@@ -4,9 +4,13 @@ Kaizen's roadmap connects public reviews to actionable issues, implementation pu
 
 [Review archive](docs/reviews/README.md) · [Open roadmap issues](https://github.com/calcuttin/Project-Kaizen/issues?q=is%3Aissue%20is%3Aopen%20label%3Aroadmap) · [AI-assisted work](https://github.com/calcuttin/Project-Kaizen/issues?q=is%3Aissue%20label%3Aai-assisted)
 
+## Native iPhone TestFlight — 2026-11-10
+
+The Apple team/App ID, distribution certificate/profile, App Store Connect app and Clerk native login registration are configured. Signed **0.1.0 (2)** passed signature, entitlement and matching-symbol inspection and was uploaded for internal TestFlight. Apple made build 2 Ready to Test, and it is now Testing in the owner-only group with manual build selection. Physical installation/sign-in/sync and VoiceOver remain open in [#49](https://github.com/calcuttin/Project-Kaizen/issues/49). Build 1 remains unassigned because its export omitted Associated Domains. [Release runbook](apps/ios/Distribution/README.md) · [Validation and limits](docs/reviews/2026-11-10/ios-testflight/README.md). Existing shared development authentication is retained; production-auth acceptance remains open. Hosted backup/recovery stays deferred.
+
 ## Native iPhone Bookshelf — 2026-11-08
 
-[Tracker #49](https://github.com/calcuttin/Project-Kaizen/issues/49) covers the native shared-account connection and device-release follow-up. The SwiftUI app uses the existing Clerk/Supabase services, with protected account caches, durable offline edits, explicit conflicts and opt-in local-library import. A disposable-account test verified book/progress/notes synchronization across iPhone, Bookshelf and Full Kaizen, plus shared deletion and account cleanup. [Searchable review and evidence](docs/reviews/2026-11-08/ios-sync/README.md) · [Xcode setup](apps/ios/README.md). Apple signing/registration, physical-device and production-auth/distribution checks remain open. Hosted backup/recovery stays deferred.
+[Tracker #49](https://github.com/calcuttin/Project-Kaizen/issues/49) covers the native shared-account connection and device-release follow-up. The SwiftUI app uses the existing Clerk/Supabase services, with protected account caches, durable offline edits, explicit conflicts and opt-in local-library import. A disposable-account test verified book/progress/notes synchronization across iPhone, Bookshelf and Full Kaizen, plus shared deletion and account cleanup. [Searchable review and evidence](docs/reviews/2026-11-08/ios-sync/README.md) · [Xcode setup](apps/ios/README.md). Apple signing/registration is complete; physical-device and production-auth/distribution acceptance remain open. Hosted backup/recovery stays deferred.
 
 ## Shared accounts and Vercel hosting — 2026-11-08
 

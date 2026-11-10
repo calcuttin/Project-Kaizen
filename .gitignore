@@ -16,3 +16,13 @@ playwright-report
 supabase/.temp/
 supabase/.branches/
 .vercel
+
+# Apple signing credentials and local distribution artifacts
+*.p8
+*.p12
+*.mobileprovision
+*.xcarchive/
+*.ipa
+*.dSYM/
+xcuserdata/
+DerivedData/
