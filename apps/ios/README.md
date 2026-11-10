@@ -50,7 +50,9 @@ Choose a simulator available in your Xcode installation (`xcrun simctl list devi
 
 Model coverage includes progress bounds/double counting, completion, disk persistence, invalid metadata, notes/ratings/goals, deletion cleanup, unreadable-file preservation, failed-write rollback, and resetting sample data. UI flows cover adding/searching/deleting a book, logging progress across an app relaunch, navigating the three main screens, shelf/grid selection, and mark-read mode.
 
-`KaizenBooks/LibraryModel.swift` owns domain, persistence and synchronization scheduling. `CloudSync.swift` owns the RPC contract, record mapping and conflict logic; `AccountView.swift` owns session boundaries and account controls. The remaining app files contain the native screens and shared visual components. The Xcode project and shared scheme are checked-in source files; no project generator is required. `tools/generate-icon.swift` rasterizes the web app’s original favicon using AppKit.
+`KaizenBooks/LibraryModel.swift` owns domain, persistence and synchronization scheduling. `CloudSync.swift` owns the RPC contract, record mapping and conflict logic; `AccountView.swift` owns session boundaries and account controls. The remaining app files contain the native screens and shared visual components. The Xcode project and shared scheme are checked-in source files; no project generator is required.
+
+The app icon uses the approved Bookshelf variation of Project Kaizen’s mark: an open book inside the broken amber ring, on charcoal. `tools/generate-icon.swift` draws the vector paths directly with the shared brand colors (`#e8b04b` / `#0f1115`), producing an opaque 1024×1024 sRGB PNG. From `apps/ios`, run `swift tools/generate-icon.swift` to regenerate it, or pass an output path and pixel size for a small-size preview. Outer corners are left square for iOS to mask. The shared in-app Kaizen mark remains separate.
 
 AI-assisted implementation by Codex, November 8, 2026. The existing web app and backend are unchanged. Native navigation follows [Apple’s SwiftUI navigation model](https://developer.apple.com/documentation/swiftui/navigation).
 
