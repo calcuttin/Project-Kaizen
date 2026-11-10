@@ -51,7 +51,7 @@ struct Eyebrow: View {
 struct BookCover: View {
     var book: Book
     var width: CGFloat = 120
-    // The web app's General/Fiction spine palette, with no added cover illustrations.
+    // Readable fallback while artwork loads or online covers are disabled/unavailable.
     private let colors: [UInt32] = [0x4A4E69, 0x22543D, 0x744210, 0x2C5282, 0x702459, 0x4A5568]
     var body: some View {
         ZStack(alignment: .leading) {
@@ -65,6 +65,7 @@ struct BookCover: View {
                 Rectangle().fill(Color(hex: 0xD9C79A).opacity(0.5)).frame(height: 1)
             }.padding(width * 0.13).foregroundStyle(Color(hex: 0xF7FAFC))
         }
+        .overlay { BookArtwork(book: book) }
         .frame(width: width, height: width * 1.48)
         .clipShape(RoundedRectangle(cornerRadius: 4))
         .overlay(RoundedRectangle(cornerRadius: 4).stroke(.black.opacity(0.4), lineWidth: 1))
@@ -95,11 +96,15 @@ struct BookRow: View {
 struct ShelfSpine: View {
     let book: Book
     let index: Int
-    private let colors: [UInt32] = [0x22543D, 0x702459, 0x4A4E69, 0x2C5282, 0x744210, 0x4A5568]
+    let theme: ShelfThemeSpec
     var body: some View {
-        let height: CGFloat = 168 + CGFloat((book.pages + index * 7) % 28)
+        let hue = (book.hue ?? book.cover * 60) % 360
+        let height: CGFloat = 180 + CGFloat(abs((hue * 7 + book.pages) % 36))
+        let width = min(40, max(23, 18 + CGFloat(book.pages) / 28))
         ZStack {
-            Color(hex: colors[index % colors.count])
+            Color(hex: theme.palette[abs((hue + index * 3) % theme.palette.count)])
+            BookArtwork(book: book, spine: true)
+            Color.black.opacity(0.16)
             HStack(spacing: 0) {
                 Color.white.opacity(0.16).frame(width: 3)
                 Spacer()
@@ -112,13 +117,14 @@ struct ShelfSpine: View {
             }.padding(.horizontal, 4)
             Text(book.title).font(BooksTheme.display(12, relativeTo: .caption)).lineLimit(1).minimumScaleFactor(0.7)
                 .frame(width: height - 42).rotationEffect(.degrees(90)).foregroundStyle(Color(hex: 0xF0E5CC))
+                .shadow(color: .black, radius: 2)
             if book.status == .reading {
                 RoundedRectangle(cornerRadius: 1).fill(BooksTheme.accent).frame(width: 4, height: 24).offset(y: height / 2 - 22)
             }
             if book.status == .finished {
                 Image(systemName: "checkmark.circle.fill").font(.system(size: 13)).foregroundStyle(Color(hex: 0xE8B04B)).offset(y: height / 2 - 20)
             }
-        }.frame(width: 44, height: height).clipShape(RoundedRectangle(cornerRadius: 2))
+        }.frame(width: width, height: height).clipShape(RoundedRectangle(cornerRadius: 2))
             .overlay(RoundedRectangle(cornerRadius: 2).stroke(.black.opacity(0.55), lineWidth: 1))
             .rotationEffect(.degrees(book.status == .reading ? -3 : 0), anchor: .bottom)
             .padding(.horizontal, book.status == .reading ? 4 : 0)
@@ -131,32 +137,33 @@ struct NativeShelf: View {
     let books: [Book]
     let markMode: Bool
     let select: (Book) -> Void
+    var appearance: ShelfAppearance?
     @Environment(\.dynamicTypeSize) private var textSize
-    private var literary: Bool { name.localizedCaseInsensitiveContains("fiction") || name.localizedCaseInsensitiveContains("novel") }
+    private var styling: ShelfAppearance { appearance ?? ShelfAppearance(id: name, name: name) }
     var body: some View {
         VStack(spacing: 0) {
             VStack(alignment: .leading, spacing: 6) {
                 HStack(alignment: .firstTextBaseline) {
-                    Text(literary ? "Fiction" : "General").font(BooksTheme.display(17)).foregroundStyle(Color(hex: 0xDFBB73))
+                    Text(styling.spec.label).font(BooksTheme.display(17)).foregroundStyle(Color(hex: 0xDFBB73))
                     Text("\(books.count) books · \(books.filter { $0.status == .finished }.count) read").font(.caption2).foregroundStyle(Color(hex: 0xC2B8A5))
                     Spacer(minLength: 0)
                 }.padding(.horizontal, 12).padding(.top, 12)
                 Text(markMode ? "Tap a spine to mark read." : "Pick a spine. Step inside.")
                     .font(.caption2).foregroundStyle(Color(hex: 0xE2CFA7)).padding(.horizontal, 12)
                 ScrollView(.horizontal) {
-                    HStack(alignment: .bottom, spacing: 4) {
+                    LazyHStack(alignment: .bottom, spacing: 3) {
                         ForEach(Array(books.enumerated()), id: \.element.id) { index, book in
-                            Button { select(book) } label: { ShelfSpine(book: book, index: index) }
+                            Button { select(book) } label: { ShelfSpine(book: book, index: index, theme: styling.spec) }
                                 .buttonStyle(.plain).accessibilityLabel("\(book.title), \(book.author), \(book.status.label)")
                                 .accessibilityHint(markMode ? "Toggle finished status" : "Open book details")
                                 .accessibilityIdentifier("shelf-\(book.title)")
                         }
-                    }.frame(minHeight: 206, alignment: .bottom).padding(.horizontal, 22).padding(.bottom, 14)
+                    }.frame(height: 232, alignment: .bottom).padding(.horizontal, 17).padding(.bottom, 14)
                 }.scrollIndicators(.hidden)
             }
             .background {
                 GeometryReader { proxy in
-                    Image("shelf-study").resizable().scaledToFill().frame(width: proxy.size.width, height: proxy.size.height).clipped().overlay(.black.opacity(0.12))
+                    Image(styling.spec.image).resizable().scaledToFill().frame(width: proxy.size.width, height: proxy.size.height).clipped().overlay(.black.opacity(0.15))
                 }
             }
             Text(name.uppercased()).font(.custom("Inter-Regular", size: 10, relativeTo: .caption2)).tracking(2)
@@ -167,11 +174,16 @@ struct NativeShelf: View {
                 GeometryReader { proxy in
                     Image("cabinet-walnut").resizable().scaledToFill().frame(width: proxy.size.width, height: proxy.size.height).clipped()
                 }
-                HStack(alignment: .bottom, spacing: -10) {
-                    Image(literary ? "object-typewriter" : "object-compass").resizable().scaledToFit().frame(width: 155, height: 140)
-                    Image(literary ? "object-pen" : "object-lantern").resizable().scaledToFit().frame(width: 110, height: 120)
-                }.blendMode(.screen).padding(.bottom, 15).accessibilityHidden(true)
-            }.frame(height: 166).clipped()
+                HStack(alignment: .bottom, spacing: styling.cabinet?.object?["layout"]?.string == "balanced" ? 8 : -12) {
+                    ForEach(Array(styling.displayObjects.enumerated()), id: \.offset) { index, object in
+                        if object != "none" {
+                            Image("cabinet-object-\(object)").resizable().scaledToFit()
+                                .frame(maxWidth: index == 0 ? 170 : 135, maxHeight: index == 0 ? 190 : 155)
+                                .blendMode(object == "computer" ? .normal : .screen)
+                        }
+                    }
+                }.opacity(0.35 + styling.brightness * 0.65).padding(.horizontal, 22).padding(.bottom, 26).accessibilityHidden(true)
+            }.frame(height: 260).clipped()
         }
         .overlay(Rectangle().stroke(Color(hex: 0x57412D), lineWidth: 2))
         .padding(4).background(Color(hex: 0x201710))

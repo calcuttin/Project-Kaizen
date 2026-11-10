@@ -4,7 +4,7 @@ final class BooksFlowTests: XCTestCase {
     override func setUpWithError() throws { continueAfterFailure = false }
     func testLogReadingPersistsAcrossRelaunch() {
         let app = XCUIApplication()
-        app.launchArguments = ["--ui-testing"]
+        app.launchArguments = ["--ui-testing", "-onlineBookCovers", "NO"]
         app.launch()
         app.tabBars.buttons["Reading"].tap()
         XCTAssertTrue(app.buttons["log-The Creative Act"].waitForExistence(timeout: 10))
@@ -15,7 +15,7 @@ final class BooksFlowTests: XCTestCase {
         app.buttons["save-progress"].tap()
         XCTAssertTrue(app.buttons["reading-The Creative Act"].waitForExistence(timeout: 5))
         app.terminate()
-        app.launchArguments = ["--ui-testing", "--keep-test-data"]
+        app.launchArguments = ["--ui-testing", "--keep-test-data", "-onlineBookCovers", "NO"]
         app.launch()
         app.tabBars.buttons["Reading"].tap()
         app.buttons["reading-The Creative Act"].tap()
@@ -24,7 +24,7 @@ final class BooksFlowTests: XCTestCase {
     }
     func testAddSearchAndDeleteBook() {
         let app = XCUIApplication()
-        app.launchArguments = ["--ui-testing"]
+        app.launchArguments = ["--ui-testing", "-onlineBookCovers", "NO"]
         app.launch()
         app.buttons["add-book"].tap()
         let title = app.textFields["book-title"]
@@ -47,7 +47,7 @@ final class BooksFlowTests: XCTestCase {
     }
     func testHomeAndJournalScreens() {
         let app = XCUIApplication()
-        app.launchArguments = ["--ui-testing"]
+        app.launchArguments = ["--ui-testing", "-onlineBookCovers", "NO"]
         app.launch()
         app.tabBars.buttons["Reading"].tap()
         XCTAssertTrue(app.buttons["log-The Creative Act"].waitForExistence(timeout: 10))
@@ -61,7 +61,7 @@ final class BooksFlowTests: XCTestCase {
     }
     func testLargeTextReadingFlow() {
         let app = XCUIApplication()
-        app.launchArguments = ["--ui-testing", "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL"]
+        app.launchArguments = ["--ui-testing", "-onlineBookCovers", "NO", "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL"]
         app.launch()
         app.tabBars.buttons["Reading"].tap()
         let log = app.buttons["log-The Creative Act"]
@@ -81,7 +81,7 @@ final class BooksFlowTests: XCTestCase {
 
     func testWebStyleShelvesGridAndMarkRead() {
         let app = XCUIApplication()
-        app.launchArguments = ["--ui-testing"]
+        app.launchArguments = ["--ui-testing", "-onlineBookCovers", "NO"]
         app.launch()
         XCTAssertTrue(app.textFields["book-search"].waitForExistence(timeout: 10))
         let shelf = app.buttons["shelf-A Psalm for the Wild-Built"]

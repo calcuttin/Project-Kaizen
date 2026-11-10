@@ -68,6 +68,10 @@ struct PreferencesView: View {
                 Section("Appearance") {
                     Picker("Theme", selection: $appearance) { Text("Dark · web default").tag("dark"); Text("Light").tag("light"); Text("System").tag("system") }
                 }
+                Section("Book covers") {
+                    OnlineCoverControls()
+                    Link("Cover artwork from Open Library", destination: URL(string: "https://openlibrary.org")!)
+                }
                 Section("Your reading year") {
                     Toggle("Set a reading goal", isOn: $enabled)
                     if enabled { Stepper("\(goal) books this year", value: $goal, in: 1...500) }
@@ -75,7 +79,7 @@ struct PreferencesView: View {
                 Section("About this prototype") {
                     LabeledContent("Project Kaizen", value: "Books for iPhone")
                     Text(store.owner == nil ? "You are using a local library. Connect your Kaizen account to synchronize, then explicitly import your personal local books." : "Books, shelves, notes, reading history and goals share your Kaizen account. Changes save on this phone first, then synchronize. Camera scanning is not included.").font(.footnote).foregroundStyle(.secondary)
-                    Text("Sample book titles are real; reading activity is fictional. Shelf and cabinet artwork comes from the Kaizen web app. Book covers use its generated color palette, not publisher artwork.").font(.footnote).foregroundStyle(.secondary)
+                    Text("Sample book titles are real; reading activity is fictional. Shelf themes and cabinet artwork match the Kaizen web app. Optional online covers come from Open Library; unavailable images keep a readable title cover. Cabinet editing and animations remain available on the website.").font(.footnote).foregroundStyle(.secondary)
                 }
                 if store.library.isDemo {
                     Section {

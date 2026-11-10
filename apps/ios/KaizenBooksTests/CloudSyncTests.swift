@@ -1,6 +1,24 @@
 import XCTest
 @testable import KaizenBooks
 
+private final class CoverProtocol: URLProtocol, @unchecked Sendable {
+    static let lock = NSLock()
+    static var requests: [URLRequest] = []
+    static var responses: [(Int, String, Data)] = []
+    override class func canInit(with request: URLRequest) -> Bool { true }
+    override class func canonicalRequest(for request: URLRequest) -> URLRequest { request }
+    override func startLoading() {
+        Self.lock.lock()
+        Self.requests.append(request)
+        let response = Self.responses.isEmpty ? (500, "text/plain", Data()) : Self.responses.removeFirst()
+        Self.lock.unlock()
+        client?.urlProtocol(self, didReceive: HTTPURLResponse(url: request.url!, statusCode: response.0, httpVersion: nil, headerFields: ["Content-Type": response.1])!, cacheStoragePolicy: .notAllowed)
+        client?.urlProtocol(self, didLoad: response.2)
+        client?.urlProtocolDidFinishLoading(self)
+    }
+    override func stopLoading() {}
+}
+
 @MainActor private final class FakeTransport: LibraryTransport {
     var changes: [CloudChange] = []
     var sent: [[CloudMutation]] = []
@@ -26,6 +44,46 @@ import XCTest
 }
 
 @MainActor final class CloudSyncTests: XCTestCase {
+    private func coverLoader(_ responses: [(Int, String, Data)]) -> CoverLoader {
+        CoverProtocol.requests = []; CoverProtocol.responses = responses
+        let config = URLSessionConfiguration.ephemeral; config.protocolClasses = [CoverProtocol.self]
+        return CoverLoader(session: URLSession(configuration: config))
+    }
+    func testCoverOptInAndStoredArtworkWithoutAuthenticationHeaders() async {
+        let bytes = Data([1, 2, 3])
+        let loader = coverLoader([(200, "image/jpeg", bytes)])
+        let off = CoverRequest(title: "Test", author: "Reader", isbn: "", storedURL: "https://covers.openlibrary.org/b/id/123-M.jpg", enabled: false, attempt: 0, owner: "test")
+        let disabled = await loader.image(for: off)
+        XCTAssertNil(disabled); XCTAssertTrue(CoverProtocol.requests.isEmpty)
+        let on = CoverRequest(title: off.title, author: off.author, isbn: off.isbn, storedURL: off.storedURL, enabled: true, attempt: 0, owner: off.owner)
+        let image = await loader.image(for: on)
+        XCTAssertEqual(image, bytes)
+        XCTAssertEqual(CoverProtocol.requests.count, 1)
+        XCTAssertEqual(CoverProtocol.requests[0].url?.absoluteString, on.storedURL)
+        XCTAssertNil(CoverProtocol.requests[0].value(forHTTPHeaderField: "Authorization"))
+        XCTAssertNil(CoverProtocol.requests[0].value(forHTTPHeaderField: "Cookie"))
+    }
+    func testMissingIsbnCoverSearchesExactTitleAndReusesArtwork() async {
+        let result = Data(#"{"docs":[{"title":"Wrong title","cover_i":1},{"title":"The Test Book","author_name":["A Reader"],"cover_i":42}]}"#.utf8)
+        let bytes = Data([4, 5, 6])
+        let loader = coverLoader([(404, "text/plain", Data()), (200, "application/json", result), (200, "image/jpeg", bytes)])
+        let request = CoverRequest(title: "The Test Book", author: "A Reader", isbn: "978-0-123456-78-9", storedURL: nil, enabled: true, attempt: 0, owner: "test")
+        let first = await loader.image(for: request), cached = await loader.image(for: request)
+        XCTAssertEqual(first, bytes); XCTAssertEqual(cached, bytes)
+        XCTAssertEqual(CoverProtocol.requests.count, 3)
+        XCTAssertTrue(CoverProtocol.requests[0].url!.path.contains("/isbn/9780123456789"))
+        XCTAssertEqual(CoverProtocol.requests[1].url?.host, "openlibrary.org")
+        XCTAssertEqual(CoverProtocol.requests[2].url?.path, "/b/id/42-M.jpg")
+    }
+    func testCoverRateLimitDoesNotFanOutAndUnsafeURLsAreRejected() async {
+        let loader = coverLoader([(429, "text/plain", Data())])
+        let request = CoverRequest(title: "Test", author: "Reader", isbn: "", storedURL: "https://covers.openlibrary.org/b/id/1-M.jpg", enabled: true, attempt: 0, owner: "test")
+        let result = await loader.image(for: request)
+        XCTAssertNil(result); XCTAssertEqual(CoverProtocol.requests.count, 1)
+        for value in ["http://covers.openlibrary.org/b/id/1.jpg", "file:///tmp/cover.jpg", "https://covers.openlibrary.org.attacker.example/image", "https://secret@covers.openlibrary.org/image", "https://localhost/image"] {
+            XCTAssertNil(CoverRequest.imageURL(value))
+        }
+    }
     private func base() -> URL {
         let url = FileManager.default.temporaryDirectory.appending(path: UUID().uuidString)
         addTeardownBlock { try? FileManager.default.removeItem(at: url) }
@@ -47,6 +105,8 @@ import XCTest
         var before = LibrarySnapshot(); try LibraryCloudMapping.project(cloud, onto: &before)
         XCTAssertEqual(before.books[0].id, "web_nanoid-123")
         XCTAssertEqual(before.books[0].cover, 4)
+        XCTAssertEqual(before.books[0].coverURL, "https://example.com/cover.jpg")
+        XCTAssertEqual(before.books[0].hue, 240)
         XCTAssertEqual(before.books[0].shelf, "Study")
         var after = before; after.books[0].notes = "A phone note"
         LibraryCloudMapping.stage(before: before, after: after, cloud: &cloud)
@@ -57,6 +117,24 @@ import XCTest
         XCTAssertEqual(payload["shelfId"], .string("web-shelf"))
         XCTAssertEqual(cloud.visible["shelves:web-shelf"]?.payload, shelf)
         XCTAssertEqual(cloud.outbox.count, 1)
+    }
+    func testShelfAppearanceUsesWebThemeObjectsAndCabinetWithoutOverwritingThem() throws {
+        var cloud = CloudState(owner: "user_styles")
+        let shelf: Payload = ["name": .string("Living room · 2"), "theme": .string("history"),
+            "objects": .array([.string("romanHelmet"), .string("bust")]), "order": .number(3),
+            "cabinet": .object(["brightness": .number(65), "layout": .string("balanced")])]
+        try cloud.apply([change("shelves", "web-shelf", shelf), change("books", "web_nanoid-123", book(), seq: 2)])
+        var before = LibrarySnapshot(); try LibraryCloudMapping.project(cloud, onto: &before)
+        let style = try XCTUnwrap(before.shelfAppearances?.first)
+        XCTAssertEqual(style.spec.label, "History & classics")
+        XCTAssertEqual(style.displayObjects, ["romanHelmet", "bust"])
+        XCTAssertEqual(style.brightness, 0.65)
+        var after = before; after.books[0].currentPage = 40
+        LibraryCloudMapping.stage(before: before, after: after, cloud: &cloud)
+        XCTAssertEqual(cloud.visible["shelves:web-shelf"]?.payload, shelf)
+        XCTAssertEqual(cloud.outbox.count, 1)
+        XCTAssertEqual(ShelfThemeSpec.inferred("Living room · 2").label, "Espionage & war")
+        XCTAssertEqual(ShelfThemeSpec.inferred("Living room · 6").label, "Networking & security")
     }
     func testOutboxAndAccountIsolationSurviveRelaunch() throws {
         let directory = base()

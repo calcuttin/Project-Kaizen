@@ -29,6 +29,8 @@ enum JSONValue: Codable, Equatable {
         return nil
     }
     var bool: Bool? { if case .bool(let v) = self { return v }; return nil }
+    var array: [JSONValue]? { if case .array(let v) = self { return v }; return nil }
+    var object: Payload? { if case .object(let v) = self { return v }; return nil }
 }
 typealias Payload = [String: JSONValue]
 
@@ -200,6 +202,12 @@ enum LibraryCloudMapping {
     static func project(_ cloud: CloudState, onto snapshot: inout LibrarySnapshot) throws {
         let records = cloud.visible.values.filter { $0.payload != nil }
         let shelves = Dictionary(uniqueKeysWithValues: records.filter { $0.entityType == "shelves" }.map { ($0.entityId, $0.payload?["name"]?.string ?? "") })
+        snapshot.shelfAppearances = records.filter { $0.entityType == "shelves" }.map { r in
+            let p = r.payload!
+            return ShelfAppearance(id: r.entityId, name: p["name"]?.string ?? "", theme: p["theme"]?.string,
+                objects: p["objects"]?.array?.compactMap(\.string), order: p["order"]?.int ?? 0,
+                cabinet: p["cabinet"])
+        }.sorted { $0.order == $1.order ? $0.id < $1.id : $0.order < $1.order }
         snapshot.books = try records.filter { $0.entityType == "books" }.map { r in
             let p = r.payload!
             guard let title = p["title"]?.string, let author = p["author"]?.string,
@@ -208,7 +216,8 @@ enum LibraryCloudMapping {
             return Book(id: r.entityId, title: title, author: author, pages: pages, currentPage: current, status: status,
                         shelf: shelves[p["shelfId"]?.string ?? ""] ?? "", isbn: p["isbn"]?.string ?? "",
                         rating: p["rating"]?.int ?? 0, notes: p["notes"]?.string ?? "",
-                        cover: abs(((p["hue"]?.int ?? 0) / 60) % 6), finishedAt: p["finishedAt"]?.string.flatMap(date))
+                        cover: abs(((p["hue"]?.int ?? 0) / 60) % 6), finishedAt: p["finishedAt"]?.string.flatMap(date),
+                        coverURL: p["coverUrl"]?.string, hue: p["hue"]?.int)
         }.sorted { $0.title.localizedCaseInsensitiveCompare($1.title) == .orderedAscending }
         let bookIDs = Set(snapshot.books.map(\.id))
         snapshot.sessions = try records.filter { $0.entityType == "reading_sessions" }.compactMap { r in
