@@ -4,6 +4,10 @@ Kaizen's roadmap connects public reviews to actionable issues, implementation pu
 
 [Review archive](docs/reviews/README.md) · [Open roadmap issues](https://github.com/calcuttin/Project-Kaizen/issues?q=is%3Aissue%20is%3Aopen%20label%3Aroadmap) · [AI-assisted work](https://github.com/calcuttin/Project-Kaizen/issues?q=is%3Aissue%20label%3Aai-assisted)
 
+## Kaizen Books icon / build 7 — 2026-11-10
+
+The maintainer selected the open-book mark inside Kaizen’s amber ring. The opaque 1024×1024 icon and its generator are ready; signed build **0.1.0 (7)** is being prepared for the existing Owner testing and External groups. [Release evidence and current status](docs/reviews/2026-11-10/ios-capabilities/release-build7.md). Apple processing, internal availability and external approval are tracked separately. Hosted backup/recovery remains deferred.
+
 ## External TestFlight build 6 — 2026-11-10
 
 Build **0.1.0 (6)** keeps build 5’s app implementation and adds external beta eligibility. The signed artifact passed verification and Apple accepted the upload at **4:15 p.m. Eastern**. [PR #65](https://github.com/calcuttin/Project-Kaizen/pull/65) records the configuration and [release status](docs/reviews/2026-11-10/ios-capabilities/release-build6.md). Beta contact/sign-in details and the test checklist are saved. Build 6 is **Waiting for Review** in the existing External group (1 tester / 1 build), submitted with **Automatically notify testers** enabled. Apple approval and external installation remain pending. Tester contacts and credentials stay private; no public link is being created. Hosted backup/recovery remains deferred.

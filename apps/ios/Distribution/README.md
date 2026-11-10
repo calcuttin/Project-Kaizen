@@ -11,7 +11,7 @@ This configuration prepares **Kaizen Books 0.1.0** (`org.projectkaizen.books`) f
 
 ## Archive and upload
 
-Select **KaizenBooks**, **Any iOS Device**, then **Product → Archive**. In Organizer choose **Distribute App → TestFlight Internal Only**. Use the configured distribution certificate/profile and include symbols. Increment `CURRENT_PROJECT_VERSION` for each upload (current source/upload: **6**; use **7** or higher for the next upload). Do not disable signing for this archive.
+Select **KaizenBooks**, **Any iOS Device**, then **Product → Archive**. In Organizer choose **Distribute App → TestFlight Internal Only**. Use the configured distribution certificate/profile and include symbols. Increment `CURRENT_PROJECT_VERSION` for each upload (current source: **7**; last upload: **6**; use **8** or higher after uploading build 7 for the next upload). Do not disable signing for this archive.
 
 Equivalent commands from the repository root after installing the approved distribution certificate and profile:
 
@@ -67,3 +67,7 @@ Record the uploaded version/build, Apple processing result and the physical-devi
 For the explicitly requested private external beta, use source build **6** and `ExportOptions-External.plist` in the same export command. That file sets `testFlightInternalTestingOnly` to false so the processed build can be submitted for beta review. Keep the existing internal export profile for owner-only releases. Use **7** or higher for a subsequent upload.
 
 Complete beta app/contact/sign-in information, add the build to the existing External group and submit for Apple’s beta review. Enable automatic tester notification for the requested group when submitting, then verify actual approval/availability; submission is not approval. Do not create a public link or add unrelated testers. Never commit tester contact information or review credentials. [Build 6 status and evidence](../../../docs/reviews/2026-11-10/ios-capabilities/release-build6.md). Hosted backup/recovery stays deferred.
+
+## Build 7: internal and external testing
+
+Build **0.1.0 (7)** introduces the approved Kaizen Books icon. Use `ExportOptions-External.plist` for this upload so the same signed build is eligible for both the existing **Owner testing** and **External** groups. Assign it explicitly to Owner testing after processing; retain manual internal distribution. Add it to External and submit for beta review when Apple permits, with automatic tester notification enabled. Reuse the saved private review information. [Build 7 evidence and checklist](../../../docs/reviews/2026-11-10/ios-capabilities/release-build7.md). Hosted backup/recovery remains deferred.
