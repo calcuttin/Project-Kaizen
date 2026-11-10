@@ -59,6 +59,9 @@ struct JournalView: View {
 }
 
 struct PreferencesView: View {
+    @AppStorage("shelfMotion") private var shelfMotion = true
+    @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
+    private var reduceMotion: Bool { ShelfMotionPolicy.reduced(systemReduceMotion) }
     @AppStorage("booksAppearance") private var appearance = "dark"
     @Environment(LibraryStore.self) private var store
     @Environment(\.dismiss) private var dismiss
@@ -74,6 +77,8 @@ struct PreferencesView: View {
                 if store.owner != nil { AccountPreferences() }
                 Section("Appearance") {
                     Picker("Theme", selection: $appearance) { Text("Dark · web default").tag("dark"); Text("Light").tag("light"); Text("System").tag("system") }
+                    Toggle("Ambient shelf motion", isOn: $shelfMotion).accessibilityIdentifier("shelf-motion")
+                    Text(reduceMotion ? "Reduce Motion is on. Shelf lighting and the solar system stay still." : "Gentle lighting and the solar system move while visible. Tap a solar system to pause it. Motion stops in the background and respects Reduce Motion.").font(.caption).foregroundStyle(.secondary)
                 }
                 Section("Book covers") {
                     OnlineCoverControls()

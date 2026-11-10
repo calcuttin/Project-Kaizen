@@ -4,7 +4,7 @@ final class BooksFlowTests: XCTestCase {
     override func setUpWithError() throws { continueAfterFailure = false }
     func testLogReadingPersistsAcrossRelaunch() {
         let app = XCUIApplication()
-        app.launchArguments = ["--ui-testing", "-onlineBookCovers", "NO"]
+        app.launchArguments = ["--ui-testing", "-shelfMotion", "NO", "-onlineBookCovers", "NO"]
         app.launch()
         app.tabBars.buttons["Reading"].tap()
         XCTAssertTrue(app.buttons["log-The Creative Act"].waitForExistence(timeout: 10))
@@ -15,7 +15,7 @@ final class BooksFlowTests: XCTestCase {
         app.buttons["save-progress"].tap()
         XCTAssertTrue(app.buttons["reading-The Creative Act"].waitForExistence(timeout: 5))
         app.terminate()
-        app.launchArguments = ["--ui-testing", "--keep-test-data", "-onlineBookCovers", "NO"]
+        app.launchArguments = ["--ui-testing", "-shelfMotion", "NO", "--keep-test-data", "-onlineBookCovers", "NO"]
         app.launch()
         app.tabBars.buttons["Reading"].tap()
         app.buttons["reading-The Creative Act"].tap()
@@ -24,7 +24,7 @@ final class BooksFlowTests: XCTestCase {
     }
     func testISBNLookupReviewsBeforeSaving() {
         let app = XCUIApplication()
-        app.launchArguments = ["--ui-testing", "--isbn-fixture", "-onlineBookCovers", "NO"]
+        app.launchArguments = ["--ui-testing", "-shelfMotion", "NO", "--isbn-fixture", "-onlineBookCovers", "NO"]
         app.launch()
         app.buttons["add-book"].tap()
         let isbn = app.textFields["book-isbn"]
@@ -53,7 +53,7 @@ final class BooksFlowTests: XCTestCase {
     }
     func testScannerFallbackAndInvalidISBNKeepManualEntry() {
         let app = XCUIApplication()
-        app.launchArguments = ["--ui-testing", "-onlineBookCovers", "NO"]
+        app.launchArguments = ["--ui-testing", "-shelfMotion", "NO", "-onlineBookCovers", "NO"]
         app.launch()
         app.buttons["add-book"].tap()
         let isbn = app.textFields["book-isbn"]
@@ -74,7 +74,7 @@ final class BooksFlowTests: XCTestCase {
     }
     func testAddSearchAndDeleteBook() {
         let app = XCUIApplication()
-        app.launchArguments = ["--ui-testing", "-onlineBookCovers", "NO"]
+        app.launchArguments = ["--ui-testing", "-shelfMotion", "NO", "-onlineBookCovers", "NO"]
         app.launch()
         app.buttons["add-book"].tap()
         let isbn = app.textFields["book-isbn"]
@@ -99,7 +99,7 @@ final class BooksFlowTests: XCTestCase {
     }
     func testHomeAndJournalScreens() {
         let app = XCUIApplication()
-        app.launchArguments = ["--ui-testing", "-onlineBookCovers", "NO"]
+        app.launchArguments = ["--ui-testing", "-shelfMotion", "NO", "-onlineBookCovers", "NO"]
         app.launch()
         app.tabBars.buttons["Reading"].tap()
         XCTAssertTrue(app.buttons["log-The Creative Act"].waitForExistence(timeout: 10))
@@ -113,7 +113,7 @@ final class BooksFlowTests: XCTestCase {
     }
     func testLargeTextReadingFlow() {
         let app = XCUIApplication()
-        app.launchArguments = ["--ui-testing", "-onlineBookCovers", "NO", "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL"]
+        app.launchArguments = ["--ui-testing", "-shelfMotion", "NO", "-onlineBookCovers", "NO", "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL"]
         app.launch()
         app.tabBars.buttons["Reading"].tap()
         let log = app.buttons["log-The Creative Act"]
@@ -133,7 +133,7 @@ final class BooksFlowTests: XCTestCase {
 
     func testWebStyleShelvesGridAndMarkRead() {
         let app = XCUIApplication()
-        app.launchArguments = ["--ui-testing", "-onlineBookCovers", "NO"]
+        app.launchArguments = ["--ui-testing", "-shelfMotion", "NO", "-onlineBookCovers", "NO"]
         app.launch()
         XCTAssertTrue(app.textFields["book-search"].waitForExistence(timeout: 10))
         let shelf = app.buttons["shelf-A Psalm for the Wild-Built"]
@@ -158,7 +158,7 @@ final class BooksFlowTests: XCTestCase {
 
     func testAppleIICommandsAndKeyboard() {
         let app = XCUIApplication()
-        app.launchArguments = ["--ui-testing", "-onlineBookCovers", "NO"]
+        app.launchArguments = ["--ui-testing", "-shelfMotion", "NO", "-onlineBookCovers", "NO"]
         app.launch()
         app.buttons["Open Apple II"].tap()
         XCTAssertTrue(app.staticTexts["APPLE II · KAIZEN EDITION"].waitForExistence(timeout: 5))
@@ -178,7 +178,7 @@ final class BooksFlowTests: XCTestCase {
 
     func testCreateStyleRenameAndRemoveEmptyShelf() {
         let app = XCUIApplication()
-        app.launchArguments = ["--ui-testing", "-onlineBookCovers", "NO"]
+        app.launchArguments = ["--ui-testing", "-shelfMotion", "NO", "-onlineBookCovers", "NO"]
         app.launch()
         let manage = app.buttons["Manage shelves"]
         for _ in 0..<4 { if manage.isHittable { break }; app.swipeUp() }
@@ -221,7 +221,7 @@ final class BooksFlowTests: XCTestCase {
 
     func testDailyGoalAndJournalNavigation() {
         let app = XCUIApplication()
-        app.launchArguments = ["--ui-testing", "-onlineBookCovers", "NO"]
+        app.launchArguments = ["--ui-testing", "-shelfMotion", "NO", "-onlineBookCovers", "NO"]
         app.launch(); app.tabBars.buttons["Journal"].tap(); app.buttons["Edit"].tap()
         let goal = app.textFields["daily-goal"]
         for _ in 0..<5 { if goal.exists && goal.isHittable { break }; app.swipeUp() }
@@ -237,7 +237,7 @@ final class BooksFlowTests: XCTestCase {
 
     func testImportPreviewDuplicateSkipAndUndo() {
         let app = XCUIApplication()
-        app.launchArguments = ["--ui-testing", "--import-fixture", "-onlineBookCovers", "NO"]
+        app.launchArguments = ["--ui-testing", "-shelfMotion", "NO", "--import-fixture", "-onlineBookCovers", "NO"]
         app.launch()
         let entry = app.buttons["Import books"]
         for _ in 0..<4 { if entry.isHittable { break }; app.swipeUp() }
@@ -257,7 +257,7 @@ final class BooksFlowTests: XCTestCase {
     }
     func testDeleteUndoReturnsBookAndProgress() {
         let app = XCUIApplication()
-        app.launchArguments = ["--ui-testing", "-onlineBookCovers", "NO"]
+        app.launchArguments = ["--ui-testing", "-shelfMotion", "NO", "-onlineBookCovers", "NO"]
         app.launch(); app.tabBars.buttons["Reading"].tap(); app.buttons["reading-The Creative Act"].tap()
         let delete = app.buttons["Delete book"]
         for _ in 0..<7 { if delete.isHittable { break }; app.swipeUp() }
@@ -267,6 +267,41 @@ final class BooksFlowTests: XCTestCase {
         for _ in 0..<7 { if book.isHittable { break }; app.swipeDown() }
         XCTAssertTrue(book.isHittable); book.tap()
         XCTAssertTrue(app.staticTexts["Page 146 of 432"].waitForExistence(timeout: 5))
+    }
+
+    func testReducedMotionKeepsSolarSystemStill() {
+        let app = XCUIApplication()
+        app.launchArguments = ["--ui-testing", "--reduce-motion-fixture", "-shelfMotion", "YES", "-onlineBookCovers", "NO"]
+        app.launch(); app.buttons["Preferences"].tap()
+        XCTAssertTrue(app.staticTexts["Reduce Motion is on. Shelf lighting and the solar system stay still."].waitForExistence(timeout: 5))
+        app.buttons["Cancel"].tap()
+        let manage = app.buttons["Manage shelves"]
+        for _ in 0..<4 { if manage.isHittable { break }; app.swipeUp() }
+        manage.tap(); app.buttons["Create shelf"].tap()
+        let name = app.textFields["shelf-name"]; name.tap(); name.typeText("Research")
+        let orrery = app.buttons["orrery-control"]
+        for _ in 0..<7 { if orrery.exists && orrery.isHittable { break }; app.swipeUp() }
+        XCTAssertTrue(orrery.exists); XCTAssertFalse(orrery.isEnabled); XCTAssertEqual(orrery.value as? String, "Still")
+        let proof = XCTAttachment(screenshot: app.screenshot()); proof.name = "Reduced-motion solar system"; proof.lifetime = .keepAlways; add(proof)
+    }
+
+    func testSolarSystemPlayPauseControl() {
+        let app = XCUIApplication()
+        app.launchArguments = ["--ui-testing", "-shelfMotion", "YES", "-onlineBookCovers", "NO"]
+        app.launch()
+        let manage = app.buttons["Manage shelves"]
+        for _ in 0..<4 { if manage.isHittable { break }; app.swipeUp() }
+        manage.tap(); app.buttons["Create shelf"].tap()
+        let name = app.textFields["shelf-name"]; name.tap(); name.typeText("Research")
+        let orrery = app.buttons["orrery-control"]
+        for _ in 0..<7 { if orrery.exists && orrery.isHittable { break }; app.swipeUp() }
+        XCTAssertTrue(orrery.isHittable); XCTAssertTrue(orrery.isEnabled)
+        XCTAssertEqual(orrery.value as? String, "Moving")
+        orrery.tap(); XCTAssertTrue(app.buttons["Play solar system"].waitForExistence(timeout: 5))
+        XCTAssertEqual(orrery.value as? String, "Still")
+        orrery.tap(); XCTAssertTrue(app.buttons["Pause solar system"].waitForExistence(timeout: 5))
+        XCTAssertEqual(orrery.value as? String, "Moving")
+        let proof = XCTAttachment(screenshot: app.screenshot()); proof.name = "Solar system playback"; proof.lifetime = .keepAlways; add(proof)
     }
 
 }

@@ -4,6 +4,10 @@ Kaizen's roadmap connects public reviews to actionable issues, implementation pu
 
 [Review archive](docs/reviews/README.md) · [Open roadmap issues](https://github.com/calcuttin/Project-Kaizen/issues?q=is%3Aissue%20is%3Aopen%20label%3Aroadmap) · [AI-assisted work](https://github.com/calcuttin/Project-Kaizen/issues?q=is%3Aissue%20label%3Aai-assisted)
 
+## Native capability PR stack — 2026-11-10
+
+The remaining source-level capabilities in [#56](https://github.com/calcuttin/Project-Kaizen/issues/56) now have implementations under review: **[#59 Apple II](https://github.com/calcuttin/Project-Kaizen/pull/59) → [#60 shelves](https://github.com/calcuttin/Project-Kaizen/pull/60) → [#61 reading/account tools](https://github.com/calcuttin/Project-Kaizen/pull/61) → [#62 imports/undo](https://github.com/calcuttin/Project-Kaizen/pull/62) → shelf motion**. [Motion and final validation](docs/reviews/2026-11-10/ios-capabilities/motion.md) · [Updated capability matrix](docs/reviews/2026-11-10/ios-capabilities/README.md). New features are not yet merged or released to TestFlight. Live sync, external Files providers, physical camera/VoiceOver/hardware keyboard acceptance and Apple II checkerboard-art cleanup stay open. Hosted backup/recovery remains deferred.
+
 ## Native import and undo follow-up — 2026-11-10
 
 CSV/Goodreads and Kindle file previews, duplicate handling, explicit book matching, local/shared annotations and guarded import undo are implemented for [#56](https://github.com/calcuttin/Project-Kaizen/issues/56). Book deletion also offers immediate undo with full cloud metadata and tombstone-aware restoration. [Review and validation](docs/reviews/2026-11-10/ios-capabilities/imports-undo.md). This follows reading PR #61 after #59 and #60. External file-provider and physical acceptance remain open. Hosted backup/recovery stays deferred.
