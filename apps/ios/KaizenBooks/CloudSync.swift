@@ -220,6 +220,7 @@ enum LibraryCloudMapping {
                         coverURL: p["coverUrl"]?.string, hue: p["hue"]?.int, shelfID: p["shelfId"]?.string)
         }.sorted { $0.title.localizedCaseInsensitiveCompare($1.title) == .orderedAscending }
         let bookIDs = Set(snapshot.books.map(\.id))
+        snapshot.importedAnnotations = records.filter { $0.entityType == "reading_annotations" && bookIDs.contains($0.payload?["bookId"]?.string ?? "") }
         snapshot.sessions = try records.filter { $0.entityType == "reading_sessions" }.compactMap { r in
             let p = r.payload!
             guard let book = p["bookId"]?.string, let raw = p["date"]?.string, let when = date(raw), let pages = p["pages"]?.int, pages > 0 else { throw CloudError.invalidResponse }
@@ -270,10 +271,11 @@ enum LibraryCloudMapping {
             if previous?.rating != book.rating { p["rating"] = book.rating == 0 ? nil : .number(Double(book.rating)) }
             if previous?.cover != book.cover && previous != nil { p["hue"] = .number(Double(book.cover * 60)) }
             if previous?.finishedAt != book.finishedAt { p["finishedAt"] = book.finishedAt.map { .string(day($0)) } }
-            if previous?.title != book.title || previous?.author != book.author || previous?.isbn != book.isbn {
+            if previous != nil && (previous?.title != book.title || previous?.author != book.author || previous?.isbn != book.isbn) {
                 p.removeValue(forKey: "coverUrl"); p["coverUnavailable"] = .bool(false)
             }
-            if previous?.shelfID != book.shelfID { p["shelfId"] = book.shelfID.map(JSONValue.string) }
+            if previous?.coverURL != book.coverURL { p["coverUrl"] = book.coverURL.map(JSONValue.string) }
+            if previous == nil || previous?.shelfID != book.shelfID { p["shelfId"] = book.shelfID.map(JSONValue.string) }
             cloud.enqueue(type: "books", id: book.id, payload: p)
         }
         let shelfIDs = Set((after.shelfAppearances ?? []).map(\.id))
@@ -287,7 +289,17 @@ enum LibraryCloudMapping {
         }
         let oldSessions = Set(before.sessions.map(\.id))
         for s in after.sessions where !oldSessions.contains(s.id) {
-            cloud.enqueue(type: "reading_sessions", id: s.id, payload: ["id": .string(s.id), "bookId": .string(s.bookID), "date": .string(day(s.date)), "pages": .number(Double(s.pages))])
+            var payload = cloud.visible["reading_sessions:\(s.id)"]?.payload ?? [:]
+            payload["id"] = .string(s.id); payload["bookId"] = .string(s.bookID); payload["date"] = .string(day(s.date)); payload["pages"] = .number(Double(s.pages))
+            cloud.enqueue(type: "reading_sessions", id: s.id, payload: payload)
+        }
+        let oldAnnotations = Dictionary(uniqueKeysWithValues: (before.importedAnnotations ?? []).map { ($0.entityId, $0) })
+        for annotation in after.importedAnnotations ?? [] where oldAnnotations[annotation.entityId]?.payload != annotation.payload {
+            cloud.enqueue(type: "reading_annotations", id: annotation.entityId, payload: annotation.payload)
+        }
+        let annotationIDs = Set((after.importedAnnotations ?? []).map(\.entityId))
+        for annotation in before.importedAnnotations ?? [] where !annotationIDs.contains(annotation.entityId) && remaining.contains(annotation.payload?["bookId"]?.string ?? "") {
+            cloud.enqueue(type: "reading_annotations", id: annotation.entityId, payload: nil)
         }
         if before.yearlyGoal != after.yearlyGoal || before.goalEnabled != after.goalEnabled || before.pagesPerDay != after.pagesPerDay {
             let year = Calendar.current.component(.year, from: Date())

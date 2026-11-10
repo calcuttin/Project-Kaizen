@@ -193,6 +193,33 @@ private final class CoverProtocol: URLProtocol, @unchecked Sendable {
         XCTAssertTrue(record.annotationContext.contains("Page 12")); XCTAssertTrue(record.annotationContext.contains("Location 140-150")); XCTAssertTrue(record.annotationContext.contains("Kindle clippings"))
         XCTAssertFalse(record.annotationContext.contains("T12:00"))
     }
+    func testSharedDeleteUndoRestoresMetadataAfterTombstoneAcknowledgement() async throws {
+        let store = LibraryStore.account(owner: "undo", base: base()), transport = FakeTransport()
+        let annotation: Payload = ["id": .string("note"), "bookId": .string("web_nanoid-123"), "kind": .string("note"), "content": .string("A note"), "sourceRef": .string("keep-ref")]
+        let session: Payload = ["id": .string("session"), "bookId": .string("web_nanoid-123"), "pages": .number(10), "date": .string("2026-11-01"), "future": .bool(true)]
+        transport.changes = [change("shelves", "web-shelf", ["name": .string("Study")]), change("books", "web_nanoid-123", book(), seq: 2), change("reading_annotations", "note", annotation, seq: 3), change("reading_sessions", "session", session, seq: 4)]
+        store.connect(transport); await store.syncNow()
+        XCTAssertTrue(store.delete("web_nanoid-123")); await store.syncNow()
+        XCTAssertNil(store.library.cloud?.records["books:web_nanoid-123"]?.payload)
+        XCTAssertTrue(store.undoDelete()); await store.syncNow()
+        XCTAssertEqual(store.book("web_nanoid-123")?.coverURL, "https://example.com/cover.jpg")
+        XCTAssertEqual(store.library.cloud?.visible["books:web_nanoid-123"]?.payload?["futureField"], book()["futureField"])
+        XCTAssertEqual(store.library.cloud?.visible["reading_sessions:session"]?.payload?["future"], .bool(true))
+        XCTAssertEqual(store.annotations.first?.payload?["sourceRef"], .string("keep-ref"))
+        XCTAssertEqual(store.pendingCount, 0)
+    }
+    func testCloudImportUndoQueuesOnlyCreatedRecordsAndProtectsNewEdits() async throws {
+        let store = LibraryStore.account(owner: "import-undo", base: base()), transport = FakeTransport()
+        store.connect(transport); await store.syncNow()
+        let preview = try LibraryImports.parse("Title,Author,Pages,Shelf\nImported,Reader,90,Study", kind: .csv)
+        XCTAssertTrue(store.importPreview(preview, choices: [:])); await store.syncNow()
+        XCTAssertEqual(store.library.books.count, 1); XCTAssertTrue(store.undoImport()); await store.syncNow()
+        XCTAssertTrue(store.library.books.isEmpty); XCTAssertTrue(store.shelves.isEmpty)
+        XCTAssertTrue(transport.changes.filter { $0.operation == "delete" }.count == 2)
+        XCTAssertTrue(store.importPreview(preview, choices: [:])); await store.syncNow()
+        var edited = try XCTUnwrap(store.library.books.first); edited.notes = "Later note"; XCTAssertTrue(store.save(edited))
+        XCTAssertFalse(store.undoImport()); XCTAssertEqual(store.book(edited.id)?.notes, "Later note")
+    }
     func testWebPayloadAndShelfMetadataSurviveNativeEdit() throws {
         var cloud = CloudState(owner: "user_test")
         let shelf: Payload = ["name": .string("Study"), "cabinet": .object(["style": .string("walnut")])]
@@ -365,7 +392,7 @@ private final class CoverProtocol: URLProtocol, @unchecked Sendable {
         var cloud = CloudState(owner: "user_delete")
         try cloud.apply([change("books", "web_nanoid-123", book()),
                          change("reading_sessions", "session", ["bookId": .string("web_nanoid-123"), "date": .string("2026-11-08"), "pages": .number(10)], seq: 2),
-                         change("reading_annotations", "note", ["bookId": .string("web_nanoid-123"), "content": .string("Saved note")], seq: 3)])
+                         change("reading_annotations", "note", ["bookId": .string("web_nanoid-123"), "kind": .string("note"), "content": .string("Saved note")], seq: 3)])
         var before = LibrarySnapshot(); try LibraryCloudMapping.project(cloud, onto: &before)
         var after = before; after.books = []; after.sessions = []
         LibraryCloudMapping.stage(before: before, after: after, cloud: &cloud)
