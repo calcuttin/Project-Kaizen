@@ -4,9 +4,9 @@ Kaizen's roadmap connects public reviews to actionable issues, implementation pu
 
 [Review archive](docs/reviews/README.md) · [Open roadmap issues](https://github.com/calcuttin/Project-Kaizen/issues?q=is%3Aissue%20is%3Aopen%20label%3Aroadmap) · [AI-assisted work](https://github.com/calcuttin/Project-Kaizen/issues?q=is%3Aissue%20label%3Aai-assisted)
 
-## Native capability PR stack — 2026-11-10
+## Native capability build 5 — 2026-11-10
 
-The remaining source-level capabilities in [#56](https://github.com/calcuttin/Project-Kaizen/issues/56) now have implementations under review: **[#59 Apple II](https://github.com/calcuttin/Project-Kaizen/pull/59) → [#60 shelves](https://github.com/calcuttin/Project-Kaizen/pull/60) → [#61 reading/account tools](https://github.com/calcuttin/Project-Kaizen/pull/61) → [#62 imports/undo](https://github.com/calcuttin/Project-Kaizen/pull/62) → shelf motion**. [Motion and final validation](docs/reviews/2026-11-10/ios-capabilities/motion.md) · [Updated capability matrix](docs/reviews/2026-11-10/ios-capabilities/README.md). New features are not yet merged or released to TestFlight. Live sync, external Files providers, physical camera/VoiceOver/hardware keyboard acceptance and Apple II checkerboard-art cleanup stay open. Hosted backup/recovery remains deferred.
+[#59 Apple II](https://github.com/calcuttin/Project-Kaizen/pull/59), [#60 shelves](https://github.com/calcuttin/Project-Kaizen/pull/60), [#61 reading/account tools](https://github.com/calcuttin/Project-Kaizen/pull/61), [#62 imports/undo](https://github.com/calcuttin/Project-Kaizen/pull/62) and [#63 shelf motion](https://github.com/calcuttin/Project-Kaizen/pull/63) merged in order after all reported checks passed. Final main revision is `4c6d33e`; its native tree matches the source validated by 51 model tests and 14 simulator flows. Signed **0.1.0 (5)** passed artifact verification and Apple accepted the upload. [Release status and phone checklist](docs/reviews/2026-11-10/ios-capabilities/release-build5.md) · [Capability matrix](docs/reviews/2026-11-10/ios-capabilities/README.md). Live sync, external Files providers, physical camera/VoiceOver/hardware keyboard/Reduce Motion acceptance and Apple II checkerboard-art cleanup stay open in #49/#56. Hosted backup/recovery remains deferred.
 
 ## Native import and undo follow-up — 2026-11-10
 

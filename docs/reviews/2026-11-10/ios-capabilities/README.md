@@ -6,9 +6,9 @@
 - **Baseline:** released iPhone 0.1.0 (3), main `b602d66`; scanner follow-up is released as build 4 (see the [release record](release.md)).
 - **Attribution:** AI-assisted source comparison and implementation by Codex at the maintainer's request. The maintainer confirmed that covers work on their physical iPhone; that does not establish scanner, full sync or VoiceOver acceptance.
 
-## Implementation follow-up under review
+## Implementation follow-up merged
 
-The gap matrix below describes the released build-4 baseline. Native follow-up implementations are now in a dependent PR stack; none of these feature PRs is a TestFlight release:
+The gap matrix below describes the released build-4 baseline. Native follow-up PRs #59–63 merged in order after all reported checks passed. Build 5 distribution and phone acceptance are recorded in the [release record](release-build5.md):
 
 | Capability | Implementation / evidence |
 | --- | --- |
@@ -16,9 +16,9 @@ The gap matrix below describes the released build-4 baseline. Native follow-up i
 | Stable-ID shelves, empty/duplicate names, CRUD/reorder and cabinet controls | [#60](https://github.com/calcuttin/Project-Kaizen/pull/60) · [Review](shelves.md) |
 | Paused Reading, daily goals, journal navigation/totals, annotation context, account/data-tool handoffs | [#61](https://github.com/calcuttin/Project-Kaizen/pull/61) · [Review](reading.md) |
 | CSV/Goodreads/Kindle previews, matching/duplicates, guarded import and book-delete undo | [#62](https://github.com/calcuttin/Project-Kaizen/pull/62) · [Review](imports-undo.md) |
-| Orrery play/pause, ambient motion, Reduce Motion/visibility/background handling | [Motion implementation and final validation](motion.md) |
+| Orrery play/pause, ambient motion, Reduce Motion/visibility/background handling | [#63](https://github.com/calcuttin/Project-Kaizen/pull/63) · [Motion implementation and final validation](motion.md) |
 
-Merge in the table’s order. #56 remains open for release, live feature sync, external Files providers, physical camera/VoiceOver/hardware keyboard acceptance and the newly observed Apple II sprite checkerboard cleanup. Generated artwork replacements failed visual review and were not included. Hosted backup/recovery stays deferred.
+Merged in the table’s order. #56 remains open for live feature sync, external Files providers, physical camera/VoiceOver/hardware keyboard acceptance and the newly observed Apple II sprite checkerboard cleanup. Generated artwork replacements failed visual review and were not included. Hosted backup/recovery stays deferred.
 
 ## Capability matrix
 
