@@ -127,6 +127,7 @@ struct BookshelfView: View {
     @State private var status: ReadingStatus?
     @State private var shelf = ""
     @State private var adding = false
+    @State private var terminal = false
     @State private var settings = false
     @State private var grid = false
     @State private var markMode = false
@@ -245,8 +246,10 @@ struct BookshelfView: View {
                 ToolbarItem(placement: .principal) {
                     HStack(spacing: 8) { Image("kaizen-mark").resizable().frame(width: 24, height: 24); Text("Kaizen").font(BooksTheme.display(20)) }
                 }
+                ToolbarItem(placement: .topBarLeading) { Button("Open Apple II", systemImage: "desktopcomputer") { terminal = true } }
                 ToolbarItem(placement: .topBarTrailing) { Button("Preferences", systemImage: "gearshape") { settings = true } }
             }
+            .sheet(isPresented: $terminal) { RetroTerminal() }
             .sheet(isPresented: $adding) { BookEditor() }
             .sheet(isPresented: $settings) { PreferencesView() }
             .navigationDestination(item: $selected) { id in BookDetailView(id: id) }
