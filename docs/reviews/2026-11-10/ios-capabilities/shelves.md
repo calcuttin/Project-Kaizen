@@ -1,0 +1,15 @@
+# Native shelf management with stable IDs
+
+Review ID: **REV-2026-11-10-IOS-SHELVES** · Related: [#56](https://github.com/calcuttin/Project-Kaizen/issues/56). Depends on Apple II [PR #59](https://github.com/calcuttin/Project-Kaizen/pull/59).
+
+Codex implemented this follow-up at the maintainer’s request. Manage shelves creates, renames, removes and reorders shelves, including empty shelves. The editor offers the web themes and cabinet objects, layout, lighting and brightness, with a live preview. The computer in the preview opens the Apple II. Removing a shelf keeps its books, notes and sessions in Unshelved.
+
+Book selection, filtering and shelf grouping use stable IDs. Duplicate names are separate shelves and appear with numbered labels in native menus. The legacy local name-only cache gains deterministic shelf IDs in memory and saves them on the next mutation; reading alone leaves the original file untouched. Shared records use their existing IDs. Local-to-account import remaps local shelf IDs and carries styling rather than attaching books to an unrelated same-name cloud shelf.
+
+Cloud staging emits independent shelf mutations, including empty shelves and deletion tombstones. Renaming a shelf does not rewrite every book. Book moves retain the full existing book payload. Shelf edits retain unrecognized top-level fields and cabinet fields; the editor changes only the cabinet keys touched by the user. Stale shelf saves/removals and book edits referencing a removed shelf fail without resurrecting the shelf. Account caches remain separate and the existing conflict/outbox mechanism handles concurrent shared edits.
+
+Validation: **39 native model tests passed**, including new duplicate/empty shelf identity, web metadata preservation, rename without book writes, removal with book/session retention, stale-edit rejection, migration and reorder coverage. The prior migration test was updated to allow in-memory shelf IDs while continuing to assert that opening a legacy file does not rewrite it. **9 distinct simulator UI tests passed** across the regression and targeted runs, including create/style/rename/remove of an empty shelf and opening its actual computer button. The new UI test needed picker labels and navigation-scoped Done selectors corrected; no app failure was found in those test failures. The expanded local-import test also verifies distinct remapped shelf identity and styling. Generic-iPhone Release compilation succeeded. [Cabinet editor screenshot](shelves.png).
+
+No live personal library was edited. Shared-payload and offline tests use synthetic records; live two-device shelf sync and spoken VoiceOver remain acceptance checks. These changes are not yet released through TestFlight. **Hosted backup/recovery remains deferred.**
+
+Screenshot review also found a pre-existing baked checkerboard behind the Apple II sprite. Three generated transparent cutouts still had visible edge artifacts and were rejected; no generated replacement is included. Artwork cleanup remains tracked in #56 separately from the working computer interaction.

@@ -217,7 +217,7 @@ enum LibraryCloudMapping {
                         shelf: shelves[p["shelfId"]?.string ?? ""] ?? "", isbn: p["isbn"]?.string ?? "",
                         rating: p["rating"]?.int ?? 0, notes: p["notes"]?.string ?? "",
                         cover: abs(((p["hue"]?.int ?? 0) / 60) % 6), finishedAt: p["finishedAt"]?.string.flatMap(date),
-                        coverURL: p["coverUrl"]?.string, hue: p["hue"]?.int)
+                        coverURL: p["coverUrl"]?.string, hue: p["hue"]?.int, shelfID: p["shelfId"]?.string)
         }.sorted { $0.title.localizedCaseInsensitiveCompare($1.title) == .orderedAscending }
         let bookIDs = Set(snapshot.books.map(\.id))
         snapshot.sessions = try records.filter { $0.entityType == "reading_sessions" }.compactMap { r in
@@ -234,9 +234,25 @@ enum LibraryCloudMapping {
     }
     static func stage(before: LibrarySnapshot, after: LibrarySnapshot, cloud: inout CloudState) {
         let stamp = ISO8601DateFormatter().string(from: Date())
+        let oldShelves = Dictionary(uniqueKeysWithValues: (before.shelfAppearances ?? []).map { ($0.id, $0) })
+        for shelf in after.shelfAppearances ?? [] where oldShelves[shelf.id] != shelf {
+            let previous = oldShelves[shelf.id]
+            var p = cloud.visible["shelves:\(shelf.id)"]?.payload ?? ["id": .string(shelf.id), "createdAt": .string(stamp)]
+            if previous?.name != shelf.name { p["name"] = .string(shelf.name) }
+            if previous?.order != shelf.order { p["order"] = .number(Double(shelf.order)) }
+            if previous?.theme != shelf.theme { p["theme"] = shelf.theme.map(JSONValue.string) }
+            if previous?.objects != shelf.objects { p["objects"] = shelf.objects.map { .array($0.map(JSONValue.string)) } }
+            if previous?.cabinet != shelf.cabinet { p["cabinet"] = shelf.cabinet }
+            p["updatedAt"] = .string(stamp)
+            cloud.enqueue(type: "shelves", id: shelf.id, payload: p)
+        }
         let old = Dictionary(uniqueKeysWithValues: before.books.map { ($0.id, $0) })
-        for book in after.books where old[book.id] != book {
+        for book in after.books {
             let previous = old[book.id]
+            var comparable = previous
+            // Names are display caches; a rename must not rewrite every book's cloud record.
+            if comparable?.shelfID == book.shelfID { comparable?.shelf = book.shelf }
+            if comparable == book { continue }
             var p = cloud.visible["books:\(book.id)"]?.payload ?? ["id": .string(book.id), "createdAt": .string(stamp), "tags": .array([]), "hue": .number(Double(book.cover * 60))]
             p["updatedAt"] = .string(stamp)
             if previous?.title != book.title { p["title"] = .string(book.title) }
@@ -256,18 +272,12 @@ enum LibraryCloudMapping {
             if previous?.title != book.title || previous?.author != book.author || previous?.isbn != book.isbn {
                 p.removeValue(forKey: "coverUrl"); p["coverUnavailable"] = .bool(false)
             }
-            if previous?.shelf != book.shelf {
-                if book.shelf.isEmpty { p.removeValue(forKey: "shelfId") }
-                else {
-                    let matching = cloud.visible.values.filter { $0.entityType == "shelves" && $0.payload?["name"]?.string == book.shelf }.sorted { $0.entityId < $1.entityId }.first
-                    let id = matching?.entityId ?? UUID().uuidString
-                    if matching == nil {
-                        cloud.enqueue(type: "shelves", id: id, payload: ["id": .string(id), "name": .string(book.shelf), "order": .number(Double(cloud.visible.values.filter { $0.entityType == "shelves" }.count)), "createdAt": .string(stamp), "updatedAt": .string(stamp)])
-                    }
-                    p["shelfId"] = .string(id)
-                }
-            }
+            if previous?.shelfID != book.shelfID { p["shelfId"] = book.shelfID.map(JSONValue.string) }
             cloud.enqueue(type: "books", id: book.id, payload: p)
+        }
+        let shelfIDs = Set((after.shelfAppearances ?? []).map(\.id))
+        for shelf in before.shelfAppearances ?? [] where !shelfIDs.contains(shelf.id) {
+            cloud.enqueue(type: "shelves", id: shelf.id, payload: nil)
         }
         let remaining = Set(after.books.map(\.id))
         for book in before.books where !remaining.contains(book.id) {

@@ -6,7 +6,7 @@ Kaizen's roadmap connects public reviews to actionable issues, implementation pu
 
 ## Native Apple II and shelf follow-up — 2026-11-10
 
-Work is progressing through [#56](https://github.com/calcuttin/Project-Kaizen/issues/56). The native Apple II implementation adds a labeled shelf control and toolbar shortcut, a bounded BASIC interpreter, demo/help/catalog commands and command history. [Review and validation](docs/reviews/2026-11-10/ios-capabilities/apple-ii.md). Stable-ID shelf management is next. Implementation, merge/release and physical-device acceptance are tracked separately. Hosted backup/recovery stays deferred.
+Work is progressing through [#56](https://github.com/calcuttin/Project-Kaizen/issues/56). The native Apple II implementation adds a labeled shelf control and toolbar shortcut, a bounded BASIC interpreter, demo/help/catalog commands and command history. [Review and validation](docs/reviews/2026-11-10/ios-capabilities/apple-ii.md). Stable-ID shelf management now adds empty/same-name shelves, create/rename/remove/reorder and cabinet appearance controls. [Shelf review and validation](docs/reviews/2026-11-10/ios-capabilities/shelves.md). Apple II is [PR #59](https://github.com/calcuttin/Project-Kaizen/pull/59); the shelf PR depends on it. Implementation, merge/release and physical-device acceptance are tracked separately. Hosted backup/recovery stays deferred.
 
 ## Native capability review and ISBN quick add — 2026-11-10
 

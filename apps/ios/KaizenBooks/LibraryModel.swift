@@ -30,6 +30,7 @@ struct Book: Identifiable, Codable, Equatable {
     var finishedAt: Date?
     var coverURL: String?
     var hue: Int?
+    var shelfID: String?
     var progress: Double { Double(currentPage) / Double(max(1, pages)) }
 }
 
@@ -62,8 +63,26 @@ struct LibrarySnapshot: Codable {
         return Self(books: books, sessions: [ReadingSession(bookID: books[0].id, date: now, pages: 24), ReadingSession(bookID: books[1].id, date: now.addingTimeInterval(-86400), pages: 18)], goalEnabled: true, isDemo: true)
     }
 
+    /// Upgrade name-only local books deterministically; persist IDs on the next mutation.
+    mutating func migrateShelves() {
+        var shelves = shelfAppearances ?? []
+        for i in books.indices {
+            if let id = books[i].shelfID {
+                books[i].shelf = shelves.first { $0.id == id }?.name ?? ""
+            } else if !books[i].shelf.isEmpty {
+                let name = books[i].shelf
+                let id: String
+                if let existing = shelves.first(where: { $0.name == name }) { id = existing.id }
+                else { id = "local-shelf-" + SHA256.hash(data: Data(name.utf8)).prefix(16).map { String(format: "%02x", $0) }.joined(); shelves.append(ShelfAppearance(id: id, name: name, order: shelves.count)) }
+                books[i].shelfID = id
+            }
+        }
+        shelfAppearances = shelves
+    }
+
     func validated() throws -> Self {
-        guard version == 1, (1...500).contains(yearlyGoal), Set(books.map(\.id)).count == books.count,
+        guard Set((shelfAppearances ?? []).map(\.id)).count == (shelfAppearances ?? []).count,
+              version == 1, (1...500).contains(yearlyGoal), Set(books.map(\.id)).count == books.count,
               books.allSatisfy({ !$0.title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && (1...100_000).contains($0.pages) && (0...$0.pages).contains($0.currentPage) && (0...5).contains($0.rating) && (0...5).contains($0.cover) }),
               sessions.allSatisfy({ $0.pages > 0 }),
               Set(sessions.map(\.id)).count == sessions.count else {
@@ -76,9 +95,10 @@ struct LibrarySnapshot: Codable {
 }
 
 enum LibraryError: LocalizedError {
-    case invalidData, invalidProgress, staleEdit
+    case invalidData, invalidProgress, staleEdit, staleShelf
     var errorDescription: String? {
         switch self {
+        case .staleShelf: "This shelf changed or was removed while you were editing. Reopen it to use the latest version; your draft has not replaced it."
         case .invalidData: "The library contains invalid book details. Check the title and page count."
         case .invalidProgress: "Enter a page after your current page, up to the last page of the book."
         case .staleEdit: "This book changed or was deleted while you were editing. Your draft has not replaced it. Copy any notes you want to keep, then reopen the editor with the latest book."
@@ -114,8 +134,11 @@ enum LibraryError: LocalizedError {
         do {
             if FileManager.default.fileExists(atPath: fileURL.path) {
                 library = try JSONDecoder().decode(LibrarySnapshot.self, from: Data(contentsOf: fileURL)).validated()
+                if let cloud = library.cloud { try LibraryCloudMapping.project(cloud, onto: &library) }
+                else { library.migrateShelves() }
             } else {
                 library = demo ? .demo() : LibrarySnapshot()
+                library.migrateShelves()
                 try write(library)
             }
         } catch {
@@ -249,11 +272,22 @@ enum LibraryError: LocalizedError {
         return commit { next in
             let existing = Set(next.books.map { "\($0.title.trimmingCharacters(in: .whitespacesAndNewlines).lowercased())|\($0.author.trimmingCharacters(in: .whitespacesAndNewlines).lowercased())" })
             var imported: [String: String] = [:]
+            var importedShelves: [String: String] = [:]
             var seen = existing
             for var book in source.books {
                 let identity = "\(book.title.trimmingCharacters(in: .whitespacesAndNewlines).lowercased())|\(book.author.trimmingCharacters(in: .whitespacesAndNewlines).lowercased())"
                 guard seen.insert(identity).inserted else { continue }
                 let original = book.id; book.id = UUID().uuidString; imported[original] = book.id
+                if !book.shelf.isEmpty || book.shelfID != nil {
+                    let sourceKey = book.shelfID ?? book.shelf
+                    if let id = importedShelves[sourceKey] { book.shelfID = id }
+                    else {
+                        var shelf = source.shelfAppearances?.first { $0.id == book.shelfID } ?? ShelfAppearance(id: sourceKey, name: book.shelf)
+                        shelf.id = UUID().uuidString; shelf.order = (next.shelfAppearances?.map(\.order).max() ?? -1) + 1
+                        next.shelfAppearances = (next.shelfAppearances ?? []) + [shelf]
+                        importedShelves[sourceKey] = shelf.id; book.shelfID = shelf.id
+                    }
+                }
                 next.books.append(book)
             }
             for var session in source.sessions {
@@ -265,7 +299,46 @@ enum LibraryError: LocalizedError {
     }
 
     var reading: [Book] { library.books.filter { $0.status == .reading } }
-    var shelves: [String] { Array(Set(library.books.map(\.shelf).filter { !$0.isEmpty })).sorted() }
+    var shelves: [ShelfAppearance] { (library.shelfAppearances ?? []).sorted { $0.order == $1.order ? $0.id < $1.id : $0.order < $1.order } }
+    func shelfLabel(_ shelf: ShelfAppearance) -> String {
+        let matches = shelves.filter { $0.name == shelf.name }
+        return matches.count > 1 ? "\(shelf.name) · \((matches.firstIndex { $0.id == shelf.id } ?? 0) + 1)" : shelf.name
+    }
+    @discardableResult func saveShelf(_ shelf: ShelfAppearance, replacing expected: ShelfAppearance? = nil) -> Bool {
+        commit { snapshot in
+            var clean = shelf; clean.name = shelf.name.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !clean.name.isEmpty, clean.name.count <= 120 else { throw LibraryError.invalidData }
+            if let expected, snapshot.shelfAppearances?.first(where: { $0.id == expected.id }) != expected { throw LibraryError.staleShelf }
+            if let i = snapshot.shelfAppearances?.firstIndex(where: { $0.id == clean.id }) { snapshot.shelfAppearances?[i] = clean }
+            else {
+                guard expected == nil else { throw LibraryError.staleShelf }
+                clean.order = (snapshot.shelfAppearances?.map(\.order).max() ?? -1) + 1
+                snapshot.shelfAppearances = (snapshot.shelfAppearances ?? []) + [clean]
+            }
+            for i in snapshot.books.indices where snapshot.books[i].shelfID == clean.id { snapshot.books[i].shelf = clean.name }
+        }
+    }
+    @discardableResult func removeShelf(_ expected: ShelfAppearance) -> Bool {
+        commit { snapshot in
+            guard snapshot.shelfAppearances?.first(where: { $0.id == expected.id }) == expected else { throw LibraryError.staleShelf }
+            for i in snapshot.books.indices where snapshot.books[i].shelfID == expected.id {
+                snapshot.books[i].shelfID = nil; snapshot.books[i].shelf = ""
+            }
+            snapshot.shelfAppearances?.removeAll { $0.id == expected.id }
+        }
+    }
+    @discardableResult func moveShelves(from offsets: IndexSet, to destination: Int) -> Bool {
+        let current = shelves
+        guard destination >= 0, destination <= current.count, offsets.allSatisfy({ current.indices.contains($0) }) else { return false }
+        let moving = offsets.sorted().map { current[$0] }
+        var reordered = current.enumerated().filter { !offsets.contains($0.offset) }.map(\.element)
+        reordered.insert(contentsOf: moving, at: destination - offsets.filter { $0 < destination }.count)
+        return commit { snapshot in
+            guard (snapshot.shelfAppearances ?? []).sorted(by: { $0.order == $1.order ? $0.id < $1.id : $0.order < $1.order }) == current else { throw LibraryError.staleShelf }
+            for i in reordered.indices { reordered[i].order = i }
+            snapshot.shelfAppearances = reordered
+        }
+    }
     var finishedThisYear: Int {
         library.books.filter { $0.status == .finished && $0.finishedAt.map { Calendar.current.isDate($0, equalTo: Date(), toGranularity: .year) } == true }.count
     }
@@ -281,6 +354,16 @@ enum LibraryError: LocalizedError {
             clean.title = book.title.trimmingCharacters(in: .whitespacesAndNewlines)
             clean.author = book.author.trimmingCharacters(in: .whitespacesAndNewlines)
             clean.shelf = book.shelf.trimmingCharacters(in: .whitespacesAndNewlines)
+            if let id = clean.shelfID {
+                guard let shelf = snapshot.shelfAppearances?.first(where: { $0.id == id }) else { throw LibraryError.staleShelf }
+                clean.shelf = shelf.name
+            } else if !clean.shelf.isEmpty {
+                if let shelf = snapshot.shelfAppearances?.first(where: { $0.name == clean.shelf }) { clean.shelfID = shelf.id }
+                else {
+                    let shelf = ShelfAppearance(id: UUID().uuidString, name: clean.shelf, order: (snapshot.shelfAppearances?.map(\.order).max() ?? -1) + 1)
+                    clean.shelfID = shelf.id; snapshot.shelfAppearances = (snapshot.shelfAppearances ?? []) + [shelf]
+                }
+            }
             if let old = snapshot.books.first(where: { $0.id == book.id }),
                old.title != clean.title || old.author != clean.author || old.isbn != clean.isbn {
                 clean.coverURL = nil

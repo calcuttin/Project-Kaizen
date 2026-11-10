@@ -178,13 +178,12 @@ struct BookEditor: View {
                     TextField("Total pages", text: $pages).keyboardType(.numberPad).accessibilityIdentifier("book-pages")
                 }
                 Section {
-                    TextField("Shelf name (optional)", text: $shelf)
-                    if !store.shelves.isEmpty {
-                        Menu("Choose an existing shelf") {
-                            ForEach(store.shelves, id: \.self) { name in Button(name) { shelf = name } }
-                            Button("No shelf") { shelf = "" }
-                        }
-                    }
+                    Picker("Shelf", selection: $shelf) {
+                        Text("Unshelved").tag("")
+                        ForEach(store.shelves) { item in Text(store.shelfLabel(item)).tag(item.id) }
+                        if !shelf.isEmpty && !store.shelves.contains(where: { $0.id == shelf }) { Text("Shelf removed — choose another").tag(shelf) }
+                    }.accessibilityIdentifier("book-shelf")
+                    Text("Create or edit shelves from Manage shelves on Bookshelf.").font(.caption).foregroundStyle(.secondary)
                     Picker("Cover color", selection: $cover) {
                         ForEach(Array(["Sand", "Forest", "Terracotta", "Ocean", "Ochre", "Twilight"].enumerated()), id: \.offset) { i, name in Text(name).tag(i) }
                     }
@@ -199,7 +198,7 @@ struct BookEditor: View {
                 }
                 .onAppear {
                     guard !initialized else { return }; initialized = true; baseline = existing
-                    if let existing { title = existing.title; author = existing.author; pages = String(existing.pages); isbn = existing.isbn; shelf = existing.shelf; cover = existing.cover }
+                    if let existing { title = existing.title; author = existing.author; pages = String(existing.pages); isbn = existing.isbn; shelf = existing.shelfID ?? ""; cover = existing.cover }
                 }
                 .onChange(of: isbn) { _, _ in lookup.cancel(); appliedLookup = nil }
                 .onDisappear { lookup.cancel() }
@@ -209,7 +208,7 @@ struct BookEditor: View {
     private func save() {
         guard valid, let count = Int(pages) else { return }
         var book = baseline ?? Book(title: title, author: author, pages: count)
-        book.title = title; book.author = author; book.pages = count; book.isbn = ISBN.normalized(isbn) ?? isbn.trimmingCharacters(in: .whitespacesAndNewlines); book.shelf = shelf; book.cover = cover
+        book.title = title; book.author = author; book.pages = count; book.isbn = ISBN.normalized(isbn) ?? isbn.trimmingCharacters(in: .whitespacesAndNewlines); book.shelfID = shelf.isEmpty ? nil : shelf; book.shelf = store.shelves.first { $0.id == shelf }?.name ?? ""; book.cover = cover
         if baseline == nil, let found = appliedLookup, found.isbn == book.isbn, found.title == title, found.author == author {
             book.coverURL = found.coverURL
         }

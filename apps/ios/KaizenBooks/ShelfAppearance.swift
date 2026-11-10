@@ -1,9 +1,9 @@
 import SwiftUI
 
-/// Read-only projection of the web shelf styling. Native book edits preserve the source payload.
-struct ShelfAppearance: Codable, Identifiable {
-    let id: String
-    let name: String
+/// Stable shelf identity and editable styling; cloud staging preserves unknown metadata.
+struct ShelfAppearance: Codable, Identifiable, Equatable {
+    var id: String
+    var name: String
     var theme: String?
     var objects: [String]?
     var order = 0
@@ -40,5 +40,16 @@ struct ShelfThemeSpec {
             ("fantasy|sci-?fi", "fantasy"), ("fiction|novel", "literary")]
         let key = patterns.first { name.range(of: $0.0, options: [.regularExpression, .caseInsensitive]) != nil }?.1 ?? "default"
         return themes[key]!
+    }
+}
+
+extension ShelfAppearance {
+    static let objectNames = ["orrery": "Solar system", "computer": "Apple II", "wafer": "Silicon wafer", "dragon": "Bronze dragon", "bust": "Marble bust", "lantern": "Reading lantern", "chessClock": "Chess clock", "cipherMachine": "Cipher machine", "romanHelmet": "Roman helmet", "detectiveFolio": "Detective folio", "networkSwitch": "Network switch", "fountainPen": "Fountain pen", "crystalD20": "Crystal D20", "compassMap": "Compass & map", "typewriter": "Typewriter", "arcadeJoystick": "Arcade joystick", "globe": "Antique globe", "hourglass": "Brass hourglass", "bonsai": "Bonsai pine", "fossil": "Ammonite fossil", "camera": "Vintage camera", "tea": "Celadon tea cup", "none": "Leave some space"]
+    var lightColor: Color {
+        switch cabinet?.object?["lighting"]?.string {
+        case "moonlight": Color(hex: 0x9DBFE8)
+        case "candle": Color(hex: 0xEBA34A)
+        default: Color(hex: 0xFFE1AD)
+        }
     }
 }
