@@ -13,10 +13,12 @@ The app implementation retains its recorded 51 model tests and 14 distinct simul
 External group creation/tester addition was confirmed before this release. The group contains one explicitly requested tester and no public link. Tester contact details and any review-account credentials stay out of this public repository.
 
 - [x] Prepare and verify signed build 6 with external eligibility.
-- [ ] Complete upload and Apple processing.
-- [ ] Complete beta description/contact/sign-in information and submit for Apple’s beta review.
-- [ ] Confirm approval and availability to the existing External group; notify the requested tester automatically when approved where supported.
+- [x] Upload accepted by Apple at **21:15:43 UTC (4:15 p.m. Eastern)** on 2026-11-10.
+- [x] Apple processing completed; build 6 appeared **Ready to Submit**, eligible for the External group.
+- [x] Save beta description, maintainer-provided contact details, verified isolated review-account instructions and build-specific What to Test; submit for Apple’s beta review. App Store Connect confirmed **Waiting for Review** in **External**, with **1 tester / 1 build**.
+- [x] Submit with **Automatically notify testers** enabled for the existing External group. Apple handles availability and tester notification after approval.
+- [ ] Apple approval and actual external tester installation/acceptance. Submission is not approval.
 
-Current beta-review contact and dedicated account details are pending maintainer input. No personal account will be supplied to Apple. The existing Clerk development instance is unchanged; production-auth acceptance remains separately tracked. **Hosted backup/recovery remains deferred.**
+The maintainer entered the review contact information and explicitly approved one dedicated review account plus the narrow Clerk admin override. The isolated account’s native-protocol email-code sign-in completed successfully. One synthetic shelf, two books and one reading session were created and read back through that account’s authenticated sync API. Only synthetic records were touched. Sign-in instructions are saved privately in App Store Connect; the review account remains available during review. No personal account was supplied to Apple. The existing Clerk development instance is unchanged; production-auth acceptance remains separately tracked. **Hosted backup/recovery remains deferred.**
 
 [Build 5 capability checklist](release-build5.md#phone-acceptance-checklist) applies to this build. Physical camera, external Files providers, spoken VoiceOver, hardware keyboard, actual system Reduce Motion and new-feature live sync remain open in #49/#56. Apple II checkerboard-art cleanup also remains open.

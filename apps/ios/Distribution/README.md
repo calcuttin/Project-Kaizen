@@ -11,7 +11,7 @@ This configuration prepares **Kaizen Books 0.1.0** (`org.projectkaizen.books`) f
 
 ## Archive and upload
 
-Select **KaizenBooks**, **Any iOS Device**, then **Product → Archive**. In Organizer choose **Distribute App → TestFlight Internal Only**. Use the configured distribution certificate/profile and include symbols. Increment `CURRENT_PROJECT_VERSION` for each upload (current source/upload: **5**; use **6** or higher for the next upload). Do not disable signing for this archive.
+Select **KaizenBooks**, **Any iOS Device**, then **Product → Archive**. In Organizer choose **Distribute App → TestFlight Internal Only**. Use the configured distribution certificate/profile and include symbols. Increment `CURRENT_PROJECT_VERSION` for each upload (current source/upload: **6**; use **7** or higher for the next upload). Do not disable signing for this archive.
 
 Equivalent commands from the repository root after installing the approved distribution certificate and profile:
 
