@@ -19,10 +19,10 @@ The internal-only upload completed at **2026-11-10 15:20 UTC** with `EXPORT SUCC
 
 The first upload, **0.1.0 (1)**, was exported from the unsigned compile archive. Inspection showed that export omitted Associated Domains. It was never assigned to a testing group; **do not enable build 1**. Build 2 corrects this by signing the archive itself using the distribution profile. The runbook now requires entitlement verification and preserves the source build number.
 
-The **Owner testing** group contains only the existing account owner, with automatic distribution disabled. Apple processing and selecting build 2 for that group are pending at this checkpoint.
+Apple subsequently made build 2 **Ready to Test**. It was assigned to **Owner testing**, which contains only the existing account owner and has automatic distribution disabled. App Store Connect now reports build 2 as **Testing**, with one internal group and one tester. The owner tester record shows **Invited — Nov 10, 2026**. Build 1 remains unassigned. A concise phone testing checklist is saved in the build’s What to Test field.
 
 ## Limits and remaining work
 
-Physical iPhone installation, sign-in, shared sync, offline/reconnect and full spoken VoiceOver remain unverified. Earlier native model/UI and disposable-account sync results remain historical evidence; this signing-only follow-up did not rerun those tests. Production Clerk/provider/passkey acceptance and public App Store distribution are separate work. PR #53 remains open for review.
+Physical iPhone installation, sign-in, shared sync, offline/reconnect and full spoken VoiceOver remain unverified. Earlier native model/UI and disposable-account sync results remain historical evidence; this signing-only follow-up did not rerun those tests. Production Clerk/provider/passkey acceptance and public App Store distribution are separate work. PR #53 remains open for review. All reported checks passed on `2753823` (web/database CI, CodeQL and both Vercel previews); the final documentation follow-up is checked separately.
 
 **Hosted backup/recovery remains deferred.** No backup destination, recovery project or restore was created.

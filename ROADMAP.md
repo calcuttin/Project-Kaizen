@@ -6,7 +6,7 @@ Kaizen's roadmap connects public reviews to actionable issues, implementation pu
 
 ## Native iPhone TestFlight — 2026-11-10
 
-The Apple team/App ID, distribution certificate/profile, App Store Connect app and Clerk native login registration are configured. Signed **0.1.0 (2)** passed signature, entitlement and matching-symbol inspection and was uploaded for internal TestFlight. The owner-only group uses manual build selection; Apple processing and physical installation are separate gates in [#49](https://github.com/calcuttin/Project-Kaizen/issues/49). Build 1 remains unassigned because its export omitted Associated Domains. [Release runbook](apps/ios/Distribution/README.md) · [Validation and limits](docs/reviews/2026-11-10/ios-testflight/README.md). Existing shared development authentication is retained; production-auth acceptance remains open. Hosted backup/recovery stays deferred.
+The Apple team/App ID, distribution certificate/profile, App Store Connect app and Clerk native login registration are configured. Signed **0.1.0 (2)** passed signature, entitlement and matching-symbol inspection and was uploaded for internal TestFlight. Apple made build 2 Ready to Test, and it is now Testing in the owner-only group with manual build selection. Physical installation/sign-in/sync and VoiceOver remain open in [#49](https://github.com/calcuttin/Project-Kaizen/issues/49). Build 1 remains unassigned because its export omitted Associated Domains. [Release runbook](apps/ios/Distribution/README.md) · [Validation and limits](docs/reviews/2026-11-10/ios-testflight/README.md). Existing shared development authentication is retained; production-auth acceptance remains open. Hosted backup/recovery stays deferred.
 
 ## Native iPhone Bookshelf — 2026-11-08
 
