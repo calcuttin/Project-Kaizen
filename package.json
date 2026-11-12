@@ -21,7 +21,7 @@
     "check:public-source": "node scripts/check-public-source.mjs"
   },
   "dependencies": {
-    "@clerk/react": "^6.15.1",
+    "@clerk/react": "^6.18.6",
     "@supabase/supabase-js": "^2.57.4",
     "date-fns": "^4.4.0",
     "idb-keyval": "^6.3.0",
