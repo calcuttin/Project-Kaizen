@@ -11,7 +11,7 @@ This configuration prepares **Kaizen Books 0.1.0** (`org.projectkaizen.books`) f
 
 ## Archive and upload
 
-Select **KaizenBooks**, **Any iOS Device**, then **Product → Archive**. In Organizer choose **Distribute App → TestFlight Internal Only**. Use the configured distribution certificate/profile and include symbols. Increment `CURRENT_PROJECT_VERSION` for each upload (current source/upload: **4**; use **5** or higher for the next upload). Do not disable signing for this archive.
+Select **KaizenBooks**, **Any iOS Device**, then **Product → Archive**. In Organizer choose **Distribute App → TestFlight Internal Only**. Use the configured distribution certificate/profile and include symbols. Increment `CURRENT_PROJECT_VERSION` for each upload (current source/upload: **5**; use **6** or higher for the next upload). Do not disable signing for this archive.
 
 Equivalent commands from the repository root after installing the approved distribution certificate and profile:
 
@@ -46,11 +46,11 @@ The privacy manifest does not replace the App Store Connect privacy questionnair
 
 After Apple finishes processing the build, use the **Owner testing** internal group and add only the account owner as a tester. Keep automatic distribution disabled and explicitly select the verified processed build for that group. Install Apple's TestFlight app on the iPhone, accept the invitation and install Kaizen Books. An internal tester needs App Store Connect access; do not invite unrelated testers or enable a public link as part of this setup.
 
-Build 4 upload and availability: [scanner release record](../../../docs/reviews/2026-11-10/ios-capabilities/release.md). Build 3 covers were confirmed on the maintainer’s phone.
+Build 5 upload and availability: [capability release record](../../../docs/reviews/2026-11-10/ios-capabilities/release-build5.md). Historical build 4: [scanner release record](../../../docs/reviews/2026-11-10/ios-capabilities/release.md). Build 3 covers were confirmed on the maintainer’s phone.
 
 Suggested “What to Test” text:
 
-> Update to build 4. Open Add book, choose Scan barcode and allow camera access. Scan a 978/979 ISBN, tap Look up ISBN, review the title/author/page count, then Use these details and Save book. Scanning stays on-device; lookup sends ISBN/IP to Open Library. Also try typed ISBN-10/13, an existing ISBN, non-book barcodes, camera denial, cancellation/backgrounding and no connectivity. Manual entry should remain available. Use a clearly named test book for phone/web sync and delete only that test book afterward. Check large text and VoiceOver. Apple II/cabinet interactions remain pending.
+> Update to build 5. Test the Apple II BASIC playground, shelf creation/styling/reordering, small CSV/Kindle imports with preview and undo, book-delete undo, paused Reading, daily goals and journal navigation. Try solar-system play/pause, Ambient shelf motion and iOS Reduce Motion. Recheck covers and barcode/manual ISBN entry. Use clearly named synthetic test records for sync and delete only those test records. See the [complete build 5 phone checklist](../../../docs/reviews/2026-11-10/ios-capabilities/release-build5.md#phone-acceptance-checklist).
 
 Record the uploaded version/build, Apple processing result and the physical-device result in #49. Keep hosted backup/recovery deferred. Do not call the release complete until the build is available to the intended tester.
 
