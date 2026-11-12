@@ -1,0 +1,24 @@
+# Build 6 external TestFlight release
+
+Review ID: **REV-2026-11-10-IOS-EXTERNAL-BETA**. Trackers: [#49](https://github.com/calcuttin/Project-Kaizen/issues/49), [#56](https://github.com/calcuttin/Project-Kaizen/issues/56). AI-assisted release preparation by Codex at the maintainer’s explicit request.
+
+## Scope and validation
+
+Build **0.1.0 (6)** has the same app implementation as build 5 (`4c6d33e` merged source). Only the build number changes; a separate `ExportOptions-External.plist` enables eligibility for external TestFlight. The original internal-only export remains available. This is a private external beta for the requested tester, not an App Store launch or public invitation link.
+
+The app implementation retains its recorded 51 model tests and 14 distinct simulator UI flows. A fresh signed build 6 archive from `f0858e2` passed strict/deep signature verification, required login Associated Domains/App ID checks, camera/encryption declarations, Release test-fixture exclusion and matching executable/dSYM UUID verification: `98C9E2F7-ED9A-3B5E-A376-195D54EDB247`. Project/export plist lint and diff checks passed. No new app behavior was introduced or broader physical/live acceptance claimed.
+
+## Distribution status
+
+External group creation/tester addition was confirmed before this release. The group contains one explicitly requested tester and no public link. Tester contact details and any review-account credentials stay out of this public repository.
+
+- [x] Prepare and verify signed build 6 with external eligibility.
+- [x] Upload accepted by Apple at **21:15:43 UTC (4:15 p.m. Eastern)** on 2026-11-10.
+- [x] Apple processing completed; build 6 appeared **Ready to Submit**, eligible for the External group.
+- [x] Save beta description, maintainer-provided contact details, verified isolated review-account instructions and build-specific What to Test; submit for Apple’s beta review. App Store Connect confirmed **Waiting for Review** in **External**, with **1 tester / 1 build**.
+- [x] Submit with **Automatically notify testers** enabled for the existing External group. Apple handles availability and tester notification after approval.
+- [ ] Apple approval and actual external tester installation/acceptance. Submission is not approval.
+
+The maintainer entered the review contact information and explicitly approved one dedicated review account plus the narrow Clerk admin override. The isolated account’s native-protocol email-code sign-in completed successfully. One synthetic shelf, two books and one reading session were created and read back through that account’s authenticated sync API. Only synthetic records were touched. Sign-in instructions are saved privately in App Store Connect; the review account remains available during review. No personal account was supplied to Apple. The existing Clerk development instance is unchanged; production-auth acceptance remains separately tracked. **Hosted backup/recovery remains deferred.**
+
+[Build 5 capability checklist](release-build5.md#phone-acceptance-checklist) applies to this build. Physical camera, external Files providers, spoken VoiceOver, hardware keyboard, actual system Reduce Motion and new-feature live sync remain open in #49/#56. Apple II checkerboard-art cleanup also remains open.
